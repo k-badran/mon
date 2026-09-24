@@ -1,0 +1,945 @@
+/**
+ * Dashboard shell and its components.
+ *
+ * Matched to the supplied design: dark sidebar, white header, cards on a light
+ * ground. Every value is a token from design-system.css, so the admin theme
+ * editor restyles all of it; every rule is written in logical properties, so
+ * the Arabic build mirrors without a single [dir="rtl"] override.
+ */
+
+/* ── Shell ──────────────────────────────────────────────────────────── */
+
+.dash {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-block-size: 100vh;
+  background: var(--surface-page);
+  font-family: var(--font-sans);
+  color: var(--text-default);
+}
+
+.dash-sidebar {
+  background: var(--surface-inverse);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100vh;
+  overflow-y: auto;
+}
+
+.dash-brand {
+  display: flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2) var(--space-6);
+}
+.dash-brand img { block-size: 26px; inline-size: auto; }
+
+.dash-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.dash-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-inverse-muted);
+  text-decoration: none;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.dash-nav a:hover { background: rgba(255, 255, 255, 0.06); color: var(--text-on-inverse); }
+
+/* The active item is the only place the brand red appears in the sidebar, so
+   it reads as "you are here" rather than as decoration. */
+.dash-nav a[aria-current="page"] {
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+  font-weight: 600;
+}
+
+.dash-nav .nav-icon { inline-size: 18px; block-size: 18px; flex: none; }
+.dash-nav .nav-label { flex: 1; min-inline-size: 0; }
+
+.dash-nav .nav-badge {
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  min-inline-size: 20px;
+  block-size: 20px;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  padding-inline: 6px;
+}
+/* On the active row the red badge would vanish into the red pill. */
+.dash-nav a[aria-current="page"] .nav-badge {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* The user sits in its own raised card, as in the design — a divider alone
+   left it looking like one more nav row. */
+.dash-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  margin-block-start: var(--space-4);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+}
+.dash-user .avatar {
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: var(--radius-full);
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  flex: none;
+}
+.dash-user .who { min-inline-size: 0; flex: 1; }
+.dash-user .name {
+  color: var(--text-on-inverse);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-user .mail {
+  color: var(--text-inverse-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-user .signout {
+  background: none;
+  border: none;
+  color: var(--text-inverse-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.dash-user .signout:hover { color: var(--text-on-inverse); }
+
+/* ── Main column ────────────────────────────────────────────────────── */
+
+.dash-main { min-inline-size: 0; }
+
+.dash-header {
+  min-block-size: var(--header-height);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-8);
+  background: var(--surface-card);
+  border-block-end: 1px solid var(--border-subtle);
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+}
+
+.dash-header h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+  margin-inline-end: auto;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* A pill, as in the design, rather than a square field. */
+.dash-search { position: relative; inline-size: min(300px, 28vw); }
+.dash-search input {
+  inline-size: 100%;
+  padding: var(--space-2) var(--space-4);
+  padding-inline-start: var(--space-10);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--surface-page);
+  font-size: var(--text-base);
+  font-family: inherit;
+  color: var(--text-default);
+}
+.dash-search input::placeholder { color: var(--text-faint); }
+.dash-search .search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.dash-phone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-strong);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.dash-phone svg { color: var(--brand-red); flex: none; }
+
+.dash-bell {
+  position: relative;
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex: none;
+}
+.dash-bell .count {
+  position: absolute;
+  inset-block-start: -6px;
+  inset-inline-end: -6px;
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+  font-size: 10px;
+  font-weight: 700;
+  min-inline-size: 18px;
+  block-size: 18px;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--surface-card);
+}
+
+.dash-body {
+  padding: var(--space-6) var(--space-8) var(--space-12);
+  display: grid;
+  gap: var(--space-5);
+  max-inline-size: var(--content-max);
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-block-end: var(--space-4);
+}
+.card-head h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+}
+.card-head a {
+  font-size: var(--text-sm);
+  color: var(--brand-red);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.welcome-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  padding: var(--space-6);
+}
+.welcome-card .copy { flex: 1; min-inline-size: 260px; }
+.welcome-card h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+}
+.welcome-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  max-inline-size: 60ch;
+}
+
+/* ── Stat tiles ─────────────────────────────────────────────────────── */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+.stat-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.stat-card .label {
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  margin-block-end: var(--space-2);
+}
+.stat-card .value {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.stat-card .sub {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  margin-block-start: var(--space-2);
+}
+
+/* Colour encodes the kind of thing being counted, not its importance. */
+.stat-icon {
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--neutral-0);
+}
+.stat-icon.is-brand { background: var(--brand-red); }
+.stat-icon.is-warning { background: var(--warning); }
+.stat-icon.is-success { background: var(--success); }
+.stat-icon.is-info { background: var(--info); }
+
+/* ── Two-column region ──────────────────────────────────────────────── */
+
+.dash-split { display: grid; grid-template-columns: 1fr; gap: var(--space-5); }
+@media (min-width: 1080px) {
+  .dash-split { grid-template-columns: 1.55fr 1fr; align-items: start; }
+}
+
+/* ── Order rows ─────────────────────────────────────────────────────── */
+
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-block-end: 1px solid var(--border-subtle);
+  text-decoration: none;
+  color: inherit;
+}
+.order-row:last-child { border-block-end: none; padding-block-end: 0; }
+.order-row .who { flex: 1; min-inline-size: 0; }
+.order-row .ref { font-weight: 700; color: var(--text-strong); font-size: var(--text-base); }
+.order-row .svc { font-size: var(--text-sm); color: var(--text-muted); margin-block-start: 2px; }
+.order-row .amount {
+  font-weight: 700;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Status pills ───────────────────────────────────────────────────── */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pill::before {
+  content: "";
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  flex: none;
+}
+.pill.is-quoted { background: var(--warning-soft); color: #9a6200; }
+.pill.is-confirmed { background: var(--info-soft); color: #1d4ed8; }
+.pill.is-completed { background: var(--success-soft); color: #047857; }
+.pill.is-cancelled { background: var(--danger-soft); color: var(--red-700); }
+
+/* ── Appointment card ───────────────────────────────────────────────── */
+
+/**
+ * The date sits in a tinted panel, as in the design.
+ *
+ * It is the one piece of information on this screen with a deadline attached,
+ * and the tint is what separates it from the neutral detail below it.
+ */
+.appointment .when {
+  background: var(--red-50);
+  border: 1px solid var(--red-100);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+.appointment .date {
+  color: var(--brand-red);
+  font-weight: 700;
+  font-size: var(--text-md);
+  font-family: var(--font-display);
+}
+.appointment .eta { color: var(--text-muted); font-size: var(--text-sm); margin-block-start: 4px; }
+
+.appointment .crew {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  margin-block: var(--space-4);
+  border-block-end: 1px solid var(--border-subtle);
+}
+.appointment .crew .avatar {
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-200);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: var(--text-default);
+  flex: none;
+}
+.appointment .crew .team { font-weight: 600; color: var(--text-strong); font-size: var(--text-base); }
+.appointment .crew .truck { font-size: var(--text-sm); color: var(--text-muted); margin-block-start: 2px; }
+
+.appointment .actions { display: flex; gap: var(--space-3); }
+.appointment .actions > * { flex: 1; justify-content: center; }
+
+/* Buttons live in buttons.css — they are a system primitive shared with the
+   public site and the admin tables, not a dashboard component. */
+
+/* ── Focus ──────────────────────────────────────────────────────────── */
+
+/* The base layer already rings focus in yellow. The sidebar keeps its own
+   colour only because yellow on the ink surface is the one place the ring
+   would read as a highlight rather than a focus indicator. */
+.dash-sidebar :where(a, button):focus-visible { outline-color: var(--neutral-0); }
+
+/* ── Skeletons ──────────────────────────────────────────────────────── */
+
+.skeleton {
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--neutral-100) 25%, var(--neutral-200) 50%, var(--neutral-100) 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+@keyframes skeleton {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--neutral-100); }
+}
+
+/* ══ Responsive ═════════════════════════════════════════════════════════
+ *
+ * Three steps rather than one: the grid loosens first, then the sidebar
+ * collapses to icons, then it becomes a bottom bar. Going straight from the
+ * desktop layout to a bottom bar wastes the tablet width entirely.
+ */
+
+/* Tablet landscape: two stat columns, stacked split. */
+@media (max-width: 1240px) {
+  .dash-body { padding-inline: var(--space-6); }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tablet: the sidebar keeps only its icons. */
+@media (max-width: 1024px) and (min-width: 861px) {
+  .dash { grid-template-columns: 72px 1fr; }
+
+  .dash-sidebar { padding-inline: var(--space-2); align-items: center; }
+  .dash-brand { padding: var(--space-1) 0 var(--space-6); }
+  .dash-brand img { block-size: 22px; }
+
+  .dash-nav { inline-size: 100%; }
+  .dash-nav a { justify-content: center; padding-inline: 0; }
+  .dash-nav .nav-label { display: none; }
+  .dash-nav .nav-badge {
+    position: absolute;
+    margin-block-start: -16px;
+    margin-inline-start: 16px;
+  }
+  .dash-nav a { position: relative; }
+
+  .dash-user { flex-direction: column; gap: var(--space-2); padding: var(--space-2); }
+  .dash-user .who, .dash-user .signout { display: none; }
+
+  .dash-header { padding-inline: var(--space-5); }
+  .dash-search { inline-size: 200px; }
+}
+
+/* Phone: the sidebar becomes a bottom bar, which is where a thumb reaches. */
+@media (max-width: 860px) {
+  .dash { grid-template-columns: 1fr; }
+
+  .dash-sidebar {
+    position: fixed;
+    /**
+     * Releasing the start edge matters.
+     *
+     * The desktop rule pins the sidebar with `inset-block-start: 0` for its
+     * sticky column. Keeping that while also setting the end edge gives the
+     * element both edges, and it stretches to the full viewport height
+     * instead of hugging the bottom.
+     */
+    inset-block-start: auto;
+    inset-block-end: 0;
+    inset-inline: 0;
+    block-size: auto;
+    flex-direction: row;
+    padding: var(--space-2) var(--space-1);
+    z-index: 20;
+    overflow: visible;
+    box-shadow: 0 -2px 12px rgba(17, 19, 23, 0.16);
+  }
+  .dash-brand, .dash-user { display: none; }
+
+  .dash-nav {
+    flex-direction: row;
+    inline-size: 100%;
+    gap: 0;
+    /* More items than fit: the bar scrolls rather than squashing them. */
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .dash-nav::-webkit-scrollbar { display: none; }
+
+  .dash-nav a {
+    flex: 1 0 auto;
+    min-inline-size: 64px;
+    flex-direction: column;
+    gap: 3px;
+    padding: var(--space-2) var(--space-1);
+    position: relative;
+  }
+  .dash-nav .nav-label {
+    font-size: 10px;
+    flex: none;
+    text-align: center;
+    max-inline-size: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dash-nav .nav-badge {
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-end: 10px;
+    min-inline-size: 16px;
+    block-size: 16px;
+    font-size: 9px;
+  }
+
+  .dash-header {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  /* Title and actions share row one; search takes row two. */
+  .dash-header h1 { font-size: var(--text-lg); margin-inline-end: auto; }
+  .dash-search { inline-size: 100%; order: 3; }
+  .dash-phone span, .dash-phone bdi { display: none; }
+  .locale-switcher { order: 2; }
+
+  /* Bottom padding clears the fixed bar. */
+  .dash-body { padding: var(--space-4) var(--space-4) 96px; gap: var(--space-4); }
+
+  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+  .stat-card { padding: var(--space-4); }
+  .stat-card .value { font-size: var(--text-xl); }
+  .stat-icon { inline-size: 34px; block-size: 34px; }
+
+  .welcome-card { padding: var(--space-4); }
+  .welcome-card .btn { inline-size: 100%; justify-content: center; }
+
+  .card { padding: var(--space-4); }
+  .appointment .actions { flex-direction: column; }
+}
+
+/* Small phone: one stat per row rather than two cramped ones. */
+@media (max-width: 420px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .order-row { flex-wrap: wrap; gap: var(--space-2); }
+  .order-row .amount { margin-inline-start: auto; }
+}
+
+/* ── Sections that exist in the design but have no backend yet ───────── */
+
+/**
+ * Rendered dimmed and inert rather than omitted.
+ *
+ * Keeping the item visible preserves the information architecture the design
+ * describes; making it non-interactive means a click cannot land on a 404.
+ */
+.dash-nav .nav-planned {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text-inverse-muted);
+  font-size: var(--text-base);
+  font-weight: 500;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.dash-nav .nav-planned .nav-icon { inline-size: 18px; block-size: 18px; flex: none; }
+.dash-nav .nav-planned .nav-label { flex: 1; min-inline-size: 0; }
+
+/* Thirteen sections do not fit at the desktop item height. */
+.dash-sidebar { scrollbar-width: thin; }
+
+/* ── Filter pills ────────────────────────────────────────────────────── */
+
+.filter-pills { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.filter-pills button {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.filter-pills button[aria-pressed="true"] {
+  background: var(--brand-red);
+  border-color: var(--brand-red);
+  color: var(--text-on-brand);
+}
+
+/* ── Toolbar above a table ───────────────────────────────────────────── */
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-4);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.table-toolbar select,
+.table-toolbar input[type="search"] {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-base);
+  background: var(--surface-card);
+  color: var(--text-default);
+}
+.table-toolbar .spacer { margin-inline-start: auto; }
+
+/**
+ * The toolbar's search keeps the icon gap.
+ *
+ * `.table-toolbar input[type="search"]` outranks `.dash-search input`, so
+ * without this the shorthand `padding` above wins and the magnifier lands on
+ * top of the first letter of the placeholder.
+ */
+.table-toolbar .dash-search input[type="search"] {
+  padding-inline-start: var(--space-8);
+  border-radius: var(--radius-md);
+}
+.table-toolbar .dash-search .search-icon { inset-inline-start: var(--space-3); }
+
+/* A reference is one token; breaking it across lines makes it unreadable. */
+.table-wrap td.ref {
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────── */
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-block-start: 1px solid var(--border-subtle);
+}
+.pager .count { color: var(--text-muted); font-size: var(--text-sm); margin-inline-end: auto; }
+.pager button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-default);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  cursor: pointer;
+}
+.pager button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Detail header ───────────────────────────────────────────────────── */
+
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.detail-head .back {
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--surface-card);
+  display: grid;
+  place-items: center;
+  color: var(--text-default);
+  flex: none;
+  text-decoration: none;
+}
+/**
+ * "Back" points the way the reader came from, which is rightwards in Arabic.
+ * The glyph itself has no logical form, so it is mirrored here rather than
+ * translated as a string.
+ */
+[dir="rtl"] .detail-head .back { transform: scaleX(-1); }
+
+.detail-head .titles { flex: 1; min-inline-size: 220px; }
+.detail-head .title-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.detail-head h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.detail-head .route { color: var(--text-muted); font-size: var(--text-base); margin-block-start: 4px; }
+.detail-head .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+/* ── Tabs ────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: var(--space-5);
+  border-block-end: 1px solid var(--border-subtle);
+}
+.tabs button {
+  background: none;
+  border: none;
+  padding: var(--space-3) 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-block-end: 2px solid transparent;
+  margin-block-end: -1px;
+}
+.tabs button[aria-selected="true"] { color: var(--brand-red); border-block-end-color: var(--brand-red); }
+
+/* ── Checklist ───────────────────────────────────────────────────────── */
+
+.checklist { display: grid; gap: var(--space-3); }
+.checklist li { display: flex; align-items: flex-start; gap: var(--space-3); list-style: none; }
+.checklist .tick {
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: var(--radius-full);
+  background: var(--success-soft);
+  color: var(--success);
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-block-start: 1px;
+}
+.checklist span { font-size: var(--text-base); color: var(--text-default); }
+
+/* ── Origin / destination ────────────────────────────────────────────── */
+
+.coords { display: grid; grid-template-columns: 1fr; gap: var(--space-3); }
+@media (min-width: 620px) { .coords { grid-template-columns: 1fr 1fr; } }
+
+.coord {
+  background: var(--surface-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+.coord .kind {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-block-end: var(--space-2);
+}
+.coord.is-origin .kind { color: var(--brand-red); }
+.coord.is-destination .kind { color: var(--success); }
+.coord .street { font-weight: 600; color: var(--text-strong); font-size: var(--text-base); }
+.coord .meta { color: var(--text-muted); font-size: var(--text-sm); margin-block-start: 4px; }
+
+/* ── Price breakdown ─────────────────────────────────────────────────── */
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-2);
+  font-size: var(--text-base);
+}
+.breakdown-row .label { color: var(--text-muted); }
+.breakdown-row .amount { font-variant-numeric: tabular-nums; color: var(--text-default); white-space: nowrap; }
+
+.breakdown-total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block-start: var(--space-4);
+  margin-block-start: var(--space-3);
+  border-block-start: 1px solid var(--border-subtle);
+  align-items: baseline;
+}
+.breakdown-total .label { font-weight: 700; color: var(--text-strong); font-size: var(--text-md); }
+.breakdown-total .amount {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  color: var(--brand-red);
+  font-variant-numeric: tabular-nums;
+}
+.breakdown-row.is-credit .amount { color: var(--success); }
+
+/**
+ * Settling a balance is the one action here that moves money, so it is the
+ * one control that is neither the brand red (which means "primary action"
+ * everywhere else) nor a quiet ghost — it gets its own weight.
+ */
+.btn.pay {
+  /* The warning state's own light fill and dark text, rather than the default
+     status colour with an invented brown on top of it. */
+  background: var(--warning-soft);
+  color: var(--warning-text);
+  border-color: var(--warning);
+  inline-size: 100%;
+  margin-block-start: var(--spacing-4);
+}
+.btn.pay:hover:not(:disabled) { background: var(--yellow-200); }
+
+/**
+ * Phone: the table stops being a table.
+ *
+ * A six-column table inside a scrolling wrapper keeps the page from
+ * overflowing, but it hides the three columns that matter most — status,
+ * amount and the action — behind a sideways scroll nobody discovers. Each row
+ * becomes a card instead, with the header cell's text carried in
+ * `data-label` so every value is still named.
+ *
+ * The markup stays one real table, so the desktop design and the screen
+ * reader's row/column semantics are unaffected.
+ */
+@media (max-width: 640px) {
+  .table-wrap { overflow-x: visible; }
+
+  .table-wrap table,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td {
+    display: block;
+    inline-size: auto;
+    /* tables.css floors every table at 640px so wide ones scroll rather than
+       crush. Stacked rows are not wide, and leaving that floor in place is
+       what pushes the values off the screen. */
+    min-inline-size: 0;
+  }
+
+  /* Visually hidden rather than removed: the header still labels the cells
+     for assistive technology. */
+  .table-wrap thead {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table-wrap tr {
+    padding: var(--space-4);
+    border-block-end: 1px solid var(--border-subtle);
+  }
+
+  .table-wrap td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-1) 0;
+    border: 0;
+    text-align: start;
+  }
+
+  .table-wrap td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  /* The reference is the row's heading, so it carries no label of its own. */
+  .table-wrap td.ref {
+    display: block;
+    padding-block-end: var(--space-2);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text-strong);
+  }
+  .table-wrap td.ref::before { content: none; }
+
+  .table-wrap td.num { justify-content: space-between; }
+
+  .table-wrap td.row-action { padding-block-start: var(--space-3); }
+  .table-wrap td.row-action::before { content: none; }
+  .table-wrap td.row-action .btn { inline-size: 100%; text-align: center; }
+
+  .pager { flex-wrap: wrap; }
+  .pager .count { inline-size: 100%; margin-block-end: var(--space-2); }
+}

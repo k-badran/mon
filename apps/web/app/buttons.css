@@ -1,0 +1,228 @@
+/**
+ * Button system.
+ *
+ * Transcribed from the M.io handbook's "Button Systems" page. It lives here
+ * rather than in dashboard.css — where `.btn` used to be defined — because the
+ * public site and the admin tables both use these classes, and a shared
+ * primitive owned by one surface is how the two drift apart.
+ *
+ * The two rules worth stating up front, because both are unusual and both are
+ * easy to "correct" into something wrong:
+ *
+ *   1. Primary hover is BLACK, not a darker red. The handbook shows the red
+ *      fill turning to ink on hover and on active.
+ *   2. The focus ring is YELLOW, on every variant. That is the one place the
+ *      brand yellow appears on an interactive control.
+ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  /* Medium (40px) is the default: 10px block padding on a 20px line box. */
+  min-block-size: 40px;
+  padding: var(--spacing-2) var(--spacing-5);
+  border-radius: var(--radius-md);
+  border: var(--border-width) solid transparent;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+/* Large (48px) and Small (32px). */
+.btn.large {
+  min-block-size: 48px;
+  padding-inline: var(--spacing-6);
+  font-size: var(--text-body);
+}
+.btn.small {
+  min-block-size: 32px;
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: var(--text-caption);
+}
+
+/**
+ * Disabled is a real colour change, not reduced opacity.
+ *
+ * Opacity fades the label along with the fill and lands at unpredictable
+ * contrast over whatever is behind it; the handbook specifies a flat grey
+ * surface with grey text instead.
+ */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background: var(--neutral-100);
+  color: var(--neutral-400);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* ── Primary: the hero action ────────────────────────────────────────── */
+
+.btn.primary {
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+}
+.btn.primary:hover:not(:disabled):not([aria-disabled="true"]),
+.btn.primary:active:not(:disabled) {
+  background: var(--neutral-900);
+}
+
+/* ── Secondary: outlined ─────────────────────────────────────────────── */
+
+.btn.secondary,
+/* `ghost` is the name the existing screens use for this variant. */
+.btn.ghost {
+  background: var(--surface-card);
+  color: var(--brand-red);
+  border-color: var(--brand-red);
+}
+.btn.secondary:hover:not(:disabled),
+.btn.ghost:hover:not(:disabled) {
+  background: var(--red-50);
+}
+.btn.secondary:active:not(:disabled),
+.btn.ghost:active:not(:disabled) {
+  background: var(--red-100);
+}
+
+/* ── Tertiary: text only ─────────────────────────────────────────────── */
+
+.btn.tertiary {
+  background: transparent;
+  color: var(--brand-red);
+  border-color: transparent;
+  padding-inline: var(--spacing-3);
+}
+.btn.tertiary:hover:not(:disabled) {
+  background: var(--red-50);
+}
+
+/* ── Destructive ─────────────────────────────────────────────────────── */
+
+/**
+ * The handbook draws destructive actions in the brand red, turning to ink on
+ * hover — the same treatment as primary. The distinction it relies on is the
+ * verb in the label, so a destructive control must always say what it
+ * destroys ("Delete driver profile", not "Delete").
+ */
+.btn.danger {
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+}
+.btn.danger:hover:not(:disabled),
+.btn.danger:active:not(:disabled) {
+  background: var(--neutral-900);
+}
+
+/* ── Dark ────────────────────────────────────────────────────────────── */
+
+.btn.dark {
+  background: var(--neutral-900);
+  color: var(--text-on-inverse);
+}
+.btn.dark:hover:not(:disabled) {
+  background: var(--neutral-800);
+}
+
+/* ── Circular icon action ────────────────────────────────────────────── */
+
+.btn.icon {
+  inline-size: 40px;
+  min-block-size: 40px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+}
+.btn.icon:hover:not(:disabled),
+.btn.icon:active:not(:disabled) {
+  background: var(--neutral-900);
+}
+.btn.icon.large {
+  inline-size: 48px;
+  min-block-size: 48px;
+}
+
+/* ── Full width ──────────────────────────────────────────────────────── */
+
+.btn.block {
+  inline-size: 100%;
+}
+
+/**
+ * ── Focus ─────────────────────────────────────────────────────────────
+ *
+ * Yellow, on every variant, and only for keyboard navigation. The ring sits
+ * outside the control rather than replacing its border, so a secondary
+ * button's red outline stays visible underneath it and the button does not
+ * change size when focused.
+ */
+.btn:focus-visible {
+  outline: var(--border-width-heavy) solid var(--brand-yellow);
+  outline-offset: 2px;
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+
+/**
+ * A loading button keeps its colours and gains a spinner. It is disabled
+ * through `aria-disabled` rather than `disabled` so it stays focusable and
+ * screen readers still announce it — a control that vanishes from the tab
+ * order mid-interaction loses the user's place.
+ */
+.btn[data-loading="true"] {
+  cursor: progress;
+}
+
+.btn[data-loading="true"]::before {
+  content: "";
+  inline-size: 1em;
+  block-size: 1em;
+  border: var(--border-width-medium) solid currentColor;
+  border-block-start-color: transparent;
+  border-radius: var(--radius-full);
+  animation: btn-spin 700ms linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn[data-loading="true"]::before {
+    animation-duration: 2.4s;
+  }
+}
+
+/**
+ * ── Composition ───────────────────────────────────────────────────────
+ *
+ * The handbook pairs a secondary "cancel" with a primary "confirm", in that
+ * order. On a phone they stack with the primary action on top, so the action
+ * the user came to take is the one under their thumb.
+ */
+.btn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+@media (max-width: 640px) {
+  .btn-row {
+    flex-direction: column-reverse;
+  }
+  .btn-row > .btn {
+    inline-size: 100%;
+  }
+}

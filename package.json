@@ -1,19 +1,44 @@
 {
   "name": "umzugplus",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+  "packageManager": "pnpm@10.4.0",
+  "engines": {
+    "node": ">=20.11.0"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
-    "next": "14.2.32",
-    "pdf-lib": "^1.17.1",
-    "react": "^18",
-    "react-dom": "^18",
-    "resend": "^4.0.0"
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:api": "turbo run dev --filter=@umzugplus/api",
+    "dev:web": "turbo run dev --filter=@umzugplus/web",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker-compose.dev.yml down",
+    "db:generate": "pnpm --filter @umzugplus/db generate",
+    "db:migrate": "pnpm --filter @umzugplus/db migrate",
+    "db:studio": "pnpm --filter @umzugplus/db studio",
+    "seed": "pnpm --filter @umzugplus/db seed",
+    "db:reset": "docker compose -f docker-compose.dev.yml down -v",
+    "db:dump": "pnpm --filter @umzugplus/db dump",
+    "db:restore": "pnpm --filter @umzugplus/db restore",
+    "db:psql": "docker exec -it umzugplus-postgres psql -U ${POSTGRES_USER:-umzugplus} -d ${POSTGRES_DB:-umzugplus_dev}",
+    "prod:up": "docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build",
+    "prod:down": "docker compose -f docker-compose.prod.yml --env-file .env.production down",
+    "prod:logs": "docker compose -f docker-compose.prod.yml --env-file .env.production logs -f api",
+    "prod:migrate": "docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.9.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild"
+    ]
   }
 }

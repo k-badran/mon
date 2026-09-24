@@ -1,0 +1,20 @@
+{
+  "name": "@umzugplus/config",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": { "dotenv": "^16.4.7", "zod": "^3.24.1" },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@umzugplus/typescript-config": "workspace:*",
+    "typescript": "^5.9.2"
+  }
+}

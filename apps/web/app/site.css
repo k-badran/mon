@@ -1,0 +1,598 @@
+/**
+ * Public site: the header and the auth screens.
+ *
+ * Separate from dashboard.css because the two have genuinely different jobs —
+ * one is a marketing surface, the other a tool — but both draw from the same
+ * tokens, so a theme change moves them together.
+ */
+
+/* ── Auth: the split panel from the brand reference ──────────────────── */
+
+.auth-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-block-size: 100vh;
+  font-family: var(--font-sans);
+}
+@media (min-width: 900px) {
+  .auth-split { grid-template-columns: 1fr 1.05fr; }
+}
+
+/**
+ * The red panel.
+ *
+ * A deep-to-bright diagonal gradient, so the headline sits on the darker end.
+ * Flat brand red behind white text at this size is right at the edge of
+ * readable; the gradient buys the contrast back without dulling the brand.
+ */
+.auth-panel {
+  display: none;
+  position: relative;
+  padding: var(--space-12);
+  background:
+    radial-gradient(120% 90% at 100% 0%, var(--red-500) 0%, transparent 60%),
+    linear-gradient(150deg, var(--red-800) 0%, var(--red-600) 55%, var(--red-500) 100%);
+  color: var(--neutral-0);
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+@media (min-width: 900px) { .auth-panel { display: flex; } }
+
+/* The road curve from the logo, echoed faintly behind the copy. */
+.auth-panel::after {
+  content: "";
+  position: absolute;
+  inset-block-end: -18%;
+  inset-inline-start: -12%;
+  inline-size: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 44px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.auth-panel-inner { position: relative; z-index: 1; max-inline-size: 30rem; }
+
+.auth-panel h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-5);
+  text-wrap: balance;
+}
+.auth-panel p {
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  color: rgba(255, 255, 255, 0.86);
+  margin: 0 0 var(--space-8);
+  max-inline-size: 44ch;
+}
+
+.auth-badges { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.auth-panel-foot {
+  position: absolute;
+  inset-block-end: var(--space-8);
+  inset-inline-start: var(--space-12);
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── The form side ───────────────────────────────────────────────────── */
+
+.auth-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+  background: var(--surface-card);
+}
+
+.auth-form { inline-size: 100%; max-inline-size: 26rem; }
+
+/* On a narrow screen the red panel is gone, so the logo carries the brand. */
+.auth-form .auth-logo { display: block; block-size: 34px; margin-block-end: var(--space-8); }
+@media (min-width: 900px) { .auth-form .auth-logo { display: none; } }
+
+.auth-form h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+  letter-spacing: -0.02em;
+}
+.auth-form .sub {
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  margin: 0 0 var(--space-6);
+}
+
+.field { display: block; margin-block-end: var(--space-4); }
+.field > label {
+  display: block;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-block-end: var(--space-2);
+}
+
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap .lead-icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.input-wrap input {
+  inline-size: 100%;
+  padding: var(--space-3);
+  padding-inline-start: var(--space-10);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-family: inherit;
+  color: var(--text-strong);
+  background: var(--surface-card);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+.input-wrap input::placeholder { color: var(--text-faint); }
+.input-wrap input:focus {
+  outline: none;
+  border-color: var(--brand-red);
+  box-shadow: 0 0 0 3px var(--red-100);
+}
+.input-wrap input[aria-invalid="true"] { border-color: var(--danger); }
+.input-wrap:has(.reveal) input { padding-inline-end: var(--space-12); }
+
+.input-wrap .reveal {
+  position: absolute;
+  inset-inline-end: var(--space-3);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-family: inherit;
+}
+
+.field-error { display: block; color: var(--red-700); font-size: var(--text-sm); margin-block-start: 4px; }
+.field-hint { display: block; color: var(--text-faint); font-size: var(--text-sm); margin-block-start: 4px; }
+
+.forgot {
+  display: block;
+  text-align: end;
+  font-size: var(--text-sm);
+  color: var(--brand-red);
+  font-weight: 500;
+  text-decoration: none;
+  margin-block-end: var(--space-5);
+}
+
+.btn.block { inline-size: 100%; justify-content: center; padding-block: var(--space-3); }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block: var(--space-6);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  block-size: 1px;
+  background: var(--border-subtle);
+}
+
+.auth-social { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.auth-social button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-default);
+  cursor: pointer;
+  font-family: inherit;
+}
+.auth-social button:hover:not(:disabled) { background: var(--surface-page); }
+.auth-social button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.auth-switch {
+  text-align: center;
+  margin-block-start: var(--space-6);
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}
+.auth-switch a { color: var(--brand-red); font-weight: 600; text-decoration: none; }
+
+.auth-alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  margin-block-end: var(--space-4);
+  background: var(--danger-soft);
+  color: var(--red-700);
+  border: 1px solid var(--red-200);
+}
+.auth-alert.is-info { background: var(--info-soft); color: #1d4ed8; border-color: #bfd7fe; }
+
+/* ── Public site header ──────────────────────────────────────────────── */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-8);
+  background: var(--surface-card);
+  border-block-end: 1px solid var(--border-subtle);
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 30;
+}
+.navbar .brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+.navbar .brand img { block-size: 28px; inline-size: auto; }
+
+.nav-links { display: flex; gap: var(--space-5); margin-inline-end: auto; }
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+.nav-links a:hover { color: var(--text-strong); }
+
+.nav-actions { display: flex; align-items: center; gap: var(--space-3); }
+
+.locale-switcher {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-page);
+  padding: 3px;
+  border-radius: var(--radius-md);
+}
+.locale-switcher button {
+  border: none;
+  background: transparent;
+  padding: 5px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+.locale-switcher button.active {
+  background: var(--surface-card);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+}
+
+/**
+ * Four full language names are 263px of buttons, which overflows a 390px
+ * phone on their own. Below the header's breakpoint the names shorten to
+ * their codes; the button's aria-label keeps the full name either way.
+ */
+.locale-switcher .locale-short { display: none; }
+
+/**
+ * The switcher shortens well before the nav links collapse.
+ *
+ * Measured: the four full names are 263px and the links are 559px, so at
+ * 1024px the header is already 100px over before the brand and the buttons
+ * are counted. Shortening only at the 820px link breakpoint is too late.
+ */
+@media (max-width: 1280px) {
+  .locale-switcher .locale-long { display: none; }
+  .locale-switcher .locale-short { display: inline; }
+  .locale-switcher button { padding-inline: var(--space-2); font-weight: 600; }
+}
+
+/**
+ * On a phone the header keeps the primary call to action and drops the
+ * secondary one: "log in" is still reachable from the sign-up screen, and
+ * three controls plus the switcher do not fit 358px of content width.
+ */
+@media (max-width: 768px) {
+  .nav-actions { gap: var(--space-2); min-inline-size: 0; }
+  .nav-actions .btn.ghost { display: none; }
+}
+
+.account-menu { position: relative; }
+.account-menu .avatar {
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--radius-full);
+  background: var(--brand-red);
+  color: var(--neutral-0);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.account-dropdown {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-inline-size: 190px;
+  padding: var(--space-2);
+  display: grid;
+  gap: 2px;
+  z-index: 40;
+}
+.account-dropdown a,
+.account-dropdown button {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-default);
+  text-decoration: none;
+  font-size: var(--text-base);
+  background: none;
+  border: none;
+  text-align: start;
+  inline-size: 100%;
+  cursor: pointer;
+  font-family: inherit;
+}
+.account-dropdown a:hover,
+.account-dropdown button:hover { background: var(--surface-page); }
+
+.nav-placeholder { inline-size: 36px; block-size: 36px; }
+
+/* ── Mobile navigation ───────────────────────────────────────────────── */
+
+/* Desktop shows the link row, so the toggle has no job there. */
+.nav-toggle { display: none; }
+
+.nav-toggle .bars {
+  display: grid;
+  gap: 4px;
+  inline-size: 20px;
+}
+.nav-toggle .bars span {
+  display: block;
+  block-size: 2px;
+  border-radius: 2px;
+  background: var(--text-strong);
+}
+
+/**
+ * The scrim is a button rather than a div: dismissing the drawer by tapping
+ * outside it should be available to a keyboard and to assistive technology,
+ * not only to a pointer.
+ */
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  padding: 0;
+  background: rgba(27, 26, 23, 0.44);
+  cursor: pointer;
+}
+
+.nav-drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 41;
+  inline-size: min(320px, 86vw);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  background: var(--surface-card);
+  border-inline-start: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+}
+
+.nav-drawer a {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-default);
+}
+.nav-drawer a:hover { background: var(--surface-sunken); color: var(--text-strong); }
+
+.nav-drawer .drawer-login {
+  margin-block-start: var(--space-4);
+  border: 1px solid var(--border-default);
+  text-align: center;
+}
+
+/**
+ * The link row is measured at 559px and the switcher at 263px, so the header
+ * runs out of room well above the old 820px breakpoint. The row hands over to
+ * the drawer at 1024px, which is also where the switcher has already
+ * shortened to language codes.
+ */
+@media (max-width: 1080px) {
+  .navbar { padding-inline: var(--space-4); gap: var(--space-3); }
+  .nav-links { display: none; }
+  .nav-toggle {
+    display: grid;
+    place-items: center;
+    inline-size: 40px;
+    block-size: 40px;
+    margin-inline-start: auto;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+  }
+}
+
+/* The drawer's language picker only appears where the header's cannot fit. */
+.drawer-locales { display: none; }
+
+/**
+ * Below 400px the header holds the brand, the menu toggle and the primary
+ * call to action, and that is all it has room for — measured at 320px the
+ * switcher and the button together are 187px of a 288px content width.
+ */
+@media (max-width: 560px) {
+  .navbar .locale-switcher { display: none; }
+
+  .drawer-locales {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    margin-block-start: var(--space-4);
+    padding-block-start: var(--space-4);
+    border-block-start: 1px solid var(--border-subtle);
+  }
+  .drawer-locales button {
+    padding: var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    color: var(--text-default);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .drawer-locales button.active {
+    border-color: var(--brand-red);
+    color: var(--brand-red);
+  }
+}
+
+/* ── Page shell for the public pages ─────────────────────────────────── */
+
+.page-wrap {
+  max-inline-size: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+  font-family: var(--font-sans);
+  color: var(--text-default);
+}
+.page-wrap h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.025em;
+  margin: 0 0 var(--space-3);
+  text-wrap: balance;
+}
+.page-wrap h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: var(--space-8) 0 var(--space-3);
+}
+.auth-sub { color: var(--text-muted); font-size: var(--text-md); margin: 0 0 var(--space-6); max-inline-size: 66ch; }
+
+/* ── Chat widget ─────────────────────────────────────────────────────── */
+
+.chat-fab {
+  position: fixed;
+  inset-block-end: var(--space-6);
+  inset-inline-end: var(--space-6);
+  inline-size: 54px;
+  block-size: 54px;
+  border-radius: var(--radius-full);
+  background: var(--brand-red);
+  color: var(--neutral-0);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-brand);
+  z-index: 50;
+}
+
+.chat-panel {
+  position: fixed;
+  inset-block-end: calc(var(--space-6) + 66px);
+  inset-inline-end: var(--space-6);
+  inline-size: min(360px, calc(100vw - 32px));
+  max-block-size: 70vh;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 50;
+}
+.chat-panel-head {
+  padding: var(--space-4);
+  border-block-end: 1px solid var(--border-subtle);
+  display: grid;
+  gap: 2px;
+}
+.chat-panel-head strong { color: var(--text-strong); font-family: var(--font-display); }
+.chat-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.chat-bubble {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  max-inline-size: 90%;
+}
+.chat-bubble.kunde { background: var(--surface-page); color: var(--text-default); justify-self: start; }
+.chat-bubble.team { background: var(--brand-red); color: var(--neutral-0); justify-self: end; }
+
+.chat-suggestions { display: grid; gap: var(--space-2); margin-block-start: var(--space-2); }
+.chat-suggestions button { text-align: start; justify-content: flex-start; }
+
+.chat-panel-input {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-block-start: 1px solid var(--border-subtle);
+}
+.chat-panel-input input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-base);
+}
+
+.muted { color: var(--text-muted); font-size: var(--text-sm); }

@@ -1,0 +1,460 @@
+@import "tailwindcss";
+
+/**
+ * The M.io design system, as Tailwind's theme.
+ *
+ * Every value is transcribed from the M.io Figma file
+ * (key HWPX9rfWeQ8GPY1MnwF5jz), whose handbook frames state their own tokens
+ * as labelled text: "Color System & Tokens", "Typographic Scales",
+ * "Core Design Tokens" and "Button Systems".
+ *
+ * Declaring them under `@theme` does two jobs at once: Tailwind generates the
+ * utilities (`bg-brand-red`, `text-h1`, `rounded-lg`), and each one is emitted
+ * as a CSS custom property on `:root`. So the hand-written stylesheets that
+ * have not been migrated yet keep resolving `var(--color-brand-red)` while new
+ * work is written in utilities. One source, both consumers.
+ *
+ * The admin panel re-themes the site at runtime by overriding these same
+ * properties, which is why nothing below may be inlined at build time.
+ */
+
+@theme {
+  /* ── Primary brand anchors ─────────────────────────────────────────── */
+  /* Red: bold action state, brand hero accents, logo mark. */
+  --color-brand-red: #d71635;
+  /* Yellow: high-visibility highlights, system warnings, safety signals. */
+  --color-brand-yellow: #ffcb08;
+
+  /* ── Red ladder ────────────────────────────────────────────────────── */
+  --color-red-50: #fdf1f3;
+  --color-red-100: #fce3e6;
+  --color-red-200: #f8c7cb;
+  --color-red-300: #f2949c;
+  --color-red-400: #ea5c69;
+  --color-red-500: #d71635;
+  --color-red-600: #b80f2a;
+  --color-red-700: #950a20;
+  --color-red-800: #730517;
+  --color-red-900: #4f020e;
+
+  /* ── Yellow ladder ─────────────────────────────────────────────────── */
+  --color-yellow-50: #fffdf0;
+  --color-yellow-100: #fffac2;
+  --color-yellow-200: #fff58f;
+  --color-yellow-300: #ffe952;
+  --color-yellow-400: #ffda1f;
+  --color-yellow-500: #ffcb08;
+  --color-yellow-600: #d9ab00;
+  --color-yellow-700: #b38c00;
+  --color-yellow-800: #8c6d00;
+  --color-yellow-900: #5e4d00;
+
+  /**
+   * ── Neutrals ─────────────────────────────────────────────────────────
+   *
+   * The ramp the page designs use, not the warm one the handbook's swatch
+   * sheet lists. Counted across 27 page frames: #121214 carries 247 text
+   * nodes, #5a5e66 188, #f8f9fa 157, and #e9ecef 88 strokes. The handbook's
+   * warm set appears on none of them.
+   */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8f9fa;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e9ecef;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #5a5e66;
+  --color-neutral-700: #4b5563;
+  --color-neutral-800: #1a1a1e;
+  --color-neutral-900: #121214;
+
+  /** The yellow wash behind badges and icon circles. */
+  --color-yellow-tint: #fffbe6;
+
+  /**
+   * ── Semantic status ──────────────────────────────────────────────────
+   *
+   * Three tiers per state, each with a stated job: the soft fill backs toasts
+   * and banners, the default is the active state itself, and the text tier is
+   * what stays readable on top of the soft fill. Using the default colour as
+   * text on the soft fill is the mistake these three tiers exist to prevent.
+   */
+  --color-success-soft: #e8f8f0;
+  --color-success: #10b981;
+  --color-success-text: #065f46;
+
+  --color-warning-soft: #fffbeb;
+  --color-warning: #f59e0b;
+  --color-warning-text: #78350f;
+
+  --color-danger-soft: #fef2f2;
+  --color-danger: #ef4444;
+  --color-danger-text: #991b1b;
+
+  --color-info-soft: #eff6ff;
+  --color-info: #3b82f6;
+  --color-info-text: #1e3a8a;
+
+  /* ── Semantic surfaces and text ────────────────────────────────────── */
+  /* The page frames paint their canvas #f9fafb, one step off the ramp's
+     #f8f9fa. #f8f9fa is the footer's text colour, so the two stay apart
+     rather than being folded into one value. */
+  --color-surface-page: #f9fafb;
+  --color-surface-card: var(--color-neutral-0);
+  --color-surface-sunken: var(--color-neutral-100);
+  --color-surface-inverse: var(--color-neutral-900);
+
+  --color-text-strong: var(--color-neutral-900);
+  /* Headings on the content pages are #111827, not the ramp's #121214 —
+     that one belongs to the nav and the footer. Both are real values in the
+     frames, so they are two tokens rather than one rounded average. */
+  --color-text-heading: #111827;
+  --color-text-default: var(--color-neutral-700);
+  /* #5a5e66 — the pages' own secondary text colour, 6.5:1 on white. */
+  --color-text-muted: var(--color-neutral-600);
+  /* Decorative and disabled only — this does not meet AA as body text. */
+  --color-text-faint: var(--color-neutral-400);
+  --color-text-on-brand: var(--color-neutral-0);
+  /* The yellow is far too light to carry white text. */
+  --color-text-on-yellow: var(--color-neutral-900);
+  --color-text-on-inverse: var(--color-neutral-50);
+  /* Secondary text on the dark surface. Only existed as a legacy alias, so
+     `text-text-inverse-muted` generated no rule at all and the element fell
+     back to the body colour — unreadable on the ink band. */
+  --color-text-inverse-muted: var(--color-neutral-400);
+
+  --color-border-subtle: var(--color-neutral-200);
+  --color-border-default: var(--color-neutral-300);
+  --color-border-strong: var(--color-neutral-400);
+
+  /**
+   * ── Spacing ──────────────────────────────────────────────────────────
+   *
+   * The handbook's fourteen-step scale. Tailwind's numeric spacing utilities
+   * (`p-4`, `gap-6`) multiply a single base, which would let any number
+   * through; naming the steps means `p-6` is 24px because the design says 24,
+   * and a step the design does not have simply does not exist.
+   */
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-0\.5: 2px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+  --spacing-32: 128px;
+
+  /* ── Corner radius ─────────────────────────────────────────────────── */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /**
+   * ── Elevation ────────────────────────────────────────────────────────
+   *
+   *   sm  subtle accent, card boundaries, navigation headers
+   *   md  standard container, high-visibility dashboards
+   *   lg  system dropdowns, dynamic context menus
+   *   xl  modal dialogs, major system alerts, focus sheets
+   */
+  --shadow-sm: 0 1px 2px rgba(19, 17, 16, 0.05);
+  --shadow-md: 0 4px 12px rgba(19, 17, 16, 0.08);
+  --shadow-lg: 0 12px 28px rgba(19, 17, 16, 0.12);
+  --shadow-xl: 0 24px 56px rgba(19, 17, 16, 0.18);
+  --shadow-brand: 0 6px 16px rgba(215, 22, 53, 0.24);
+
+  /**
+   * ── Type ─────────────────────────────────────────────────────────────
+   *
+   * "A geometric, highly readable Sans-Serif system built for legibility on
+   * digital dashboards and moving vehicles." The handbook describes the face
+   * but does not name it, so the stack leads with the geometric grotesques
+   * that match its specimens.
+   */
+  --font-sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Outfit", var(--font-sans);
+
+  /**
+   * The hierarchy, as size / line-height / tracking / weight. Each entry
+   * carries its line height and tracking, so `text-h1` sets all three and a
+   * heading cannot be half-applied.
+   */
+  --text-display: 3rem;
+  --text-display--line-height: 3.5rem;
+  --text-display--letter-spacing: -1.5px;
+  --text-display--font-weight: 700;
+
+  --text-h1: 2.25rem;
+  --text-h1--line-height: 2.75rem;
+  --text-h1--letter-spacing: -1px;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 1.875rem;
+  --text-h2--line-height: 2.375rem;
+  --text-h2--letter-spacing: -0.5px;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 1.5rem;
+  --text-h3--line-height: 2rem;
+  --text-h3--font-weight: 600;
+
+  --text-h4: 1.25rem;
+  --text-h4--line-height: 1.75rem;
+  --text-h4--font-weight: 500;
+
+  --text-h5: 1.125rem;
+  --text-h5--line-height: 1.625rem;
+  --text-h5--font-weight: 500;
+
+  --text-h6: 1rem;
+  --text-h6--line-height: 1.5rem;
+  --text-h6--letter-spacing: 0.2px;
+  --text-h6--font-weight: 600;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.75rem;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+
+  /*
+   * 15px. The M.io frames set form placeholders, button labels and the
+   * hotline note at 15/400 — a step between `body` and `body-sm` the scale
+   * was missing, so those nodes had been rendering a pixel short.
+   */
+  --text-body-md: 0.9375rem;
+  --text-body-md--line-height: 1.21875rem;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.25rem;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-caption--letter-spacing: 0.5px;
+
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 1rem;
+  --text-overline--letter-spacing: 2px;
+  --text-overline--font-weight: 700;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /**
+   * ── Breakpoints ──────────────────────────────────────────────────────
+   *
+   * The handbook's five devices. Tailwind's defaults (640/768/1024/1280/1536)
+   * are close but not the same, and "close" is what makes a build drift from
+   * a design at exactly the widths a designer checked.
+   */
+  --breakpoint-sm: 375px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+
+  --container-content: 1280px;
+
+  /* ── Motion ────────────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/**
+ * Right-to-left locales.
+ *
+ * Only the typeface changes: Tailwind's logical utilities (`ps-`, `pe-`,
+ * `ms-`, `me-`, `start-`, `end-`) mirror on their own, so direction needs no
+ * overrides. Latin glyphs still appear on Arabic pages — references, prices,
+ * addresses — so the Latin face stays in the stack behind the Arabic one.
+ */
+[dir="rtl"] {
+  --font-sans: "IBM Plex Sans Arabic", "DM Sans", system-ui, sans-serif;
+  --font-display: "Cairo", "Outfit", system-ui, sans-serif;
+}
+
+/**
+ * Bridge to the hand-written stylesheets.
+ *
+ * Those files reference `--brand-red`, `--space-6`, `--radius-lg` and so on.
+ * Rather than rewrite every one of them in a single pass — which would mean
+ * changing thousands of lines with no way to tell a mistake from a migration —
+ * the old names are aliased onto the theme's. Both resolve to the same value,
+ * so a screen can move to utilities one component at a time.
+ *
+ * Nothing new should use these. They exist to be deleted.
+ */
+:root {
+  --brand-red: var(--color-brand-red);
+  --brand-yellow: var(--color-brand-yellow);
+
+  --red-50: var(--color-red-50);
+  --red-100: var(--color-red-100);
+  --red-200: var(--color-red-200);
+  --red-300: var(--color-red-300);
+  --red-400: var(--color-red-400);
+  --red-500: var(--color-red-500);
+  --red-600: var(--color-red-600);
+  --red-700: var(--color-red-700);
+  --red-800: var(--color-red-800);
+  --red-900: var(--color-red-900);
+
+  --yellow-tint: var(--color-yellow-tint);
+  --yellow-50: var(--color-yellow-50);
+  --yellow-100: var(--color-yellow-100);
+  --yellow-200: var(--color-yellow-200);
+  --yellow-300: var(--color-yellow-300);
+  --yellow-400: var(--color-yellow-400);
+  --yellow-500: var(--color-yellow-500);
+  --yellow-600: var(--color-yellow-600);
+
+  --neutral-0: var(--color-neutral-0);
+  --neutral-50: var(--color-neutral-50);
+  --neutral-100: var(--color-neutral-100);
+  --neutral-200: var(--color-neutral-200);
+  --neutral-300: var(--color-neutral-300);
+  --neutral-400: var(--color-neutral-400);
+  --neutral-500: var(--color-neutral-500);
+  --neutral-600: var(--color-neutral-600);
+  --neutral-700: var(--color-neutral-700);
+  --neutral-800: var(--color-neutral-800);
+  --neutral-900: var(--color-neutral-900);
+
+  --success: var(--color-success);
+  --success-soft: var(--color-success-soft);
+  --success-text: var(--color-success-text);
+  --warning: var(--color-warning);
+  --warning-soft: var(--color-warning-soft);
+  --warning-text: var(--color-warning-text);
+  --danger: var(--color-danger);
+  --danger-soft: var(--color-danger-soft);
+  --danger-text: var(--color-danger-text);
+  --info: var(--color-info);
+  --info-soft: var(--color-info-soft);
+  --info-text: var(--color-info-text);
+
+  --surface-page: var(--color-surface-page);
+  --surface-card: var(--color-surface-card);
+  --surface-raised: var(--color-surface-card);
+  --surface-sunken: var(--color-surface-sunken);
+  --surface-inverse: var(--color-surface-inverse);
+
+  --text-strong: var(--color-text-strong);
+  --text-heading: var(--color-text-heading);
+  --text-default: var(--color-text-default);
+  --text-muted: var(--color-text-muted);
+  --text-faint: var(--color-text-faint);
+  --text-on-brand: var(--color-text-on-brand);
+  --text-on-yellow: var(--color-text-on-yellow);
+  --text-on-inverse: var(--color-text-on-inverse);
+  --text-inverse-muted: var(--color-neutral-400);
+
+  --border-subtle: var(--color-border-subtle);
+  --border-default: var(--color-border-default);
+  --border-strong: var(--color-border-strong);
+  --border-inverse: rgba(255, 255, 255, 0.08);
+
+  --border-width: 1px;
+  --border-width-medium: 1.5px;
+  --border-width-heavy: 2px;
+  --border-width-structural: 3px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 32px;
+  --space-9: 40px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-80: 80px;
+  --space-96: 96px;
+  --space-128: 128px;
+
+  --radius-full: 9999px;
+
+  /* Legacy type aliases, mapped onto the real scale. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-body: 1.5rem;
+  --leading-body-sm: 1.25rem;
+  --leading-caption: 1rem;
+
+  --tracking-display: -1.5px;
+  --tracking-h1: -1px;
+  --tracking-h2: -0.5px;
+  --tracking-h6: 0.2px;
+  --tracking-caption: 0.5px;
+  --tracking-overline: 2px;
+
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --icon-size: 24px;
+  --icon-size-sm: 20px;
+  --icon-size-lg: 32px;
+  --icon-stroke: 1.5;
+
+  --content-max: 1280px;
+  --sidebar-width: 236px;
+  --header-height: 80px;
+
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --hover-lift: -4px;
+
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-40: 0.4;
+  --opacity-60: 0.6;
+  --opacity-80: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --hover-lift: 0px;
+  }
+}

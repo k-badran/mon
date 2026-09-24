@@ -1,0 +1,187 @@
+/**
+ * Base layer.
+ *
+ * The tokens moved to theme.css, where Tailwind's `@theme` generates both the
+ * utilities and the custom properties. What is left here is the reset and the
+ * element defaults — the things a utility class cannot express because they
+ * apply to bare HTML.
+ *
+ * Kept deliberately small. A reset that restyles elements is a second design
+ * system competing with Tailwind's.
+ */
+
+/**
+ * Everything below sits in Tailwind's `base` layer.
+ *
+ * Utilities are emitted inside `@layer utilities`, and an unlayered rule beats
+ * a layered one regardless of specificity — so an unlayered `h2 { color }`
+ * here would override `text-*` on every heading in the app. Being in `base`
+ * puts these where they belong: the default when no utility has an opinion.
+ */
+@layer base {
+
+
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Anchored sections must not land under the fixed header. */
+    scroll-padding-block-start: calc(var(--header-height) + var(--space-16));
+  }
+
+  body {
+    margin: 0;
+    background: var(--surface-page);
+    color: var(--text-default);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--weight-regular);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /**
+   * Headings carry no margin. Spacing between blocks is the layout's job — a
+   * heading that brings its own margin collapses unpredictably inside a flex or
+   * grid container, which is most of this system.
+   */
+  /**
+   * German compounds do not fit a 320px phone.
+   *
+   * "Allgemeine Geschäftsbedingungen" is one unbreakable token wider than the
+   * viewport, so a legal heading pushed the whole page sideways. The document
+   * carries a lang attribute, so the browser can hyphenate correctly for
+   * whichever of the four languages is being shown.
+   */
+  h1, h2, h3, h4, h5, h6, p, li, dd, dt, blockquote, summary {
+    overflow-wrap: break-word;
+    hyphens: auto;
+    /* As a grid or flex item these default to min-width:auto, which is the
+       width of the longest word — so break-word never gets a chance. */
+    min-inline-size: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-family: var(--font-display);
+    color: var(--text-strong);
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-h1);
+    letter-spacing: var(--tracking-h1);
+    font-weight: var(--weight-bold);
+  }
+  h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-h2);
+    letter-spacing: var(--tracking-h2);
+    font-weight: var(--weight-semibold);
+  }
+  h3 {
+    font-size: var(--text-h3);
+    line-height: var(--leading-h3);
+    font-weight: var(--weight-semibold);
+  }
+  h4 {
+    font-size: var(--text-h4);
+    line-height: var(--leading-h4);
+    font-weight: var(--weight-medium);
+  }
+  h5 {
+    font-size: var(--text-h5);
+    line-height: var(--leading-h5);
+    font-weight: var(--weight-medium);
+  }
+  h6 {
+    font-size: var(--text-h6);
+    line-height: var(--leading-h6);
+    letter-spacing: var(--tracking-h6);
+    font-weight: var(--weight-semibold);
+  }
+
+  p, figure, blockquote, dl, dd {
+    margin: 0;
+  }
+
+  ul, ol {
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img, svg, video {
+    display: block;
+    max-inline-size: 100%;
+  }
+
+  /* Form controls do not inherit type by default, and every one of them should. */
+  button, input, select, textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  /**
+   * A visible focus ring on keyboard navigation only.
+   *
+   * :focus-visible rather than :focus, so a mouse click on a button does not
+   * leave a ring behind it, while tabbing still shows where you are.
+   */
+  :focus-visible {
+    outline: var(--border-width-heavy) solid var(--brand-yellow);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /** The handbook's display and overline styles, as utilities. */
+  .text-display {
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    font-weight: var(--weight-bold);
+    color: var(--text-strong);
+  }
+
+  .text-overline {
+    font-size: var(--text-overline);
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-overline);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+  }
+
+  .text-caption {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-caption);
+  }
+
+  /** Available to assistive technology, absent from the visual layout. */
+  .sr-only {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+}
