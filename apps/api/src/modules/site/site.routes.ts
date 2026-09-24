@@ -312,15 +312,30 @@ siteRouter.post(
 async function invalidateSiteCache(): Promise<void> {
   await redis.del(SETTINGS_CACHE_KEY).catch(() => undefined);
 
-  // Content is cached per locale and section, so the keys are enumerated.
-  const locales = ["de", "en", "ar", "tr"];
-  const sections = ["all", "home", "footer", "services", "about"];
+  // Scanned rather than enumerated. `section` is a free-text query parameter,
+  // so the cached key space is whatever has been requested — every `page-*`
+  // frame, not the five names the old list happened to carry. Enumerating left
+  // an edit to any other section waiting out the full TTL, which read as the
+  // dashboard silently ignoring the change.
+  let cursor = "0";
 
-  await Promise.all(
-    locales.flatMap((locale) =>
-      sections.map((section) =>
-        redis.del(`${CONTENT_CACHE_PREFIX}${locale}:${section}`).catch(() => undefined),
-      ),
-    ),
-  );
+  try {
+    do {
+      const [next, keys] = await redis.scan(
+        cursor,
+        "MATCH",
+        `${CONTENT_CACHE_PREFIX}*`,
+        "COUNT",
+        250,
+      );
+
+      cursor = next;
+
+      if (keys.length > 0) await redis.del(...keys);
+    } while (cursor !== "0");
+  } catch {
+    // The write itself is already committed. A cache that cannot be cleared
+    // must not turn that into a failed request; the entries expire on their
+    // own TTL.
+  }
 }

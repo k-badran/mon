@@ -24,6 +24,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { HINT_COOKIE } from "./access/cookies";
+
 /**
  * The single point at which this app talks to the backend.
  *
@@ -34,6 +36,77 @@ import {
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+/**
+ * Set while a sign-out has been asked for but not confirmed by the API.
+ *
+ * Only the API can clear the refresh cookie, so a logout that never arrives
+ * leaves a live session that the next page load silently resumes — the user
+ * pressed "sign out" and came back signed in. The intent is remembered here
+ * and carried out before any session is restored.
+ */
+const PENDING_SIGN_OUT_KEY = "umzugplus.signout-pending";
+
+function rememberPendingSignOut(pending: boolean): void {
+  try {
+    if (pending) globalThis.localStorage?.setItem(PENDING_SIGN_OUT_KEY, "1");
+    else globalThis.localStorage?.removeItem(PENDING_SIGN_OUT_KEY);
+  } catch {
+    // Private mode, or a browser blocking site data. The sign-out still
+    // happens; only the ability to finish it after a reload is lost.
+  }
+}
+
+function hasPendingSignOut(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(PENDING_SIGN_OUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Ends the session on the server, which is the only place it can be ended.
+ *
+ * Two attempts, because the failure this exists for is a dropped connection
+ * rather than a refusal — the endpoint accepts an unauthenticated call and
+ * clears the cookies regardless of what it finds.
+ */
+async function endServerSession(sdk: UmzugPlusSdk): Promise<boolean> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await sdk.auth.logout();
+      rememberPendingSignOut(false);
+      return true;
+    } catch {
+      // Retried once, then left to the pending flag above.
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Drops the session hint from this browser.
+ *
+ * The hint is not httpOnly precisely so this is possible. When a sign-out
+ * cannot reach the API the refresh cookie survives — nothing here can touch
+ * it — but the hint is what the edge middleware routes on, and a browser that
+ * keeps being sent into /admin after the user asked to leave is the part they
+ * can see. Deleting a cookie means matching the attributes it was set with,
+ * and the hint carries a parent domain in production, so each candidate is
+ * tried.
+ */
+function dropSessionHint(): void {
+  if (typeof document === "undefined") return;
+
+  const { hostname } = window.location;
+  const parent = hostname.split(".").slice(-2).join(".");
+
+  for (const domain of [null, hostname, `.${parent}`]) {
+    document.cookie = `${HINT_COOKIE}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ""}`;
+  }
+}
 
 interface AuthState {
   user: AuthUser | null;
@@ -135,8 +208,19 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   // Restore the session on mount. The SDK refreshes the access token from the
   // stored refresh token transparently, so a reload keeps the user signed in.
   useEffect(() => {
-    void refreshUser();
-  }, [refreshUser]);
+    void (async () => {
+      // Unless a sign-out is still owed. Finishing it here is what stops a
+      // failed logout from being undone by a page reload: the refresh cookie
+      // outlives the browser's own state, so restoring first would hand back
+      // the session the user asked to end.
+      if (hasPendingSignOut() && !(await endServerSession(sdk))) {
+        applyUser(null);
+        return;
+      }
+
+      await refreshUser();
+    })();
+  }, [sdk, refreshUser, applyUser]);
 
   const signIn = useCallback(
     async (email: string, password: string) => {
@@ -170,13 +254,23 @@ export function ApiProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     // Always called, with no token to pass: the refresh token is an httpOnly
-    // cookie now, so this code can neither read it nor delete it — only the
-    // API can. Skipping the call would leave the cookie in place and the next
-    // page load would quietly restore the session.
+    // cookie, so this code can neither read it nor delete it — only the API
+    // can. Skipping the call would leave the cookie in place and the next page
+    // load would quietly restore the session.
     //
-    // Local state is cleared either way. The user asked to be out.
-    await sdk.auth.logout().catch(() => undefined);
+    // The intent is written down before the attempt, so a failure is finished
+    // on the next mount rather than forgotten. It used to be swallowed
+    // outright: local state was cleared, the user was told they were signed
+    // out, and both cookies stayed live for as long as they lasted.
+    rememberPendingSignOut(true);
 
+    if (!(await endServerSession(sdk))) {
+      // The server session survives and nothing here can end it. What this can
+      // do is stop the browser behaving as though it were still signed in.
+      dropSessionHint();
+    }
+
+    // Cleared either way. The user asked to be out.
     tokensRef.current.clear();
     applyUser(null);
   }, [sdk, applyUser]);

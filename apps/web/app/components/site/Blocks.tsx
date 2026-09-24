@@ -17,8 +17,19 @@ import type { Locale } from "@/lib/i18n/config";
 
 export type Copy = Record<string, string>;
 
-/** 1280 content column, 80px inline on desktop. */
-export const SHELL = "mx-auto w-full max-w-[1280px] px-5 md:px-10";
+/**
+ * The 1280 content column, inside the page frame's 80px inline padding.
+ *
+ * The outer box is therefore the 1440 page frame itself, not the column: a
+ * 1280 max-width with 40px of padding resolved to a 1200 column, which is the
+ * width every section of every page had been drawn at. Below 1440 the padding
+ * steps down so the column stays fluid and nothing narrower than the design
+ * breakpoint changes; at 1440 and above it resolves to exactly 1280.
+ *
+ * `Navbar` and `Footer` carry the same three steps so the header, the content
+ * and the footer stay on one vertical edge.
+ */
+export const SHELL = "mx-auto w-full max-w-[1440px] px-5 md:px-10 2xl:px-20";
 const PAD = "py-14 md:py-20";
 
 /** Renders `**emphasis**` in brand red, as several Figma headlines do. */
@@ -153,7 +164,14 @@ export function PageHero({
             token would be a pixel right and a tracking wrong. */}
         <div className="mx-auto grid w-full gap-3 text-center">
           {eyebrow ? (
-            <p className="text-body-sm font-bold text-brand-red uppercase">{eyebrow}</p>
+            /* The sub-page frames set this 14/700 eyebrow at 18.2px, i.e. 1.3.
+               `text-body-sm` carries the body token's 20px line box, which is
+               1.43 here, so the ratio is stated rather than inherited — the
+               same value `SectionHeading` already states for the identical
+               14/700 eyebrow it renders further down these same pages. */
+            <p className="text-body-sm leading-[1.3] font-bold text-brand-red uppercase">
+              {eyebrow}
+            </p>
           ) : null}
 
           {headline ? (
@@ -176,6 +194,7 @@ export function SectionHeading({
   headline,
   subline,
   align = "center",
+  startWidth = "default",
   size = "lg",
   eyebrowSize = "sm",
 }: {
@@ -183,6 +202,13 @@ export function SectionHeading({
   headline?: string | undefined;
   subline?: string | undefined;
   align?: "center" | "start";
+  /**
+   * How wide the left-aligned column runs. The frames disagree: the checklist
+   * and company lead-ins are drawn 640 wide, page-pricing's
+   * calculator-preview column 520. Ignored when align is "center", where the
+   * stack runs the full content column.
+   */
+  startWidth?: "default" | "narrow";
   /** The frame's two headline sizes: 36/800 ("lg") and 32/800 ("md"). */
   size?: "md" | "lg";
   /**
@@ -201,7 +227,13 @@ export function SectionHeading({
        renders one, which is every content page. The red closing band's 800 is
        not this component's — `CtaBand` sets its own. */
     <div
-      className={`grid w-full gap-3 ${centred ? "mx-auto text-center" : "max-w-[640px]"}`}
+      className={`grid w-full gap-3 ${
+        centred
+          ? "mx-auto text-center"
+          : startWidth === "narrow"
+            ? "max-w-[520px]"
+            : "max-w-[640px]"
+      }`}
     >
       {eyebrow ? (
         <p
@@ -217,7 +249,9 @@ export function SectionHeading({
 
       {headline ? (
         <h2
-          className={`font-display leading-[1.15] font-extrabold text-text-heading ${
+          /* 36/43.2 in the frame — the same 1.2 ratio `PageHero`'s h1 is set
+             at, the two headings being typographically identical there. */
+          className={`font-display leading-[1.2] font-extrabold text-text-heading ${
             size === "md" ? "text-[1.5rem] md:text-[2rem]" : "text-[1.625rem] md:text-[2.25rem]"
           }`}
         >
@@ -236,14 +270,29 @@ export function SectionHeading({
 
 export function Section({
   tone = "white",
+  gap = "40",
   children,
 }: {
   tone?: "white" | "subtle";
+  /**
+   * The frame's two section itemSpacings. `gallery-section` and
+   * `cross-sell-section` sit their content 40 under the heading;
+   * `pricing-factors` and `faq-section` sit it 48. It is a per-section fact,
+   * not a house rhythm, so the section type states which of the two it is.
+   */
+  gap?: "40" | "48";
   children: ReactNode;
 }) {
   return (
-    <section className={tone === "white" ? "bg-neutral-0" : "bg-neutral-50"}>
-      <div className={`${SHELL} ${PAD} grid gap-10`}>{children}</div>
+    /* `subtle` is the page canvas showing through rather than a fill of its
+       own: these sections carry no fill in the frames, and the canvas is
+       painted #f9fafb. The neutral ramp's #f8f9fa is a different value with a
+       different job — it is the footer's text colour — so the two stay apart
+       here exactly as they do in the theme. */
+    <section className={tone === "white" ? "bg-neutral-0" : "bg-surface-page"}>
+      <div className={`${SHELL} ${PAD} grid ${gap === "48" ? "gap-12" : "gap-10"}`}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -271,7 +320,7 @@ export function ChecklistSection({
           stacks the section-title over the items, and the photograph. Heading
           beside list — the first build's shape — is a different composition. */}
       <div
-        className={`${SHELL} ${PAD} grid items-center gap-16 [&>*]:min-w-0 ${
+        className={`${SHELL} ${PAD} grid items-start gap-16 [&>*]:min-w-0 ${
           image ? "md:grid-cols-[minmax(0,580fr)_minmax(0,640fr)]" : ""
         }`}
       >
@@ -344,7 +393,7 @@ export function NumberedGrid({
         : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5";
 
   return (
-    <Section tone={tone}>
+    <Section tone={tone} gap="48">
       <SectionHeading
         eyebrow={eyebrow}
         headline={headline}
@@ -358,7 +407,7 @@ export function NumberedGrid({
         {items.map((item, index) => (
           <li
             key={item.title}
-            className="grid content-start gap-4 rounded-lg bg-neutral-0 p-6"
+            className="grid content-start gap-4 rounded-lg border border-neutral-100 bg-neutral-0 p-6"
           >
             <span className="font-display text-[1.75rem] leading-none font-extrabold text-brand-red">
               {String(index + 1).padStart(2, "0")}
@@ -406,7 +455,7 @@ export function Gallery({
             width={400}
             height={280}
             loading="lazy"
-            className="aspect-[10/7] w-full rounded-lg object-cover"
+            className="aspect-[411/280] w-full rounded-lg object-cover"
           />
         ))}
       </div>
@@ -431,7 +480,7 @@ export function FaqSection({
   if (entries.length === 0) return null;
 
   return (
-    <Section tone={tone}>
+    <Section tone={tone} gap="48">
       <SectionHeading
         eyebrow={eyebrow}
         headline={headline}
@@ -575,7 +624,8 @@ export function CtaBand({
 }) {
   return (
     <section className="bg-brand-red">
-      <div className={`${SHELL} ${PAD} grid gap-6 text-center`}>
+      {/* `cta-section` is itemSpacing 32, not the 24 the other stacks use. */}
+      <div className={`${SHELL} ${PAD} grid gap-8 text-center`}>
         {eyebrow ? (
           <p className="mx-auto w-fit rounded-md border border-white/40 px-3 py-1.5 text-caption font-bold text-white">
             {eyebrow}
@@ -589,7 +639,7 @@ export function CtaBand({
         ) : null}
 
         {subline ? (
-          <p className="mx-auto max-w-[720px] text-body text-white">{subline}</p>
+          <p className="mx-auto max-w-[640px] text-body text-white">{subline}</p>
         ) : null}
 
         {primary || secondary ? (

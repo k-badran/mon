@@ -1,42 +1,19 @@
+import { cache } from "react";
+
+import { DEFAULT_THEME, type SiteTheme } from "./defaults";
+
 /**
- * The bridge between the settings an admin edits and the CSS the site renders.
+ * The bridge between the settings an admin edits and the CSS the site renders,
+ * and the server-side reads that fetch them.
  *
  * Settings come back as a flat map of keys like "color.brand". This turns them
  * into the custom properties the design system already references, so changing
  * a value in the dashboard restyles the whole product — no component knows a
  * hex code, which is exactly what makes that possible.
+ *
+ * Server-only: the reads below use React's request-scoped `cache`, so anything
+ * client-side takes the defaults from `./defaults` instead.
  */
-
-export interface SiteTheme {
-  theme: Record<string, string>;
-  brand: Record<string, string>;
-  contact: Record<string, string>;
-  seo: Record<string, string>;
-}
-
-/** Falls back to the brand defaults, so a failed fetch never yields an unstyled page. */
-export const DEFAULT_THEME: SiteTheme = {
-  theme: {
-    "color.brand": "#D71635",
-    "color.brandHover": "#B80F2A",
-    "color.ink": "#121214",
-    "color.accent": "#FFCB08",
-    "color.pageBackground": "#F8F9FA",
-    "color.success": "#10B981",
-    "color.warning": "#F59E0B",
-    "radius.base": "12",
-    "font.display": "Outfit",
-    "font.body": "DM Sans",
-  },
-  brand: {
-    "brand.name": "UmzugPlus",
-    "brand.legalName": "UmzugPlus GmbH",
-    "brand.logo": "/images/logo.svg",
-    "brand.tagline": "Moving made simpler, faster, and stress-free.",
-  },
-  contact: {},
-  seo: {},
-};
 
 /** Maps a settings key to the custom property the stylesheet reads. */
 const TOKEN_MAP: Record<string, string[]> = {
@@ -126,6 +103,124 @@ export function fontHref(theme: SiteTheme["theme"], isRtl: boolean): string {
   return `https://fonts.googleapis.com/css2?${families}&display=swap`;
 }
 
+// ── Reporting a dropped read ────────────────────────────────────────────
+
+/**
+ * Why the next three blocks exist.
+ *
+ * Both reads below used to swallow their error and hand back an empty map.
+ * With the API stopped, every page still answered 200 — navbar, footer, and
+ * nothing in between. No log line, no message on the page, nothing naming the
+ * cause. It read as a broken stylesheet and cost hours of looking in the
+ * wrong place.
+ *
+ * So: a dropped read is always reported to the server log, is shown on the
+ * page in development, and still never takes production down.
+ */
+
+/** One dropped CMS read. */
+export interface ContentFailure {
+  /** The section asked for, or "all sections" for a whole-locale read. */
+  section: string;
+  url: string;
+  reason: string;
+}
+
+interface FailureLog {
+  failures: ContentFailure[];
+  /** Reads still in flight, so the banner can wait for the page's own. */
+  pending: Set<Promise<unknown>>;
+}
+
+/**
+ * Request-scoped, via React's `cache`: one log per server render pass.
+ *
+ * A module-level array would be shared by everyone being served at that
+ * moment, so one visitor's dropped read would surface on another's page.
+ */
+const failureLog = cache((): FailureLog => ({ failures: [], pending: new Set() }));
+
+/**
+ * `fetch` reports every transport-level problem as the same "fetch failed" and
+ * puts the part that identifies it — ECONNREFUSED, ENOTFOUND, a timeout — on
+ * the cause. Reporting only the message is what makes a log line useless.
+ */
+function describe(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+
+  const cause = error.cause;
+
+  return cause instanceof Error ? `${error.message} (${cause.message})` : error.message;
+}
+
+function record(section: string, url: string, reason: string): void {
+  // Loud, and in every environment. Production staying up is not the same as
+  // production having nothing to say.
+  console.error(`[site-content] "${section}" could not be loaded from ${url} — ${reason}`);
+
+  failureLog().failures.push({ section, url, reason });
+}
+
+/**
+ * Reads JSON from the CMS, reporting rather than hiding a failure.
+ *
+ * Returns null on any failure, so each caller still chooses what to stand in
+ * with — the difference being that the choice is now made knowingly.
+ */
+async function readJson<T>(section: string, url: string, revalidate: number): Promise<T | null> {
+  const log = failureLog();
+
+  const request = (async (): Promise<T | null> => {
+    try {
+      const response = await fetch(url, { next: { revalidate } });
+
+      if (!response.ok) {
+        record(section, url, `HTTP ${response.status} ${response.statusText}`.trimEnd());
+        return null;
+      }
+
+      return (await response.json()) as T;
+    } catch (error) {
+      record(section, url, describe(error));
+      return null;
+    }
+  })();
+
+  log.pending.add(request);
+  // Cleared by a reaction attached before any waiter's, so something awaiting
+  // this promise always sees the set shrink rather than spinning on it.
+  void request.finally(() => log.pending.delete(request));
+
+  return request;
+}
+
+/**
+ * Every CMS read this request has dropped, once the reads have finished.
+ *
+ * The development banner renders as a sibling of the page, so when it runs the
+ * page has started its own reads but not finished them. Waiting on whatever is
+ * in flight is what lets the banner name the section the page was missing
+ * rather than only the layout's own read.
+ */
+export async function settledContentFailures(): Promise<ContentFailure[]> {
+  const log = failureLog();
+
+  // A pass can uncover a read that a deeper component only started once its
+  // parent's data arrived. The cap is there so this can never hold a response
+  // open indefinitely.
+  for (let pass = 0; pass < 10 && log.pending.size > 0; pass += 1) {
+    await Promise.allSettled([...log.pending]);
+  }
+
+  return log.failures;
+}
+
+// ── Reads ───────────────────────────────────────────────────────────────
+
+function apiBase(): string {
+  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+}
+
 /**
  * Fetches the theme on the server.
  *
@@ -134,47 +229,38 @@ export function fontHref(theme: SiteTheme["theme"], isRtl: boolean): string {
  * down, so the defaults stand in.
  */
 export async function fetchSiteTheme(): Promise<SiteTheme> {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  const url = `${apiBase()}/api/site/theme`;
+  const payload = await readJson<SiteTheme>("theme", url, 60);
 
-  try {
-    const response = await fetch(`${base}/api/site/theme`, { next: { revalidate: 60 } });
+  if (!payload) return DEFAULT_THEME;
 
-    if (!response.ok) return DEFAULT_THEME;
-
-    const payload = (await response.json()) as SiteTheme;
-
-    return {
-      theme: { ...DEFAULT_THEME.theme, ...payload.theme },
-      brand: { ...DEFAULT_THEME.brand, ...payload.brand },
-      contact: payload.contact ?? {},
-      seo: payload.seo ?? {},
-    };
-  } catch {
-    return DEFAULT_THEME;
-  }
+  return {
+    theme: { ...DEFAULT_THEME.theme, ...payload.theme },
+    brand: { ...DEFAULT_THEME.brand, ...payload.brand },
+    contact: payload.contact ?? {},
+    seo: payload.seo ?? {},
+  };
 }
 
-/** Editable copy for a locale, by section. */
+/**
+ * Editable copy for a locale, by section.
+ *
+ * Still resolves to an empty map on failure, so a CMS outage leaves the
+ * marketing site standing rather than turning every page into a 500 — but by
+ * then the failure has been logged, and in development it is on the screen.
+ */
 export async function fetchSiteContent(
   locale: string,
   section?: string,
 ): Promise<Record<string, Record<string, string>>> {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
   const query = new URLSearchParams({ locale, ...(section ? { section } : {}) });
+  const url = `${apiBase()}/api/site/content?${query}`;
 
-  try {
-    const response = await fetch(`${base}/api/site/content?${query}`, {
-      next: { revalidate: 60 },
-    });
+  const payload = await readJson<{ sections: Record<string, Record<string, string>> }>(
+    section ?? "all sections",
+    url,
+    60,
+  );
 
-    if (!response.ok) return {};
-
-    const payload = (await response.json()) as { sections: Record<string, Record<string, string>> };
-
-    return payload.sections ?? {};
-  } catch {
-    // Copy is decoration relative to the app working; an empty map lets each
-    // component fall back to its own default string.
-    return {};
-  }
+  return payload?.sections ?? {};
 }

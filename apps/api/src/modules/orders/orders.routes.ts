@@ -7,7 +7,7 @@ import { requireAuth } from "../../middleware/require-auth.js";
 import { hasPermission, requirePermission } from "../../middleware/require-permission.js";
 import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
 import { eventsFor } from "./orders.state-machine.js";
-import { publishToMany } from "../../realtime/gateway.js";
+import { feedRoom, publishToMany } from "../../realtime/gateway.js";
 import * as ordersService from "./orders.service.js";
 import { changeStatusSchema, createOrderSchema, listOrdersSchema } from "./orders.schema.js";
 
@@ -33,7 +33,7 @@ ordersRouter.post(
     // Emitted only once the transaction above has committed, so the admin
     // board never shows an order the database rolled back.
     await publishToMany(
-      ["role:staff", `user:${req.user!.id}`],
+      [feedRoom("orders.read"), `user:${req.user!.id}`],
       "order.created",
       { id: order.id, reference: order.reference, status: order.status },
     );
@@ -112,7 +112,7 @@ ordersRouter.patch(
 
     for (const event of eventsFor(order.status)) {
       await publishToMany(
-        ["role:staff", `user:${order.userId}`, `order:${order.id}`],
+        [feedRoom("orders.read"), `user:${order.userId}`, `order:${order.id}`],
         event,
         { id: order.id, reference: order.reference, status: order.status },
       );
@@ -148,7 +148,7 @@ ordersRouter.post(
 
     for (const event of eventsFor(order.status)) {
       await publishToMany(
-        ["role:staff", `user:${order.userId}`, `order:${order.id}`],
+        [feedRoom("orders.read"), `user:${order.userId}`, `order:${order.id}`],
         event,
         { id: order.id, reference: order.reference, status: order.status },
       );

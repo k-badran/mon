@@ -13,6 +13,17 @@ import { Emphasise, SHELL, SectionHeading } from "./Blocks";
 const PAD = "py-14 md:py-20";
 
 /**
+ * The 20/700 titles on the business frame: the form title, the four benefit
+ * cards and the three service tiles. `text-h4` draws a 28px line box and the
+ * frame sets every one of them on 25.2, so the line height is stated here
+ * rather than corrected on the token — `text-h4` also carries the LogoStrip
+ * wordmarks and a dozen headings measured from other frames, and those keep
+ * their 28.
+ */
+const TITLE_20 =
+  "font-display text-h4 leading-[1.575rem] font-bold text-text-strong";
+
+/**
  * The step timeline on "how it works".
  *
  * Each step is a full-width row with the copy on one side and a photograph on
@@ -130,7 +141,11 @@ export function ComparisonTable({
         {/* The frame's plate is 1280x408: a 68px ink header row and five 68px
             body rows, each ruled 1px #d1d5db along its bottom. The last rule
             and the plate's own bottom border land on the same line, so only
-            one of them is drawn. The columns are 384 / 320 / 576 of the plate
+            one of them is drawn. Nothing sets that 68: it is 24px of padding
+            either side of the label column's intrinsic 20.16px line box, which
+            is why the header and feature cells are written literally at 16/1.26
+            in the display family. On `text-body`'s 1.5rem line box the rows
+            came out 72 and the plate 432. The columns are 384 / 320 / 576 of the plate
             — 24px of padding before the first cell and after the last, and
             none at all between them. */}
         <div className="overflow-hidden rounded-lg border border-border-default bg-surface-page">
@@ -141,19 +156,19 @@ export function ComparisonTable({
               <tr>
                 <th
                   scope="col"
-                  className="w-[30%] py-6 ps-6 pe-0 text-start text-body font-bold text-white"
+                  className="w-[30%] py-6 ps-6 pe-0 text-start font-display text-[1rem] leading-[1.26] font-bold text-white"
                 >
                   {columns.feature}
                 </th>
                 <th
                   scope="col"
-                  className="w-[25%] px-0 py-6 text-start text-body font-bold text-brand-yellow"
+                  className="w-[25%] px-0 py-6 text-start font-display text-[1rem] leading-[1.26] font-bold text-brand-yellow"
                 >
                   {columns.ours}
                 </th>
                 <th
                   scope="col"
-                  className="w-[45%] py-6 ps-0 pe-6 text-start text-body font-bold text-white"
+                  className="w-[45%] py-6 ps-0 pe-6 text-start font-display text-[1rem] leading-[1.26] font-bold text-white"
                 >
                   {columns.theirs}
                 </th>
@@ -168,7 +183,7 @@ export function ComparisonTable({
                 >
                   <th
                     scope="row"
-                    className="block p-5 pb-2 text-start text-body font-bold text-text-heading md:table-cell md:py-6 md:ps-6 md:pe-0"
+                    className="block p-5 pb-2 text-start font-display text-[1rem] leading-[1.26] font-bold text-text-heading md:table-cell md:py-6 md:ps-6 md:pe-0"
                   >
                     {row.feature}
                   </th>
@@ -247,7 +262,7 @@ export function RateTable({
   if (rows.length === 0) return null;
 
   return (
-    <section className="bg-neutral-50">
+    <section className="bg-surface-page">
       <div className={`${SHELL} grid gap-6 pb-14 md:pb-20`}>
         {headline ? (
           <h2 className="font-display text-[1.375rem] leading-[1.25] font-extrabold text-text-heading md:text-[1.5rem]">
@@ -256,7 +271,21 @@ export function RateTable({
         ) : null}
 
         <div className="overflow-hidden rounded-lg border border-neutral-100 bg-neutral-0">
-          <table className="block w-full border-collapse md:table">
+          {/* The frame's header row is SPACE_BETWEEN at 340 / 180 / 720 across
+              the table's 1240 inner width, so the split is a measured ratio,
+              not whatever the longest cell happens to need. Held as
+              percentages of that 1240 rather than pixels so the ratio survives
+              the fluid shell, and paired with `table-fixed` because automatic
+              layout treats a `col` width as a suggestion content may overrule.
+              The colgroup is inert while the table is `block` on mobile — a
+              stacked card has no columns to size. */}
+          <table className="block w-full border-collapse md:table md:table-fixed">
+            <colgroup>
+              <col className="md:w-[27.42%]" />
+              <col className="md:w-[14.52%]" />
+              <col className="md:w-[58.06%]" />
+            </colgroup>
+
             <thead
               className={`border-b border-neutral-100 bg-neutral-100 ${"absolute h-px w-px overflow-hidden [clip-path:inset(50%)] whitespace-nowrap md:static md:h-auto md:w-auto md:[clip-path:none]"}`}
             >
@@ -331,7 +360,10 @@ export function TeamGrid({
   if (members.length === 0) return null;
 
   return (
-    <section className="bg-neutral-50">
+    /* The frame gives team-section no fill of its own, so it shows the page
+       canvas #f9fafb. That is `surface-page`, which theme.css keeps one step
+       off the ramp's #f8f9fa (`neutral-50`) on purpose. */
+    <section className="bg-surface-page">
       <div className={`${SHELL} ${PAD} grid gap-10`}>
         <SectionHeading
           eyebrow={eyebrow}
@@ -361,7 +393,7 @@ export function TeamGrid({
               ) : null}
 
               <div className="grid gap-1">
-                <p className="font-display text-h5 font-bold text-text-strong">
+                <p className="font-display text-h5 leading-[1.26] font-bold text-text-heading">
                   {member.name}
                 </p>
                 <p className="text-body-sm text-brand-red">{member.role}</p>
@@ -398,14 +430,23 @@ export function StatsRow({
               key={stat.label}
               className="grid flex-1 basis-[220px] gap-3 sm:max-w-[400px]"
             >
-              <dt className="sr-only">{stat.label}</dt>
-              <dd className="font-display text-[2.25rem] leading-none font-extrabold text-brand-yellow md:text-[3rem]">
+              {/* The label is the term and the figure its description, so the
+                  visible label is itself the <dt>. It used to be emitted
+                  twice — once hidden here, once as a <p> — which a screen
+                  reader announced twice and which is not a legal child of
+                  `dl > div` in any case. `order` keeps the figure on top
+                  while the markup keeps the dt-before-dd order a <dl>
+                  requires. The frame sets these labels UPPER and pure
+                  #ffffff. */}
+              <dt className="order-2 text-body-sm text-neutral-0 uppercase">
+                {stat.label}
+              </dt>
+              {/* 48/800 at lineHeight 60.48 in the frame. The 1.26 ratio is
+                  what makes each figure block 90 tall (60 + 12 + 18) and the
+                  strip 210; `leading-none` collapsed it to 48. */}
+              <dd className="order-1 font-display text-[2.25rem] leading-[1.26] font-extrabold text-brand-yellow md:text-[3rem]">
                 {stat.value}
               </dd>
-              {/* The frame sets these labels UPPER and pure #ffffff. */}
-              <p className="text-body-sm text-neutral-0 uppercase">
-                {stat.label}
-              </p>
             </div>
           ))}
         </dl>
@@ -434,62 +475,67 @@ export function SplitFeature({
 }) {
   return (
     <section className={tone === "white" ? "bg-neutral-0" : "bg-neutral-50"}>
-      {/* 520 copy + 60 gutter + 640 image across the 1280 box, not an even split. */}
-      <div
-        className={`${SHELL} ${PAD} grid items-center gap-15 md:grid-cols-[13fr_16fr] [&>*]:min-w-0`}
-      >
-        <div className={`grid gap-6 ${flip ? "md:order-2" : ""}`}>
-          <div className="grid gap-3">
-            {eyebrow ? (
-              <p className="text-body-sm leading-[1.3] font-bold text-brand-red uppercase">
-                {eyebrow}
-              </p>
-            ) : null}
+      <div className={`${SHELL} ${PAD}`}>
+        {/* 520 copy + 60 gutter + 640 image = 1220 inside the 1280 content
+            box. The frame MIN-aligns the row and leaves 60px of slack at the
+            right rather than stretching the pair across the column, so the cap
+            is a max-width on the row itself: the ratio still holds at every
+            width below 1220, and the row stays flush with the left edge the
+            rest of the page aligns to. */}
+        <div className="grid items-center gap-15 md:max-w-[1220px] md:grid-cols-[13fr_16fr] [&>*]:min-w-0">
+          <div className={`grid gap-6 ${flip ? "md:order-2" : ""}`}>
+            <div className="grid gap-3">
+              {eyebrow ? (
+                <p className="text-body-sm leading-[1.3] font-bold text-brand-red uppercase">
+                  {eyebrow}
+                </p>
+              ) : null}
 
-            {headline ? (
-              <h2 className="font-display text-[1.625rem] leading-[1.15] font-extrabold text-text-strong md:text-[2.25rem]">
-                {headline}
-              </h2>
+              {headline ? (
+                <h2 className="font-display text-[1.625rem] leading-[1.2] font-extrabold text-text-heading md:text-[2.25rem]">
+                  {headline}
+                </h2>
+              ) : null}
+            </div>
+
+            {body ? <p className="text-[0.9375rem] leading-[1.5] text-text-default">{body}</p> : null}
+
+            {points.length > 0 ? (
+              <ul className="grid gap-3">
+                {points.map((point) => (
+                  <li key={point} className="flex items-center gap-2 text-body-sm text-[#1f2937]">
+                    {/* A bare 14px glyph stroked in brand red. No check mark in the
+                        design document sits on a plate, so none is drawn here. */}
+                    <svg
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="size-3.5 shrink-0 text-brand-red"
+                    >
+                      <path d="m2.33 7.4 3.09 3.02 6.25-6.42" />
+                    </svg>
+                    {point}
+                  </li>
+                ))}
+              </ul>
             ) : null}
           </div>
 
-          {body ? <p className="text-[0.9375rem] leading-[1.5] text-text-muted">{body}</p> : null}
-
-          {points.length > 0 ? (
-            <ul className="grid gap-3">
-              {points.map((point) => (
-                <li key={point} className="flex items-center gap-2 text-body-sm text-[#1f2937]">
-                  {/* A bare 14px glyph stroked in brand red. No check mark in the
-                      design document sits on a plate, so none is drawn here. */}
-                  <svg
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="size-3.5 shrink-0 text-brand-red"
-                  >
-                    <path d="m2.33 7.4 3.09 3.02 6.25-6.42" />
-                  </svg>
-                  {point}
-                </li>
-              ))}
-            </ul>
+          {image ? (
+            <img
+              src={image}
+              alt=""
+              width={640}
+              height={400}
+              loading="lazy"
+              className={`aspect-[8/5] w-full rounded-xl object-cover ${flip ? "md:order-1" : ""}`}
+            />
           ) : null}
         </div>
-
-        {image ? (
-          <img
-            src={image}
-            alt=""
-            width={640}
-            height={400}
-            loading="lazy"
-            className={`aspect-[8/5] w-full rounded-xl object-cover ${flip ? "md:order-1" : ""}`}
-          />
-        ) : null}
       </div>
     </section>
   );
@@ -562,11 +608,15 @@ export function ContactPanel({
  * written in the German convention `+49 (0) 800 123 4567`, where the
  * parenthesised 0 is the *national* trunk prefix — dialled instead of the
  * country code, never after it. Keeping it emits `tel:+4908001234567`,
- * which fails from any foreign network. The parenthesised group is dropped
- * first, so the one printed string serves both readings.
+ * which fails from any foreign network. Dropping it first lets the one
+ * printed string serve both readings.
+ *
+ * Only `(0)` goes. A wider pattern would also swallow a parenthesised area
+ * code — an editor writing `+49 (30) 901820` in the CMS would get a dial
+ * string three digits short, and nothing would say so.
  */
 function telHref(phone: string) {
-  return phone.replace(/\(\d+\)/g, "").replace(/[^\d+]/g, "");
+  return phone.replace(/\(0\)/g, "").replace(/[^\d+]/g, "");
 }
 
 /**
@@ -613,10 +663,19 @@ export function HotlineBanner({
         </span>
 
         <div className="grid max-w-[800px] gap-1">
-          <h2 className="font-display text-h3 font-extrabold text-white">
+          {/* 126% in the frame, where `text-h3`'s fixed 32px line box is 30.24. */}
+          <h2 className="font-display text-h3 leading-[1.26] font-extrabold text-white">
             {title}
           </h2>
-          {note ? <p className="text-body-md text-white">{note}</p> : null}
+          {/*
+            The note's fill is solid white, but the frame drops the text node
+            itself to 90% — that is what sets it back from the title over the
+            red. Opacity on the element, not a lighter colour, so it is the
+            same relationship the frame draws.
+          */}
+          {note ? (
+            <p className="text-body-md text-white/90">{note}</p>
+          ) : null}
         </div>
 
         {phone ? (
@@ -733,7 +792,7 @@ export function ArticleGrid({
               ) : null}
 
               <div className="flex flex-1 flex-col gap-3 p-6">
-                <h3 className="font-display text-h4 font-bold text-text-strong">
+                <h3 className={TITLE_20}>
                   {article.title}
                 </h3>
                 <p className="flex-1 text-body-sm text-text-muted">
@@ -787,7 +846,7 @@ export function FeaturedArticle({
     <section className="bg-neutral-50">
       <div className={`${SHELL} ${PAD} grid gap-8`}>
         {eyebrow ? (
-          <p className="text-body-sm font-bold text-brand-red">{eyebrow}</p>
+          <p className="text-body-sm font-bold text-brand-red uppercase">{eyebrow}</p>
         ) : null}
 
         <article className="grid overflow-hidden rounded-xl border border-border-subtle bg-neutral-0 md:grid-cols-2 [&>*]:min-w-0">
@@ -802,8 +861,12 @@ export function FeaturedArticle({
           ) : null}
 
           <div className="flex flex-col justify-center gap-5 p-8 md:p-10">
+            {/* Uppercased, unlike the chips on the four cards below in
+                `ArticleIndex`: the "page-blog" frame sets textCase UPPER on
+                this one node and leaves the card chips at none. The
+                asymmetry is the frame's — do not tidy it into consistency. */}
             {category ? (
-              <span className="w-fit rounded-sm bg-brand-red/8 px-2.5 py-1 text-caption font-bold text-brand-red">
+              <span className="w-fit rounded-sm bg-brand-red/8 px-2.5 py-1 text-caption font-bold text-brand-red uppercase">
                 {category}
               </span>
             ) : null}
@@ -1091,18 +1154,32 @@ export function LeadFormHero({
         </>
       ) : null}
 
+      {/* The frame does not spread the two columns across the content width:
+          hero-left is a fixed 640, the form a fixed 420, the gutter 64, and the
+          band stops short of the right margin. `1fr_420px` pinned the form to
+          that margin and stretched the copy column past its 640 measure. The
+          fixed tracks start at xl, where the 1200 column is wide enough to
+          leave slack behind them; below that the column is narrower than
+          640 + 64 + 420, so there is no slack to leave and 1fr still holds. */}
       <div
-        className={`${SHELL} grid items-center gap-10 py-14 md:py-20 lg:min-h-[540px] lg:grid-cols-[1fr_420px] lg:gap-16 lg:py-0`}
+        className={`${SHELL} grid items-center gap-10 py-14 md:py-20 lg:min-h-[540px] lg:grid-cols-[1fr_420px] lg:gap-16 lg:py-0 xl:grid-cols-[640px_420px]`}
       >
         <div className="grid gap-6">
+          {/* The frame's badge is textCase UPPER at letterSpacing 0. The row
+              stores sentence case and `text-caption` brings 0.5px of tracking
+              the node does not have, so both are corrected here rather than by
+              rewriting the copy or the token — the token's 0.5px is right for
+              the sub-page eyebrows that opt into it. */}
           {eyebrow ? (
-            <p className="w-fit rounded-full bg-brand-red px-3 py-1.5 text-caption font-bold text-white">
+            <p className="w-fit rounded-full bg-brand-red px-3 py-1.5 text-caption font-bold tracking-normal text-white uppercase">
               {eyebrow}
             </p>
           ) : null}
 
+          {/* 48/800 over a 60.5px line box in the frame, which is 1.26. At 1.1
+              the three-line headline came out ~23px short. */}
           {headline ? (
-            <h1 className="max-w-[640px] font-display text-[2rem] leading-[1.1] font-extrabold text-white md:text-[3rem]">
+            <h1 className="max-w-[640px] font-display text-[2rem] leading-[1.26] font-extrabold text-white md:text-[3rem]">
               <Emphasise text={headline} />
             </h1>
           ) : null}
@@ -1119,7 +1196,7 @@ export function LeadFormHero({
           className="grid gap-5 rounded-lg bg-neutral-0 p-8"
         >
           {form.title ? (
-            <h2 className="font-display text-h4 font-bold text-text-strong">
+            <h2 className={TITLE_20}>
               {form.title}
             </h2>
           ) : null}
@@ -1249,7 +1326,7 @@ export function IconCardGrid({
               <span className="grid size-12 place-items-center rounded-lg bg-brand-red text-white">
                 <BlockIcon name={item.icon} />
               </span>
-              <h3 className="font-display text-h4 font-bold text-text-strong">
+              <h3 className={TITLE_20}>
                 {item.title}
               </h3>
               <p className="text-body-sm text-text-muted">{item.body}</p>
@@ -1398,11 +1475,14 @@ export function EstimatePreview({
         className={`${SHELL} ${PAD} grid items-start gap-10 md:grid-cols-2 md:gap-15 [&>*]:min-w-0`}
       >
         <div className="grid gap-6">
+          {/* The frame's calculator-preview column is 520 wide, not the 640
+              the start-aligned heading defaults to. */}
           <SectionHeading
             eyebrow={eyebrow}
             headline={headline}
             subline={subline}
             align="start"
+            startWidth="narrow"
             eyebrowSize="md"
           />
 
@@ -1413,7 +1493,7 @@ export function EstimatePreview({
                   <dt className="text-body-sm font-bold text-text-heading">
                     {field.label}
                   </dt>
-                  <dd className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-neutral-50 px-3.5 py-3.5 text-[0.9375rem] text-text-heading">
+                  <dd className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface-page px-3.5 py-3.5 text-[0.9375rem] text-text-heading">
                     <span>{field.value}</span>
                     {field.hint ? (
                       <span className="text-body-sm text-brand-red">
@@ -1656,12 +1736,26 @@ export function DetailCard({
  *
  * A rating, not an ornament. The frame strokes the first `filled` stars
  * #ffcb08 and the remainder #e5e7eb — that is how the summary card draws 4.8
- * and how Laura Hoffmann's four-star review is drawn. Since the row carries a
- * number no neighbouring line repeats, it is labelled rather than hidden.
+ * and how Laura Hoffmann's four-star review is drawn. Where the row carries a
+ * number no neighbouring line repeats it is labelled; `decorative` covers the
+ * other case — the summary card, where the score is already set in text right
+ * beside the stars. Announcing the graphic there would read out a second,
+ * rounded figure ("4 / 5") contradicting the "4.8" a sighted visitor sees.
  */
-function Stars({ filled }: { filled: number }) {
+function Stars({
+  filled,
+  decorative = false,
+}: {
+  filled: number;
+  decorative?: boolean;
+}) {
   return (
-    <span className="flex gap-1" role="img" aria-label={`${filled} / 5`}>
+    <span
+      className="flex gap-1"
+      {...(decorative
+        ? { "aria-hidden": true as const }
+        : { role: "img" as const, "aria-label": `${filled} / 5` })}
+    >
       {[1, 2, 3, 4, 5].map((index) => (
         <svg
           key={index}
@@ -1703,6 +1797,21 @@ function Check({ className }: { className?: string }) {
   );
 }
 
+/*
+ * 13px, written literally rather than added to the scale.
+ *
+ * The page-reviews frame sets its filter chips, its sort control and the
+ * operator replies at 13px. `theme.css` states its own doctrine that it holds
+ * the handbook's published scale and nothing else, and 13px is not a rung of
+ * it — it appears on this one frame. `Sections.tsx` writes its own 13px nodes
+ * the same way (`MICRO_BOLD`), so this follows the house pattern instead of
+ * minting a token for a single page. The line box is spelled out because an
+ * arbitrary `text-[…]` sets the font size alone, and dropping `text-caption`
+ * is also what takes these nodes off its 0.5px tracking — the frame sets 0.
+ */
+const MICRO = "text-[0.8125rem] leading-[1.25rem]";
+const MICRO_SEMI = `${MICRO} font-semibold`;
+
 /**
  * A page opening that pairs a headline with an aggregate-rating card.
  *
@@ -1732,8 +1841,10 @@ export function RatingSummary({
         className={`${SHELL} grid items-center gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16 md:py-16`}
       >
         <div className="grid gap-4 md:max-w-[420px]">
+          {/* Outfit, not the body face: the frame sets this eyebrow in the
+              display family at 14/700. */}
           {eyebrow ? (
-            <p className="text-body-sm font-bold text-brand-red uppercase">
+            <p className="font-display text-body-sm font-bold text-brand-red uppercase">
               {eyebrow}
             </p>
           ) : null}
@@ -1745,7 +1856,7 @@ export function RatingSummary({
           ) : null}
 
           {subline ? (
-            <p className="text-body text-text-muted">{subline}</p>
+            <p className="text-body-md text-text-muted">{subline}</p>
           ) : null}
         </div>
 
@@ -1765,17 +1876,21 @@ export function RatingSummary({
             <span className="hidden w-px self-stretch bg-border-subtle sm:block" />
 
             <div className="grid flex-1 gap-2">
-              {/* The frame lights four of five here — the graphic form of "4.8". */}
-              <Stars filled={4} />
+              {/*
+               * The frame lights four of five here — the graphic form of
+               * "4.8". Decorative whenever that number is on the page in
+               * words, which is the frame's own arrangement.
+               */}
+              <Stars filled={4} decorative={Boolean(score)} />
 
               {basis ? (
-                <p className="text-body-sm font-semibold text-text-strong">
+                <p className="text-body-md font-semibold text-text-strong">
                   {basis}
                 </p>
               ) : null}
 
               {note ? (
-                <p className="flex items-center gap-2 text-caption font-semibold text-success">
+                <p className="flex items-center gap-2 text-caption font-semibold tracking-normal text-success">
                   <span className="grid size-4 shrink-0 place-items-center rounded-full bg-success text-white">
                     <Check />
                   </span>
@@ -1826,8 +1941,8 @@ export function FilterBar({
               {...(index === 0 ? { "aria-current": true as const } : {})}
               className={
                 index === 0
-                  ? "rounded-full bg-brand-red px-4 py-2 text-caption font-semibold text-white"
-                  : "rounded-full border border-border-subtle px-4 py-2 text-caption font-semibold text-text-strong"
+                  ? `rounded-full bg-brand-red px-4 py-2 ${MICRO_SEMI} text-white`
+                  : `rounded-full border border-border-subtle px-4 py-2 ${MICRO_SEMI} text-text-strong`
               }
             >
               {chip}
@@ -1838,9 +1953,12 @@ export function FilterBar({
         {sortValue ? (
           <p className="flex items-center gap-3 md:ms-auto">
             {sortLabel ? (
-              <span className="text-caption text-text-muted">{sortLabel}</span>
+              <span className={`${MICRO} text-text-muted`}>{sortLabel}</span>
             ) : null}
-            <span className="rounded-md border border-border-subtle px-4 py-2 text-caption font-semibold text-text-strong">
+            {/* r:6 sits below `--radius-md` (8px), so it is written out. */}
+            <span
+              className={`rounded-[6px] border border-border-subtle px-4 py-2 ${MICRO_SEMI} text-text-strong`}
+            >
               {sortValue}
             </span>
           </p>
@@ -1882,7 +2000,7 @@ export function ReviewFeed({
           {reviews.map((review) => (
             <li
               key={review.name}
-              className="grid gap-5 rounded-xl border border-border-subtle bg-neutral-50 p-6 md:p-8"
+              className="grid gap-5 rounded-lg border border-border-subtle bg-neutral-50 p-6 md:p-8"
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -1899,7 +2017,7 @@ export function ReviewFeed({
 
                   <div className="grid gap-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-body font-bold text-text-strong">
+                      <p className="font-display text-body font-bold text-text-strong">
                         {review.name}
                       </p>
 
@@ -1912,7 +2030,7 @@ export function ReviewFeed({
                     </div>
 
                     {review.meta ? (
-                      <p className="text-caption text-text-muted">
+                      <p className="text-caption tracking-normal text-text-muted">
                         {review.meta}
                       </p>
                     ) : null}
@@ -1923,17 +2041,22 @@ export function ReviewFeed({
               </div>
 
               {review.body ? (
-                <p className="text-body-sm text-text-strong">{review.body}</p>
+                /* 15/400 on a 24px line box — `text-body-md` carries 19.5px,
+                   which is the button/placeholder line the token was cut for,
+                   so the paragraph states its own. */
+                <p className="text-body-md leading-[1.5rem] text-text-strong">
+                  {review.body}
+                </p>
               ) : null}
 
               {review.response ? (
                 <div className="grid gap-2 rounded-md border border-border-subtle bg-neutral-0 p-4">
                   {responseLabel ? (
-                    <p className="text-caption font-bold text-brand-red">
+                    <p className="text-caption font-bold tracking-normal text-brand-red">
                       {responseLabel}
                     </p>
                   ) : null}
-                  <p className="text-body-sm text-text-strong">
+                  <p className={`${MICRO} text-text-strong`}>
                     {review.response}
                   </p>
                 </div>
@@ -1997,7 +2120,7 @@ export function SplitDetail({
             ) : null}
 
             {headline ? (
-              <h2 className="font-display text-[1.625rem] leading-[1.15] font-extrabold text-text-strong md:text-[2.25rem]">
+              <h2 className="font-display text-[1.625rem] leading-[1.2] font-extrabold text-text-heading md:text-[2.25rem]">
                 {headline}
               </h2>
             ) : null}
@@ -2009,10 +2132,10 @@ export function SplitDetail({
             <dl className="grid gap-4">
               {items.map((item) => (
                 <div key={item.title} className="grid gap-1.5">
-                  <dt className="font-display text-h5 font-bold text-text-strong">
+                  <dt className="font-display text-h5 leading-[1.26] font-bold text-text-heading">
                     {item.title}
                   </dt>
-                  <dd className="text-body-sm text-text-muted">{item.body}</dd>
+                  <dd className="text-body-sm text-text-default">{item.body}</dd>
                 </div>
               ))}
             </dl>
@@ -2208,10 +2331,15 @@ export function ContactFormSection({
    * boundary past the 3:1 non-text contrast floor.
    */
   const control =
-    "w-full rounded-md border border-border-subtle bg-neutral-50 p-3.5 text-body-md text-text-heading placeholder:text-text-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red";
+    "w-full rounded-md border border-border-subtle bg-surface-page p-3.5 text-body-md text-text-heading placeholder:text-text-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red";
 
   return (
-    <section className="bg-neutral-50">
+    /*
+      #f9fafb, the page canvas — one unit off the ramp's #f8f9fa, and the two
+      are separate tokens on purpose (see theme.css), so this ground names the
+      one the frame actually paints.
+    */
+    <section className="bg-surface-page">
       <div
         className={`${SHELL} ${PAD} grid items-start gap-10 lg:grid-cols-[minmax(0,29fr)_minmax(0,32fr)] lg:gap-[3.75rem]`}
       >
@@ -2227,8 +2355,15 @@ export function ContactFormSection({
           {...(action ? { action } : {})}
           className="grid gap-8 rounded-xl bg-neutral-0 p-6 md:p-10"
         >
+          {/*
+            The leadings on this form are stated as ratios rather than left to
+            the tokens: the frame sets them as percentages (126% here, 130% on
+            the labels, 140% on the card bodies), and the tokens' fixed line
+            boxes round each one up a pixel or two. The type scale is shared
+            with every other page, so the correction belongs on these nodes.
+          */}
           {formTitle ? (
-            <h2 className="font-display text-h3 font-extrabold text-text-heading">
+            <h2 className="font-display text-h3 leading-[1.26] font-extrabold text-text-heading">
               {formTitle}
             </h2>
           ) : null}
@@ -2241,7 +2376,7 @@ export function ContactFormSection({
                 <div key={field.name} className="grid gap-2">
                   <label
                     htmlFor={id}
-                    className="text-body-sm font-bold text-text-heading"
+                    className="text-body-sm leading-[1.3] font-bold text-text-heading"
                   >
                     {field.label}
                   </label>
@@ -2281,6 +2416,13 @@ export function ContactFormSection({
                         ))}
                       </select>
 
+                      {/*
+                        #4b5563 — the frame strokes the chevron a step darker
+                        than its secondary text. It is not text, so it does not
+                        follow `text-muted` (#5a5e66) the way the labels and
+                        card bodies do; the arrow has to hold its own against
+                        the plate behind it.
+                      */}
                       <svg
                         width="16"
                         height="16"
@@ -2291,7 +2433,7 @@ export function ContactFormSection({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         aria-hidden="true"
-                        className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-text-muted"
+                        className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-text-default"
                       >
                         <path d="m6 9 6 6 6-6" />
                       </svg>
@@ -2342,7 +2484,7 @@ export function ContactFormSection({
                   <h3 className="font-display text-body font-bold text-text-heading">
                     {card.title}
                   </h3>
-                  <p className="text-body-sm whitespace-pre-line text-text-default">
+                  <p className="text-body-sm leading-[1.4] whitespace-pre-line text-text-default">
                     {card.body}
                   </p>
                 </li>
@@ -2375,15 +2517,17 @@ export function RedHero({
 }) {
   return (
     <section className="bg-brand-red">
-      <div className={`${SHELL} ${PAD} grid gap-5 text-center`}>
+      {/* The frame aligns every text node LEFT inside a CENTER-aligned band,
+          so the blocks are centred but their lines are not. */}
+      <div className={`${SHELL} ${PAD} grid gap-5`}>
         {headline ? (
-          <h1 className="mx-auto max-w-[900px] font-display text-[2rem] leading-[1.15] font-extrabold text-white md:text-[2.5rem]">
+          <h1 className="mx-auto w-fit max-w-[900px] text-left font-display text-[2rem] leading-[1.15] font-extrabold text-white md:text-[2.5rem]">
             <Emphasise text={headline} />
           </h1>
         ) : null}
 
         {subline ? (
-          <p className="mx-auto max-w-[820px] text-body text-neutral-50">
+          <p className="mx-auto w-fit max-w-[820px] text-left text-body text-white">
             {subline}
           </p>
         ) : null}
@@ -2424,6 +2568,9 @@ export function RedHero({
  * endpoint, and the fields' `kind` is structure supplied by the page, not
  * translatable copy.
  */
+/** The "partner-split" frame pads 64 top and bottom, not the shared 80. */
+const SPLIT_PAD = "py-14 md:py-16";
+
 export function ApplicationSection({
   benefits,
   requirements,
@@ -2450,13 +2597,17 @@ export function ApplicationSection({
     }>;
     submit?: string | undefined;
     action?: string | undefined;
+    notice?: string | undefined;
   };
   idPrefix?: string;
 }) {
+  // Named so the submit button can point at the notice that explains it.
+  const noticeId = `${idPrefix}-form-notice`;
+
   return (
     <section className="bg-neutral-0">
       <div
-        className={`${SHELL} ${PAD} grid items-start gap-12 lg:grid-cols-[1fr_496px] lg:gap-16`}
+        className={`${SHELL} ${SPLIT_PAD} grid items-start gap-12 lg:grid-cols-[1fr_496px] lg:gap-16`}
       >
         <div className="grid gap-10">
           {benefits.items.length > 0 ? (
@@ -2477,7 +2628,7 @@ export function ApplicationSection({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         aria-hidden="true"
@@ -2487,7 +2638,9 @@ export function ApplicationSection({
                     </span>
 
                     <span className="grid gap-1">
-                      <span className="text-body font-bold text-text-strong">
+                      {/* Outfit 16/700 in the frame; without font-display it
+                          would fall back to the body face. */}
+                      <span className="font-display text-body font-bold text-text-strong">
                         {item.title}
                       </span>
                       <span className="text-body-sm text-text-muted">
@@ -2546,13 +2699,15 @@ export function ApplicationSection({
               ) : null}
 
               {/* The step number is part of the transcribed label, so nothing is auto-numbered. */}
-              <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
+              {/* SPACE_BETWEEN in the frame: four fixed 130px items across the
+                  640px column, i.e. 40px gutters rather than an even grid. */}
+              <ol className="grid gap-6 sm:grid-cols-2 lg:flex lg:justify-between lg:gap-x-10 [&>*]:min-w-0">
                 {timeline.steps.map((step) => (
-                  <li key={step.title} className="grid gap-1.5">
-                    <span className="text-body-sm font-bold text-brand-red">
+                  <li key={step.title} className="grid gap-1.5 lg:w-[130px]">
+                    <span className="font-display text-body-sm font-bold text-brand-red">
                       {step.title}
                     </span>
-                    <span className="text-caption text-text-muted">
+                    <span className="text-caption tracking-normal text-text-muted">
                       {step.body}
                     </span>
                   </li>
@@ -2577,13 +2732,15 @@ export function ApplicationSection({
               {form.fields.map((field, index) => {
                 const id = `${idPrefix}-field-${index + 1}`;
                 const control =
-                  "w-full rounded-md bg-neutral-100 px-3 py-3 text-body-sm text-text-strong placeholder:text-text-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red";
+                  // r:6 and 13/400 per the frame; 10px of padding either side
+                  // of the 20px line box is what makes the plate 40px tall.
+                  "w-full rounded-[6px] bg-neutral-100 px-3 py-2.5 text-[0.8125rem] leading-[1.25rem] text-text-strong placeholder:text-text-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red";
 
                 return (
                   <div key={id} className="grid gap-1.5">
                     <label
                       htmlFor={id}
-                      className="text-caption font-semibold text-text-muted"
+                      className="text-caption tracking-normal font-semibold text-text-muted"
                     >
                       {field.label}
                     </label>
@@ -2609,7 +2766,7 @@ export function ApplicationSection({
                          dropzone opens the picker while the input stays native. */
                       <label
                         htmlFor={id}
-                        className="flex h-[70px] cursor-pointer flex-col items-center justify-center gap-2 rounded-md bg-neutral-100 text-caption text-text-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-red"
+                        className="flex h-[70px] cursor-pointer flex-col items-center justify-center gap-2 rounded-md bg-neutral-100 text-caption tracking-normal text-text-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-red"
                       >
                         <svg
                           width="18"
@@ -2650,11 +2807,27 @@ export function ApplicationSection({
 
             {form.submit ? (
               <button
-                type="submit"
-                className="w-full rounded-md bg-brand-red px-5 py-3 text-body-sm font-bold text-white transition-colors hover:bg-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red"
+                /* A form with no `action` submits a same-page GET, which would
+                   push everything the visitor typed into the URL and the back
+                   history and read as though it had been sent. Until an
+                   endpoint is wired the control is inert rather than lying. */
+                type={form.action ? "submit" : "button"}
+                disabled={!form.action}
+                aria-describedby={form.notice ? noticeId : undefined}
+                className="w-full rounded-md bg-brand-red px-5 py-3 text-body-sm font-bold text-white transition-colors hover:bg-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-brand-red"
               >
                 {form.submit}
               </button>
+            ) : null}
+
+            {/* The standing-in-for-an-endpoint line, when the CMS supplies one. */}
+            {form.notice ? (
+              <p
+                id={noticeId}
+                className="text-caption tracking-normal text-text-muted"
+              >
+                {form.notice}
+              </p>
             ) : null}
           </form>
         ) : null}

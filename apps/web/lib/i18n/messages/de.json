@@ -244,6 +244,7 @@
   "site.loadFailed": "Die Website-Einstellungen konnten nicht geladen werden.",
   "footer.rights": "Alle Rechte vorbehalten.",
   "footer.tagline": "Umzug, Entsorgung & Reinigung zum transparenten Festpreis.",
+  "footer.companyTitle": "Unternehmen",
   "admin.nav.dashboard": "Dashboard",
   "admin.nav.users": "Nutzer",
   "admin.nav.leads": "Leads",

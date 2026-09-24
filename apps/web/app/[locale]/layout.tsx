@@ -8,6 +8,7 @@ import { I18nProvider } from "@/lib/i18n/provider";
 import { QueryProvider } from "@/lib/live/query-provider";
 import { fetchSiteContent, fetchSiteTheme, fontHref, themeToCss } from "@/lib/site/theme";
 import { Footer as SiteFooter } from "@/app/components/home/Sections";
+import { ContentLoadBanner } from "@/app/components/site/ContentLoadBanner";
 import { SiteChrome } from "@/app/components/SiteChrome";
 import "../theme.css";
 import "../base.css";
@@ -137,6 +138,11 @@ export default async function LocaleLayout({
             </I18nProvider>
           </QueryProvider>
         </ApiProvider>
+
+        {/* Last, so that by the time it renders the page has started its own
+            CMS reads and the banner can name the section that failed rather
+            than only the layout's. Renders nothing in production. */}
+        <ContentLoadBanner />
       </body>
     </html>
   );

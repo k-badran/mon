@@ -244,6 +244,7 @@
   "site.loadFailed": "The website settings could not be loaded.",
   "footer.rights": "All rights reserved.",
   "footer.tagline": "Moving, disposal & cleaning at a transparent fixed price.",
+  "footer.companyTitle": "Company",
   "admin.nav.dashboard": "Dashboard",
   "admin.nav.users": "Users",
   "admin.nav.leads": "Leads",

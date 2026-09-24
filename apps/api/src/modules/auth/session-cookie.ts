@@ -54,25 +54,47 @@ export function setRefreshCookie(res: Response, token: string): void {
 /**
  * The hint the edge middleware reads.
  *
- * Not `httpOnly`: nothing secret is in it, and a future client-side guard may
- * want to read it too. It is signed, so tampering with the role inside it
- * invalidates the signature; and it is short-lived, so a role change takes
- * effect within minutes even for routing.
+ * Not `httpOnly`: nothing secret is in it, and the browser needs to be able to
+ * drop it when a sign-out fails to reach the API. It is signed, so tampering
+ * with the role inside it invalidates the signature; and it is short-lived, so
+ * a role change takes effect within minutes even for routing.
+ *
+ * ## Why this one cookie has a domain and the refresh cookie does not
+ *
+ * The hint is read by a *different origin* from the one that sets it. In
+ * development that difference is a port, which cookies ignore, so nothing is
+ * needed. In production the API is api.umzugplus.de and the web app is
+ * umzugplus.de, and a host-only cookie set by the first never reaches the
+ * second: `readHint` then returns null for everyone and every signed-in user
+ * is redirected to /login — a failure that looks like a broken session rather
+ * than missing configuration.
+ *
+ * The refresh cookie deliberately does not follow. It is a credential, and a
+ * credential scoped to the parent domain is sent to every subdomain,
+ * including whichever one is compromised first.
  */
-export function setSessionHintCookie(res: Response, token: string): void {
-  res.cookie(HINT_COOKIE, token, {
+function hintOptions(): CookieOptions {
+  return {
     httpOnly: false,
     sameSite: "lax",
     secure: env.NODE_ENV === "production",
     path: "/",
-    maxAge: 15 * 60 * 1000,
-  });
+    ...(env.SESSION_COOKIE_DOMAIN ? { domain: env.SESSION_COOKIE_DOMAIN } : {}),
+  };
 }
 
+export function setSessionHintCookie(res: Response, token: string): void {
+  res.cookie(HINT_COOKIE, token, { ...hintOptions(), maxAge: 15 * 60 * 1000 });
+}
+
+/**
+ * Clearing has to name the same attributes the cookie was set with — a browser
+ * matches the deletion by name, domain and path, so a mismatched domain leaves
+ * the original cookie exactly where it was.
+ */
 export function clearSessionCookies(res: Response): void {
-  const options = { ...baseOptions(), maxAge: 0 };
-  res.clearCookie(REFRESH_COOKIE, options);
-  res.clearCookie(HINT_COOKIE, { ...options, httpOnly: false });
+  res.clearCookie(REFRESH_COOKIE, { ...baseOptions(), maxAge: 0 });
+  res.clearCookie(HINT_COOKIE, { ...hintOptions(), maxAge: 0 });
 }
 
 /**

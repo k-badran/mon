@@ -251,6 +251,19 @@ export class ApiClient {
   }
 
   /**
+   * Refreshes the access token for a transport that cannot retry a 401.
+   *
+   * `request` recovers from an expired token by itself; a WebSocket handshake
+   * cannot — it is refused outright, and reconnecting with the same expired
+   * token loops. Sharing the in-flight refresh with `request` matters here:
+   * a reconnect racing a REST call must not rotate the refresh token twice,
+   * because the server's reuse detection would correctly read that as theft.
+   */
+  async renewAccessToken(): Promise<string | null> {
+    return this.refreshAccessToken();
+  }
+
+  /**
    * Refreshes the access token.
    *
    * Concurrent 401s share one in-flight refresh. Without this, several

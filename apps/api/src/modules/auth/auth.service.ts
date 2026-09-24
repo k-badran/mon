@@ -13,6 +13,7 @@ import { and, eq, gt, isNull, lt, or } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";
 import { logger } from "../../lib/logger.js";
+import { disconnectUserSockets } from "../../realtime/gateway.js";
 
 const { users, refreshTokens } = schema;
 
@@ -180,11 +181,23 @@ export async function logout(token: string): Promise<void> {
     .where(and(eq(refreshTokens.tokenHash, hashToken(token)), isNull(refreshTokens.revokedAt)));
 }
 
+/**
+ * Ends every session a user has, everywhere.
+ *
+ * Revoking the refresh rows stops further access tokens being minted, which is
+ * the whole story for HTTP: the next request re-reads the account and is
+ * refused. It is not the whole story for a socket, which was authorised once at
+ * handshake and then simply stayed open — so blocking someone left the tab in
+ * front of them receiving the staff feed. The connections are closed here too;
+ * a client that is still entitled to one reconnects and is re-authorised.
+ */
 export async function revokeAllSessions(userId: string): Promise<void> {
   await db
     .update(refreshTokens)
     .set({ revokedAt: new Date() })
     .where(and(eq(refreshTokens.userId, userId), isNull(refreshTokens.revokedAt)));
+
+  disconnectUserSockets(userId);
 }
 
 export async function changePassword(

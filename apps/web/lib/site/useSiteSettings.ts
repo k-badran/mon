@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useApi } from "@/lib/api";
-import { DEFAULT_THEME, type SiteTheme } from "./theme";
+import { DEFAULT_THEME, type SiteTheme } from "./defaults";
 import { REFERENCE_POLL_MS } from "@/lib/live/config";
 
 /**

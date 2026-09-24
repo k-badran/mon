@@ -4,7 +4,7 @@ import { and, asc, eq } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";
 import { redis } from "../../lib/redis.js";
-import { publishToMany } from "../../realtime/gateway.js";
+import { feedRoom, publishToMany } from "../../realtime/gateway.js";
 
 const { chatThreads, chatMessages, knowledgeEntries, knowledgeGaps } = schema;
 
@@ -140,7 +140,7 @@ export async function sendMessage(
   await db.update(chatThreads).set({ updatedAt: new Date() }).where(eq(chatThreads.id, thread.id));
 
   // Notify staff so a live conversation is visible on the admin side.
-  await publishToMany(["role:staff", `thread:${thread.id}`], "chat.message", {
+  await publishToMany([feedRoom("messages.read"), `thread:${thread.id}`], "chat.message", {
     threadId: thread.id,
     role: "user",
     content: text,

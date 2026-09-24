@@ -19,9 +19,22 @@ import { EstimatePreview, NoticePill, RateTable } from "@/app/components/site/Bl
 
 const SECTION = "page-pricing";
 
-export const metadata: Metadata = {
-  title: "Preise — UmzugPlus",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const sections = await fetchSiteContent(params.locale, SECTION);
+  const copy: Copy = sections[SECTION] ?? {};
+
+  // This was a hardcoded German string served to all four locales. The
+  // `meta.title` row that page-about and page-faq read does not exist under
+  // `page-pricing` yet, so the hero headline stands in until an editor adds
+  // one — it is at least the page's own name in the reader's language.
+  const name = copy["meta.title"] ?? copy["hero.headline"];
+
+  return { title: name ? `${name} — UmzugPlus` : "UmzugPlus" };
+}
 
 export default async function PricingPage({ params }: { params: { locale: Locale } }) {
   const locale = params.locale;

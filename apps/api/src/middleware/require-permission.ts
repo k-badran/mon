@@ -1,9 +1,8 @@
-import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 
-import { can, canAll, isRole, type Permission, type Role } from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+import { can, canAll, type Permission, type Role } from "@umzugplus/core";
 
+import { effectiveRole } from "../lib/account-state.js";
 import { AppError } from "../lib/errors.js";
 
 /**
@@ -20,29 +19,15 @@ import { AppError } from "../lib/errors.js";
  * The access token carries a role, and trusting it would save a query. But a
  * token minted before someone was demoted keeps asserting the old role until
  * it expires — up to fifteen minutes during which a revoked administrator is
- * still an administrator. For staff routes, which are low-volume, the current
- * role is read from the database so a revocation takes effect on the next
- * request.
- *
- * Customer-facing routes are unaffected: they authorise by ownership of the
- * record, not by role, and never reach this middleware.
+ * still an administrator. `requireAuth` has already resolved the account
+ * against the database for this request and left the answer on `req`; this
+ * guard reuses that rather than repeating the read, and falls back to its own
+ * read so it is still correct if it is ever mounted on its own.
  */
 
-/** The caller's role as the database has it right now. */
-async function currentRole(userId: string): Promise<Role | null> {
-  const [row] = await db
-    .select({ role: schema.users.role, status: schema.users.status })
-    .from(schema.users)
-    .where(eq(schema.users.id, userId))
-    .limit(1);
-
-  if (!row) return null;
-
-  // A blocked account keeps its role but loses every capability, so a
-  // suspension does not require also demoting the person.
-  if (row.status === "blocked") return null;
-
-  return isRole(row.role) ? row.role : null;
+/** The caller's role as the database has it for this request. */
+async function roleForRequest(req: Request, userId: string): Promise<Role | null> {
+  return req.verifiedRole ?? (await effectiveRole(userId));
 }
 
 /**
@@ -66,7 +51,7 @@ export function requirePermission(...required: readonly Permission[]) {
     }
 
     try {
-      const role = await currentRole(req.user.id);
+      const role = await roleForRequest(req, req.user.id);
 
       if (!role) {
         next(AppError.unauthenticated());
@@ -99,6 +84,6 @@ export async function hasPermission(
   userId: string,
   permission: Permission,
 ): Promise<boolean> {
-  const role = await currentRole(userId);
+  const role = await effectiveRole(userId);
   return role !== null && can(role, permission);
 }

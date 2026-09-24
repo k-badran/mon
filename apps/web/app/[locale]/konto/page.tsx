@@ -125,7 +125,7 @@ export default function AccountPage() {
             readOnly
           />
           <span className="field-hint">
-            Zum Ã„ndern der E-Mail wende dich bitte an den Support.
+            Zum Ändern der E-Mail wende dich bitte an den Support.
           </span>
         </div>
 
@@ -152,7 +152,7 @@ export default function AccountPage() {
         </div>
 
         <button className="btn primary block large mt-5" disabled={saving}>
-          {saving ? "Speichern…" : "Speichern"}
+          {saving ? t("common.saving") : t("common.save")}
         </button>
 
         <div aria-live="polite">

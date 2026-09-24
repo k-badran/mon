@@ -1,12 +1,11 @@
 import { jwtVerify } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { can, isRole, isStaffRole, type Permission, type Role } from "@umzugplus/core";
+import { can, isRole, isStaffRole, type Role } from "@umzugplus/core";
 
+import { HINT_COOKIE, LOCALE_COOKIE } from "./lib/access/cookies";
+import { isUnder, requiredPermission } from "./lib/access/staff-routes";
 import { DEFAULT_LOCALE, isLocale, negotiateLocale } from "./lib/i18n/config";
-
-const LOCALE_COOKIE = "umzugplus_locale";
-const HINT_COOKIE = "umzugplus_sh";
 
 /**
  * Locale routing and route protection.
@@ -34,20 +33,20 @@ const HINT_COOKIE = "umzugplus_sh";
  * experience; a guard that runs at the data gives the right answer.
  */
 
-const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET ?? "");
+/**
+ * The hint key, which is not the key that mints API sessions.
+ *
+ * `next.config.js` puts it here — deriving it from the access secret when no
+ * separate one is configured — so this process can verify a routing hint
+ * without holding the secret that signs access tokens.
+ */
+const secret = new TextEncoder().encode(process.env.JWT_HINT_SECRET ?? "");
 const issuer = process.env.JWT_ISSUER ?? "umzugplus-api";
 
-/** Route prefixes that require a signed-in staff member with a capability. */
-const PROTECTED: Array<{ prefix: string; permission: Permission }> = [
-  { prefix: "/admin/nutzer", permission: "users.read" },
-  { prefix: "/admin/preise", permission: "pricing.read" },
-  { prefix: "/admin/abrechnung", permission: "payments.read" },
-  { prefix: "/admin/website", permission: "content.write" },
-  { prefix: "/admin/einstellungen", permission: "settings.write" },
-  // The rest of the admin area needs staff standing and at least the ability
-  // to see the work. More specific prefixes above win, so this is last.
-  { prefix: "/admin", permission: "orders.read" },
-];
+// Which staff route needs which capability lives in `lib/access/staff-routes`,
+// beside the navigation that links to those same routes. Two lists that were
+// meant to mirror each other did not, and the edge was the half with entries
+// missing.
 
 /** Routes that need a session but no particular capability. */
 const SIGNED_IN_ONLY = ["/dashboard", "/konto"];
@@ -60,6 +59,9 @@ async function readHint(request: NextRequest): Promise<Role | null> {
     const { payload } = await jwtVerify(token, secret, {
       issuer,
       audience: `${issuer}:hint`,
+      // The verifier decides which algorithm was acceptable, not the token.
+      // Without this the header is something the sender writes.
+      algorithms: ["HS256"],
     });
 
     return isRole(payload.role) ? payload.role : null;
@@ -100,8 +102,8 @@ export async function middleware(request: NextRequest) {
   const locale = first;
   const route = pathname.slice(`/${locale}`.length) || "/";
 
-  const protectedRoute = PROTECTED.find((entry) => route.startsWith(entry.prefix));
-  const needsSession = protectedRoute || SIGNED_IN_ONLY.some((p) => route.startsWith(p));
+  const needsCapability = requiredPermission(route);
+  const needsSession = needsCapability !== null || SIGNED_IN_ONLY.some((p) => isUnder(route, p));
 
   if (needsSession) {
     const role = await readHint(request);
@@ -114,10 +116,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (protectedRoute) {
+    if (needsCapability) {
       // A customer who reaches an admin URL is sent to their own dashboard
       // rather than to a refusal: they are signed in, just not for this.
-      if (!isStaffRole(role) || !can(role, protectedRoute.permission)) {
+      if (!isStaffRole(role) || !can(role, needsCapability)) {
         const url = request.nextUrl.clone();
         url.pathname = isStaffRole(role) ? `/${locale}/admin` : `/${locale}/dashboard`;
         url.search = "";

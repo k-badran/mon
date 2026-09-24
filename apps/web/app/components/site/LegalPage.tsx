@@ -37,7 +37,7 @@ export async function LegalPage({
        */}
       {copy["notice"] ? (
         <div className="bg-neutral-0">
-          <div className="mx-auto w-full max-w-[1280px] px-5 md:px-10">
+          <div className="mx-auto w-full max-w-[1440px] px-5 md:px-10 2xl:px-20">
             <p
               role="note"
               className="mx-auto max-w-[800px] rounded-xl border border-warning bg-warning-soft px-5 py-4 text-body-sm text-warning-text"

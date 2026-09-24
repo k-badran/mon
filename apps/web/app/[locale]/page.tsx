@@ -33,6 +33,22 @@ import {
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 /**
+ * Records that one of this page's two feeds could not be read.
+ *
+ * Both sections below are allowed to disappear, which is the right behaviour —
+ * a reviews strip with no reviews in it is worse than no strip. What was wrong
+ * is that they disappeared *silently*: an unreachable API and a genuinely
+ * empty table produced the same page, so "the homepage is missing two of its
+ * nine sections" looked like a styling bug rather than an outage.
+ *
+ * The same shape as `[site-content]` in `lib/site/theme.ts`, so one grep finds
+ * every CMS read that failed for a request.
+ */
+function reportFeedFailure(feed: string, url: string, reason: string) {
+  console.error(`[home-feed] "${feed}" could not be loaded from ${url} — ${reason}`);
+}
+
+/**
  * Published reviews, if there are any.
  *
  * The homepage prefers genuine customer reviews and falls back to the
@@ -40,27 +56,40 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
  * the section simply does not render.
  */
 async function fetchReviews(): Promise<HomeReview[]> {
+  const url = `${API}/api/reviews?limit=3`;
+
   try {
-    const response = await fetch(`${API}/api/reviews?limit=3`, { next: { revalidate: 300 } });
-    if (!response.ok) return [];
+    const response = await fetch(url, { next: { revalidate: 300 } });
+    if (!response.ok) {
+      reportFeedFailure("reviews", url, `HTTP ${response.status}`);
+      return [];
+    }
 
     const payload = (await response.json()) as { items?: HomeReview[] };
     return payload.items ?? [];
-  } catch {
+  } catch (error) {
+    reportFeedFailure("reviews", url, error instanceof Error ? error.message : String(error));
     return [];
   }
 }
 
 async function fetchFaq(locale: string): Promise<HomeFaq[]> {
+  const url = `${API}/api/faq?locale=${locale}`;
+
   try {
-    const response = await fetch(`${API}/api/faq?locale=${locale}`, {
-      next: { revalidate: 300 },
-    });
-    if (!response.ok) return [];
+    const response = await fetch(url, { next: { revalidate: 300 } });
+    if (!response.ok) {
+      reportFeedFailure("faq", url, `HTTP ${response.status}`);
+      return [];
+    }
 
     const payload = (await response.json()) as { entries?: HomeFaq[] };
-    return (payload.entries ?? []).slice(0, 6);
-  } catch {
+
+    // Four, not six: the frame draws four `faq-item` rows here and the section
+    // is a teaser — `/${locale}/faq` is where the full list lives.
+    return (payload.entries ?? []).slice(0, 4);
+  } catch (error) {
+    reportFeedFailure("faq", url, error instanceof Error ? error.message : String(error));
     return [];
   }
 }

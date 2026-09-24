@@ -38,14 +38,55 @@ export interface AccessTokenClaims {
   sid: string;
 }
 
+/**
+ * A token that has been verified, as opposed to one being minted.
+ *
+ * `expiresAt` is carried out of the payload because one consumer genuinely
+ * needs it: a socket is not torn down when the token that opened it expires,
+ * so the gateway has to know when that moment arrives and close the connection
+ * itself.
+ */
+export interface VerifiedAccessToken extends AccessTokenClaims {
+  expiresAt: Date;
+}
+
 const accessClaimsSchema = z.object({
   sub: z.string().uuid(),
   role: z.enum(ROLES),
   email: z.string().email(),
   sid: z.string().uuid(),
+  /** Seconds since the epoch, as JWT defines it. Always set by the signer. */
+  exp: z.number().int().positive(),
 });
 
 const accessSecret = new TextEncoder().encode(env.JWT_ACCESS_SECRET);
+
+/**
+ * A hint key with no power to mint a session.
+ *
+ * Returns a string rather than bytes because the other half of this lives in
+ * `apps/web/next.config.js`, which can only hand the Next.js process a value
+ * through the environment. Both sides then encode that string the same way, so
+ * a configured `JWT_HINT_SECRET` and a derived one are handled identically.
+ * The two derivations are one rule written twice and have to stay in step.
+ */
+export function deriveHintSecret(source: string): string {
+  return createHash("sha256").update(`umzugplus:session-hint:v1:${source}`).digest("base64");
+}
+
+/**
+ * The key the session hint is signed with — deliberately not `accessSecret`.
+ *
+ * The hint is verified by the Next.js server, so that process has to hold
+ * whichever key verifies it. While the two were the same key, any disclosure
+ * from the web tier was also the key that mints API access tokens: a routing
+ * convenience that could buy a session. A separate `JWT_HINT_SECRET` is
+ * preferred; without one the key is derived from the access secret, which the
+ * web tier can then hold without being able to run it backwards.
+ */
+const hintSecret = new TextEncoder().encode(
+  env.JWT_HINT_SECRET ?? deriveHintSecret(env.JWT_ACCESS_SECRET),
+);
 
 export class TokenError extends Error {
   constructor(
@@ -73,7 +114,7 @@ export async function signAccessToken(claims: AccessTokenClaims): Promise<string
  * shape. A token that is cryptographically valid but structurally wrong is
  * still rejected — never trust a payload just because the signature checks.
  */
-export async function verifyAccessToken(token: string): Promise<AccessTokenClaims> {
+export async function verifyAccessToken(token: string): Promise<VerifiedAccessToken> {
   let payload: JWTPayload;
 
   try {
@@ -94,7 +135,9 @@ export async function verifyAccessToken(token: string): Promise<AccessTokenClaim
     throw new TokenError("Access token payload has an unexpected shape.", "MALFORMED");
   }
 
-  return parsed.data;
+  const { exp, ...claims } = parsed.data;
+
+  return { ...claims, expiresAt: new Date(exp * 1000) };
 }
 
 /**
@@ -163,10 +206,10 @@ export function refreshTokenExpiry(): Date {
  * visitor from an administrator, so the admin area was guarded by a redirect
  * that fired after the page had already rendered.
  *
- * It is signed with the same secret so a forged role cannot pass verification,
- * and it is never treated as authority: the API resolves the caller's real
- * role from the database on every request. The hint only decides what to
- * render and where to send someone.
+ * It is signed, so a forged role cannot pass verification, and it is never
+ * treated as authority: the API resolves the caller's real role from the
+ * database on every request. The hint only decides what to render and where to
+ * send someone.
  */
 export interface SessionHintClaims {
   sub: string;
@@ -186,16 +229,20 @@ export async function signSessionHint(claims: SessionHintClaims): Promise<string
     .setAudience(`${env.JWT_ISSUER}:hint`)
     .setIssuedAt()
     .setExpirationTime(env.JWT_ACCESS_TTL)
-    .sign(accessSecret);
+    .sign(hintSecret);
 }
 
 export async function verifySessionHint(token: string): Promise<SessionHintClaims> {
   let payload: JWTPayload;
 
   try {
-    ({ payload } = await jwtVerify(token, accessSecret, {
+    ({ payload } = await jwtVerify(token, hintSecret, {
       issuer: env.JWT_ISSUER,
       audience: `${env.JWT_ISSUER}:hint`,
+      // Pinned for the same reason the access token pins it: the verifier, not
+      // the token, decides which algorithm was acceptable. Leaving it open
+      // makes the header a thing the attacker writes.
+      algorithms: ["HS256"],
     }));
   } catch (error) {
     const expired = error instanceof Error && error.name === "JWTExpired";

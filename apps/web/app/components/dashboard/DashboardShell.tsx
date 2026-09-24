@@ -1,10 +1,10 @@
 "use client";
 
-import type { Permission } from "@umzugplus/core";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
+import { permissionFor, type StaffRoutePath } from "@/lib/access/staff-routes";
 import { useApi } from "@/lib/api";
 import { LOCALE_META, type Locale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/provider";
@@ -64,18 +64,27 @@ interface NavItem {
    * landing on a 404.
    */
   planned?: boolean | undefined;
-  /**
-   * The capability this section needs. Without it the entry is not rendered at
-   * all — not dimmed — because a disabled Pricing link still tells a
-   * customer-service agent that pricing is a thing they are being kept out of,
-   * and invites them to go looking for the URL.
-   *
-   * These mirror the prefixes in `middleware.ts`, so an entry someone can see
-   * is an entry the edge will let them open. They are a second copy of the
-   * same intent, not the enforcement: the endpoint each screen calls checks
-   * the capability again for itself.
-   */
-  permission?: Permission | undefined;
+}
+
+/**
+ * A staff entry names a path from the shared route table, and takes its
+ * capability from there.
+ *
+ * The capability used to be repeated here, described as mirroring the prefixes
+ * in `middleware.ts`. It did not mirror them: eight of these destinations had
+ * no entry at the edge at all, and the payments entry pointed at a path the
+ * edge did not guard while the edge guarded a path nothing linked to. Naming
+ * the path is now the only thing an entry does, and a path the table does not
+ * declare will not compile.
+ *
+ * Without the capability an entry is not rendered at all — not dimmed —
+ * because a disabled Pricing link still tells a customer-service agent that
+ * pricing is a thing they are being kept out of, and invites them to go
+ * looking for the URL. That is a courtesy, not the enforcement: the endpoint
+ * each screen calls checks the capability again for itself.
+ */
+interface StaffNavItem extends Omit<NavItem, "href"> {
+  href: StaffRoutePath;
 }
 
 const CUSTOMER_NAV: NavItem[] = [
@@ -90,117 +99,31 @@ const CUSTOMER_NAV: NavItem[] = [
 ];
 
 /**
- * Every entry declares what it needs. A customer-service agent holds
- * `orders.read`, `quotes.read` and `reviews.read`, so they get the overview,
- * leads, orders and quality — and never learn that Pricing, Payments or
- * Settings exist.
+ * The staff sections, in the order they are shown.
+ *
+ * A customer-service agent holds `orders.read`, `quotes.read` and
+ * `reviews.read`, so they get the overview, leads, orders and quality — and
+ * never learn that Pricing, Payments or Settings exist.
  */
-const STAFF_NAV: NavItem[] = [
-  {
-    href: "/admin",
-    labelKey: "admin.nav.dashboard",
-    Icon: IconDashboard,
-    // The overview is the landing page for anyone on the staff side, so it
-    // asks for the least any staff role has.
-    permission: "orders.read",
-  },
-  {
-    href: "/admin/nutzer",
-    labelKey: "admin.nav.users",
-    Icon: IconUsers,
-    permission: "users.read",
-  },
-  {
-    href: "/admin/leads",
-    labelKey: "admin.nav.leads",
-    Icon: IconLeads,
-    planned: true,
-    // A lead is a quote that has not been accepted yet.
-    permission: "quotes.read",
-  },
-  {
-    href: "/admin/auftraege",
-    labelKey: "admin.nav.orders",
-    Icon: IconOrders,
-    permission: "orders.read",
-  },
-  {
-    href: "/admin/dispatch",
-    labelKey: "admin.nav.dispatch",
-    Icon: IconDispatch,
-    planned: true,
-    // Dispatch exists to put a crew on a job; reading the board without being
-    // able to do that is not a screen anyone needs.
-    permission: "orders.assign",
-  },
-  {
-    href: "/admin/preise",
-    labelKey: "admin.nav.pricing",
-    Icon: IconPricing,
-    planned: true,
-    permission: "pricing.read",
-  },
-  {
-    href: "/admin/zahlungen",
-    labelKey: "admin.nav.payments",
-    Icon: IconPayment,
-    planned: true,
-    permission: "payments.read",
-  },
-  {
-    href: "/admin/betrieb",
-    labelKey: "admin.nav.operations",
-    Icon: IconOperations,
-    planned: true,
-    // Operations is the capacity calendar — what the company can take on.
-    permission: "availability.write",
-  },
-  {
-    href: "/admin/partner",
-    labelKey: "admin.nav.partners",
-    Icon: IconPartners,
-    planned: true,
-    // Partners are the subcontractors work gets handed to, so the section
-    // belongs to whoever may hand it over.
-    permission: "orders.assign",
-  },
-  {
-    href: "/admin/qualitaet",
-    labelKey: "admin.nav.quality",
-    Icon: IconReviews,
-    planned: true,
-    // Read, not moderate: complaints handling is customer service's job, and
-    // they need to see what was said before they can answer it.
-    permission: "reviews.read",
-  },
-  {
-    href: "/admin/analytics",
-    labelKey: "admin.nav.analytics",
-    Icon: IconAnalytics,
-    planned: true,
-    // Reporting is mostly revenue, so it is gated with the money it shows
-    // rather than with a capability of its own.
-    permission: "payments.read",
-  },
-  {
-    href: "/admin/logs",
-    labelKey: "admin.nav.logs",
-    Icon: IconLogs,
-    permission: "audit.read",
-  },
-  {
-    href: "/admin/website",
-    labelKey: "site.title",
-    Icon: IconSite,
-    permission: "content.write",
-  },
-  {
-    href: "/admin/einstellungen",
-    labelKey: "admin.nav.settings",
-    Icon: IconSettings,
-    planned: true,
-    permission: "settings.write",
-  },
+const STAFF_NAV: StaffNavItem[] = [
+  { href: "/admin", labelKey: "admin.nav.dashboard", Icon: IconDashboard },
+  { href: "/admin/nutzer", labelKey: "admin.nav.users", Icon: IconUsers },
+  { href: "/admin/leads", labelKey: "admin.nav.leads", Icon: IconLeads, planned: true },
+  { href: "/admin/auftraege", labelKey: "admin.nav.orders", Icon: IconOrders },
+  { href: "/admin/dispatch", labelKey: "admin.nav.dispatch", Icon: IconDispatch, planned: true },
+  { href: "/admin/preise", labelKey: "admin.nav.pricing", Icon: IconPricing, planned: true },
+  // Points at the billing screen that exists. The entry used to name
+  // /admin/zahlungen, which was never built and was not the path the edge
+  // guarded — so the one working payments page was reachable only by typing
+  // its URL.
+  { href: "/admin/abrechnung", labelKey: "admin.nav.payments", Icon: IconPayment },
+  { href: "/admin/betrieb", labelKey: "admin.nav.operations", Icon: IconOperations, planned: true },
+  { href: "/admin/partner", labelKey: "admin.nav.partners", Icon: IconPartners, planned: true },
+  { href: "/admin/qualitaet", labelKey: "admin.nav.quality", Icon: IconReviews, planned: true },
+  { href: "/admin/analytics", labelKey: "admin.nav.analytics", Icon: IconAnalytics, planned: true },
+  { href: "/admin/logs", labelKey: "admin.nav.logs", Icon: IconLogs },
+  { href: "/admin/website", labelKey: "site.title", Icon: IconSite },
+  { href: "/admin/einstellungen", labelKey: "admin.nav.settings", Icon: IconSettings, planned: true },
 ];
 
 export function DashboardShell({
@@ -236,11 +159,14 @@ export function DashboardShell({
     }
   }, [loading, user, isStaff, variant, router, locale, pathname]);
 
-  // Customer entries carry no permission — a customer holds none by design —
-  // so the filter passes them through untouched.
-  const items = (variant === "staff" ? STAFF_NAV : CUSTOMER_NAV).filter(
-    (item) => !item.permission || can(item.permission),
-  );
+  // Staff entries are filtered by the capability the shared route table gives
+  // each path — the same table the edge middleware guards with, so an entry
+  // someone can see is an entry the edge will let them open. Customer entries
+  // need no capability: a customer holds none by design.
+  const items: NavItem[] =
+    variant === "staff"
+      ? STAFF_NAV.filter((item) => can(permissionFor(item.href)))
+      : CUSTOMER_NAV;
   const href = (path: string) => `/${locale}${path}`;
 
   // While the session is resolving, render the frame with placeholders rather

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { MESSAGES } from "@/lib/i18n/catalogue";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
@@ -21,8 +22,15 @@ import type { Locale } from "@/lib/i18n/config";
 
 export type Copy = Record<string, string>;
 
-/** 100px block padding, 80px inline, capped at the 1280 content column. */
-const SHELL = "mx-auto w-full max-w-[1280px] px-5 md:px-10";
+/**
+ * 100px block padding on a 1280 content column, 80px inline.
+ *
+ * The outer box is the 1440 page frame, not the column — capping at 1280 and
+ * padding it 40 gave a 1200 column. The same three steps as `Blocks.SHELL`,
+ * which this file deliberately does not import: it is private to the homepage
+ * and the footer, and the two are kept in step by hand.
+ */
+const SHELL = "mx-auto w-full max-w-[1440px] px-5 md:px-10 2xl:px-20";
 const PAD = "py-16 md:py-25";
 
 /**
@@ -44,6 +52,24 @@ const PAD = "py-16 md:py-25";
  */
 const CARD_TITLE = "font-display text-[1.375rem] leading-[2rem] font-bold";
 const MICRO_BOLD = "text-[0.8125rem] leading-[1.25rem] font-bold";
+
+/**
+ * Two line boxes the tokens set tighter than this frame draws them.
+ *
+ * The frame's body copy inside a card or a disclosure is 14/22; `text-body-sm`
+ * carries 14/20. Its section sublines are 18/26; `text-body-lg` carries 18/28.
+ * Both tokens are site-wide — `text-body-sm` alone has well over a hundred
+ * call sites across `Blocks.tsx`, `Blocks2.tsx` and the dashboard — and the
+ * only frame measured here is this page's, so the leading is overridden at the
+ * call site rather than moved in `theme.css`. If the other frames turn out to
+ * agree, the tokens are the right place and these two go away.
+ *
+ * Only paragraphs take these. The page's other 14px nodes (hero trust points,
+ * coverage tags, the `Learn More` link, the footer links) are single-line
+ * labels, where the line box is not what the frame is describing.
+ */
+const CARD_BODY = "text-body-sm leading-[1.375rem]";
+const SUBLINE = "text-body-lg leading-[1.625rem]";
 
 /**
  * Renders `**emphasis**` as brand red.
@@ -125,7 +151,7 @@ function SectionHeading({
       ) : null}
 
       {subline ? (
-        <p className={`text-body-lg ${onRed ? "text-neutral-50" : "text-text-muted"}`}>
+        <p className={`${SUBLINE} ${onRed ? "text-neutral-50" : "text-text-muted"}`}>
           {subline}
         </p>
       ) : null}
@@ -250,7 +276,9 @@ export function Services({ copy, locale }: { copy: Copy; locale: Locale }) {
             />
 
             <div className="grid gap-3">
-              <div className="flex flex-wrap items-start justify-between gap-2">
+              {/* cross:CENTER in the frame — the 11/700 badge sits on the
+                  title's centre line, not on its cap line. */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className={`${CARD_TITLE} text-text-strong`}>
                   {copy[`services.${card.key}.title`]}
                 </h3>
@@ -264,7 +292,7 @@ export function Services({ copy, locale }: { copy: Copy; locale: Locale }) {
                 ) : null}
               </div>
 
-              <p className="text-body-sm text-text-muted">
+              <p className={`${CARD_BODY} text-text-muted`}>
                 {copy[`services.${card.key}.body`]}
               </p>
             </div>
@@ -323,7 +351,7 @@ export function WhyUs({ copy }: { copy: Copy }) {
               <h3 className="font-display text-h4 font-bold text-text-strong">
                 {copy[`why.${point.key}.title`]}
               </h3>
-              <p className="text-body-sm text-text-muted">{copy[`why.${point.key}.body`]}</p>
+              <p className={`${CARD_BODY} text-text-muted`}>{copy[`why.${point.key}.body`]}</p>
             </div>
           </div>
         ))}
@@ -346,8 +374,17 @@ export function HowItWorks({ copy }: { copy: Copy }) {
       <ol className="grid gap-8 md:grid-cols-3">
         {steps.map((step, index) => (
           <li key={step} className="grid gap-6">
-            <div className="flex items-center gap-4">
-              <span className="grid size-14 shrink-0 place-items-center rounded-full bg-brand-red font-display text-h4 font-extrabold text-white">
+            {/* No gap: the frame's step row is SPACE_BETWEEN over badge 54 +
+                rule 351 = 405, which is the full width of a column in this
+                grid, so there is no free space to distribute and the rule
+                starts flush against the badge. `gap-4` held it 16px clear. */}
+            <div className="flex items-center">
+              {/* 54px written out, not `size-14`: the handbook's spacing scale
+                  in theme.css has no rung 14, so `size-14` falls through to
+                  Tailwind's stock `calc(--spacing * 14)` = 56px. The frame's
+                  step-badge is 54. (The why-us icon wrapper keeps `size-14` —
+                  it is a different node and the audit did not measure it.) */}
+              <span className="grid size-[54px] shrink-0 place-items-center rounded-full bg-brand-red font-display text-h4 font-extrabold text-white">
                 {String(index + 1).padStart(2, "0")}
               </span>
               {/* The 2px yellow rule the frame draws from each badge to the
@@ -421,7 +458,7 @@ export function Addons({ copy }: { copy: Copy }) {
                 {head}
               </summary>
 
-              <p className="mt-4 text-body-sm text-text-muted">{body}</p>
+              <p className={`mt-4 ${CARD_BODY} text-text-muted`}>{body}</p>
 
               {price ? (
                 <p
@@ -562,7 +599,7 @@ export function Faq({ copy, entries }: { copy: Copy; entries: HomeFaq[] }) {
               <Plus className="shrink-0 text-text-strong transition-transform group-open:rotate-45" />
             </summary>
 
-            <p className="mt-4 text-body-sm text-text-muted">{entry.answer}</p>
+            <p className={`mt-4 ${CARD_BODY} text-text-muted`}>{entry.answer}</p>
           </details>
         ))}
       </div>
@@ -625,6 +662,35 @@ export function FinalCta({ copy, locale }: { copy: Copy; locale: Locale }) {
   );
 }
 
+/**
+ * The keys the footer reads from the catalogue rather than from the CMS.
+ *
+ * Narrow rather than `MessageKey`, so `chrome()` can only be handed a key that
+ * really is a plain string in every locale — the catalogue also holds plural
+ * objects, which would render as `[object Object]`.
+ */
+type ChromeKey =
+  | "footer.companyTitle"
+  | "nav.howItWorks"
+  | "nav.guide"
+  | "nav.business"
+  | "nav.partner";
+
+/**
+ * A footer label, preferring the CMS row so an admin can still rename it.
+ *
+ * The three columns the design draws are CMS-only, because the content seed
+ * created their rows. The fourth column below is not in the design, so its
+ * rows do not exist yet; the catalogue already carries every one of its labels
+ * in all four locales, because the pages it points at use the same keys.
+ *
+ * `||` rather than `??`: a row that exists but is blank should fall back too,
+ * since a blank label renders a link nobody can see or click.
+ */
+function chrome(copy: Copy, slot: string, key: ChromeKey, locale: Locale): string {
+  return copy[slot] || MESSAGES[key][locale];
+}
+
 export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
   const services = [
     { href: "/umzug", key: "footer.link.residential" },
@@ -635,17 +701,43 @@ export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
     { href: "/umzug", key: "footer.link.storage" },
   ];
 
+  /**
+   * The four pages the design draws but never links to.
+   *
+   * All fourteen page frames carry the same navbar — Calculator, Services,
+   * Reviews, About Us, FAQ, Contact — and the same three-column footer, so the
+   * frames put "page-blog", "page-partner", "page-for-business" and
+   * "page-how-it-works" nowhere at all. They are real pages that return 200,
+   * and a page a visitor cannot reach does not exist to them, so they are
+   * gathered here rather than left to a homepage anchor.
+   *
+   * This column is the one part of the footer with no frame behind it. If the
+   * design later gives these links a home, that is where they should move.
+   */
+  const company = [
+    { href: "/so-funktioniert", slot: "footer.company.howItWorks", key: "nav.howItWorks" },
+    { href: "/ratgeber", slot: "footer.company.guide", key: "nav.guide" },
+    { href: "/fuer-unternehmen", slot: "footer.company.business", key: "nav.business" },
+    { href: "/partner", slot: "footer.company.partner", key: "nav.partner" },
+  ] as const;
+
+  /**
+   * The frame draws four legal links, the last of them "Cookie Policy" — a
+   * separate destination from the "Privacy Policy" beside it, and the frame
+   * "page-legal-cookie" exists for it. Both used to point at /datenschutz,
+   * which left /cookies unreachable and the two labels doing the same thing.
+   */
   const legal = [
     { href: "/impressum", key: "footer.legal.imprint" },
     { href: "/datenschutz", key: "footer.legal.privacy" },
     { href: "/agb", key: "footer.legal.terms" },
-    { href: "/datenschutz", key: "footer.legal.cookies" },
+    { href: "/cookies", key: "footer.legal.cookies" },
   ];
 
   return (
     <footer className="bg-neutral-900 text-neutral-50">
       <div className={`${SHELL} grid gap-16 pt-20 pb-10`}>
-        <div className="grid gap-16 md:grid-cols-3">
+        <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-4">
           <div className="grid content-start gap-6">
             <img
               src="/images/brand/logo.png"
@@ -683,6 +775,24 @@ export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
                     href={`/${locale}${item.href}`}
                   >
                     {copy[item.key]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="grid content-start gap-5">
+            <h2 className="text-h6 font-bold text-brand-yellow">
+              {chrome(copy, "footer.companyTitle", "footer.companyTitle", locale)}
+            </h2>
+            <ul className="grid gap-3">
+              {company.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    className="text-body-sm text-neutral-50 hover:text-brand-yellow"
+                    href={`/${locale}${item.href}`}
+                  >
+                    {chrome(copy, item.slot, item.key, locale)}
                   </Link>
                 </li>
               ))}
@@ -876,8 +986,15 @@ function Arrow() {
   );
 }
 
+/**
+ * The `Learn More` chevron, 14x14 per the frame.
+ *
+ * Its one call site is the services card. `ChevronDown` below is a separate
+ * component at 20 because the add-ons disclosure glyph really is that size —
+ * these two are not one icon at two sizes.
+ */
 function Chevron({ className }: { className?: string }) {
-  return icon(<path d="m9 18 6-6-6-6" />, className, 20);
+  return icon(<path d="m9 18 6-6-6-6" />, className, 14);
 }
 
 function ChevronDown({ className }: { className?: string }) {

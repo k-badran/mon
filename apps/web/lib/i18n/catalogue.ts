@@ -838,6 +838,18 @@ export const MESSAGES = {
     ar: "نقل وتخلّص من الأثاث وتنظيف بسعر ثابت وشفّاف.",
     tr: "Şeffaf sabit fiyatla nakliye, tasfiye ve temizlik.",
   },
+  /**
+   * The footer's fourth column heading.
+   *
+   * The M.io footer draws three columns — brand, Services, Contact & Support —
+   * and no frame links the guide, partner, business or how-it-works pages from
+   * anywhere. This heading is therefore the one string here with no source in
+   * the design; the four labels under it already existed in this catalogue,
+   * because the pages themselves use them.
+   */
+  "footer.companyTitle": {
+    de: "Unternehmen", en: "Company", ar: "الشركة", tr: "Şirket",
+  },
 
 
   // ── Admin navigation ────────────────────────────────────────────────

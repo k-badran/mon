@@ -77,6 +77,11 @@ export default async function PartnerPage({ params }: { params: { locale: Locale
           headline: copy["form.headline"],
           fields,
           submit: copy["form.submit"],
+          // No `action`: there is no partner-application endpoint yet, so the
+          // section renders the submit inert. `form.notice` is the CMS slot
+          // that would explain that; it has no row seeded yet, so nothing is
+          // shown rather than a sentence invented here.
+          notice: copy["form.notice"],
         }}
       />
     </>

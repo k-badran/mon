@@ -2,10 +2,13 @@ import type { Server as HttpServer } from "node:http";
 
 import { env } from "@umzugplus/config";
 import { verifyAccessToken, type UserRole } from "@umzugplus/auth";
-import { isStaffRole } from "@umzugplus/core";
+import { can } from "@umzugplus/core";
+import { db, schema } from "@umzugplus/db";
 import { createAdapter } from "@socket.io/redis-adapter";
+import { eq } from "drizzle-orm";
 import { Server, type Socket } from "socket.io";
 
+import { effectiveRole } from "../lib/account-state.js";
 import { logger } from "../lib/logger.js";
 import { redis } from "../lib/redis.js";
 
@@ -18,27 +21,47 @@ import { redis } from "../lib/redis.js";
  * other silently, and the availability calendar could offer a slot taken
  * minutes earlier.
  *
- * Four rules this implementation follows:
+ * Five rules this implementation follows:
  *
  *  1. **The socket is authenticated, not just the page.** The JWT is verified
- *     during the handshake and the role is derived server-side.
+ *     during the handshake and the role is read from the database, never taken
+ *     from the token's claim.
  *
  *  2. **The client never picks its own rooms.** Room membership follows from
  *     the verified identity, so a customer cannot subscribe to another
  *     customer's order by guessing an id.
  *
- *  3. **Events are emitted after commit**, by the service layer, so no client
- *     is ever told about a change the database rolled back.
+ *  3. **A room is earned by a capability, not by rank.** A feed carries the
+ *     same data an endpoint would return, so it asks the same question the
+ *     endpoint asks. The single `role:staff` room this replaces was the one
+ *     staff data feed in the system with no capability check: a
+ *     customer-service token and a super-admin token received byte-identical
+ *     traffic, including verbatim visitor chat.
  *
- *  4. **Every event carries a per-room sequence number.** On reconnect a
- *     client sends its last sequence and receives what it missed — without
- *     this, a tunnel change silently desynchronises the board.
+ *  4. **Authority is re-checked while the connection is open.** A request is
+ *     authorised once and then ends; a socket is authorised once and then
+ *     lives for hours. Without the re-check, a demoted or blocked staff member
+ *     with a tab open kept the staff feed indefinitely — long past the expiry
+ *     of the token that let them in, because an expiring token does not close
+ *     a socket by itself.
+ *
+ *  5. **Events are emitted after commit**, by the service layer, so no client
+ *     is ever told about a change the database rolled back. Every event
+ *     carries a per-room sequence number, so a client that reconnects can tell
+ *     it missed something instead of silently desynchronising.
  */
 
 export interface SocketIdentity {
   userId: string;
+  /**
+   * The role as the last re-authorisation pass read it from the database —
+   * never the token's claim. Mutable on purpose: a demotion has to reach a
+   * connection that is already open.
+   */
   role: UserRole;
   email: string;
+  /** When the token that opened this connection stops being valid. */
+  tokenExpiresAt: Date;
 }
 
 declare module "socket.io" {
@@ -46,6 +69,37 @@ declare module "socket.io" {
     identity?: SocketIdentity;
   }
 }
+
+/**
+ * The capabilities that have a live feed behind them.
+ *
+ * Adding a feed means naming the capability that pays for it here and
+ * publishing to `feedRoom(...)`. There is deliberately no "all staff" room to
+ * fall back on.
+ */
+export const FEED_PERMISSIONS = ["orders.read", "messages.read"] as const;
+
+export type FeedPermission = (typeof FEED_PERMISSIONS)[number];
+
+/**
+ * The room carrying what a holder of `permission` may see.
+ *
+ * Publishers name a capability rather than an audience, so a feed cannot be
+ * widened by accident: putting order events somewhere a customer-service agent
+ * can hear them takes writing their capability at the call site.
+ */
+export function feedRoom(permission: FeedPermission): string {
+  return `feed:${permission}`;
+}
+
+/**
+ * How often an open socket's authority is re-read from the database.
+ *
+ * One minute, chosen to sit well inside the fifteen-minute access-token
+ * lifetime that used to be the only — and unenforced — bound on how long a
+ * socket kept the authority it was opened with.
+ */
+const REAUTHORISE_INTERVAL_MS = 60_000;
 
 /** Business events. Named after facts, not table operations. */
 export type RealtimeEvent =
@@ -97,7 +151,22 @@ export function createRealtimeGateway(httpServer: HttpServer): Server {
 
       const claims = await verifyAccessToken(token);
 
-      socket.identity = { userId: claims.sub, role: claims.role, email: claims.email };
+      // The token proves who is connecting. What they may receive is a second
+      // question, asked of the database — so an account blocked a minute ago
+      // cannot open a feed with a token minted before it was blocked.
+      const role = await effectiveRole(claims.sub);
+
+      if (!role) {
+        next(new Error("UNAUTHENTICATED"));
+        return;
+      }
+
+      socket.identity = {
+        userId: claims.sub,
+        role,
+        email: claims.email,
+        tokenExpiresAt: claims.expiresAt,
+      };
       next();
     } catch {
       next(new Error("UNAUTHENTICATED"));
@@ -107,12 +176,15 @@ export function createRealtimeGateway(httpServer: HttpServer): Server {
   io.on("connection", (socket) => {
     const identity = socket.identity!;
 
-    // Rooms are assigned from the verified identity — never requested.
+    // Rooms are assigned from the verified identity — never requested. The
+    // role here came from the database during the handshake, so the feeds can
+    // be granted without asking again.
     void socket.join(`user:${identity.userId}`);
+    applyFeedRooms(socket, identity.role);
 
-    if (isStaffRole(identity.role)) {
-      void socket.join("role:staff");
-    }
+    // A socket outlives the credential that opened it, so the credential is
+    // checked again rather than assumed to still hold.
+    const timer = setInterval(() => void reauthorise(socket), REAUTHORISE_INTERVAL_MS);
 
     logger.debug({ userId: identity.userId, role: identity.role }, "Socket connected");
 
@@ -147,6 +219,7 @@ export function createRealtimeGateway(httpServer: HttpServer): Server {
     });
 
     socket.on("disconnect", (reason) => {
+      clearInterval(timer);
       logger.debug({ userId: identity.userId, reason }, "Socket disconnected");
     });
   });
@@ -199,6 +272,27 @@ export async function publishToMany<T>(
   await Promise.all(rooms.map((room) => publish(room, event, payload)));
 }
 
+/**
+ * Closes every connection belonging to a user.
+ *
+ * Revoking sessions marks refresh-token rows revoked, which stops further
+ * access tokens being minted and says nothing at all to a connection that is
+ * already open. Blocking someone, or changing what they may do, has to reach
+ * the tab in front of them and not only their next request. The Redis adapter
+ * carries this to sockets held by other API instances.
+ */
+export function disconnectUserSockets(userId: string): void {
+  if (!io) return;
+
+  try {
+    // `true` closes the underlying connection rather than only the namespace,
+    // so the client reconnects — and is re-authorised — instead of lingering.
+    io.in(`user:${userId}`).disconnectSockets(true);
+  } catch (error) {
+    logger.error({ err: error, userId }, "Failed to disconnect sockets for user");
+  }
+}
+
 export async function closeRealtimeGateway(): Promise<void> {
   await io?.close();
   io = null;
@@ -220,25 +314,117 @@ function extractToken(socket: Socket): string | null {
   return header?.startsWith("Bearer ") ? header.slice(7) : null;
 }
 
-async function canAccessOrder(identity: SocketIdentity, orderId: string): Promise<boolean> {
-  // Asked of the shared role table rather than listed here. This read "staff"
-  // or "admin" until the roles were split; the enumeration then silently
-  // stopped matching operators and super admins, which an `isStaffRole` call
-  // cannot do.
-  if (isStaffRole(identity.role)) {
-    return true;
+/**
+ * Re-reads what this connection may receive, and adjusts it.
+ *
+ * Runs on a timer for the life of the connection. Three outcomes: the account
+ * may no longer act at all and the socket goes; the role changed and the feeds
+ * follow it; nothing changed and the pass costs one primary-key lookup.
+ */
+async function reauthorise(socket: Socket): Promise<void> {
+  const identity = socket.identity;
+
+  if (!identity) return;
+
+  // The handshake token has run out. Nothing is revoked by that on its own —
+  // which is the problem — so the connection is closed and the client comes
+  // back with a token it can still prove it is entitled to.
+  if (identity.tokenExpiresAt.getTime() <= Date.now()) {
+    socket.disconnect(true);
+    return;
   }
 
-  // Imported lazily to keep the gateway free of a hard dependency on the
-  // orders module, which would otherwise create an import cycle.
-  const { db, schema } = await import("@umzugplus/db");
-  const { eq } = await import("drizzle-orm");
+  let role: UserRole | null;
 
+  try {
+    role = await effectiveRole(identity.userId);
+  } catch (error) {
+    // A database blip must not silently widen what a socket receives, and must
+    // not drop a legitimate connection either. The membership from the last
+    // successful pass stands until the next one.
+    logger.error({ err: error, userId: identity.userId }, "Could not re-authorise socket");
+    return;
+  }
+
+  if (!role) {
+    // Blocked or deleted. There is nothing left to narrow.
+    socket.disconnect(true);
+    return;
+  }
+
+  identity.role = role;
+
+  applyFeedRooms(socket, role);
+  await pruneOrderRooms(socket, role);
+}
+
+/**
+ * Brings the feed rooms in line with a role.
+ *
+ * Both directions, every time: a pass that only ever joins would leave a
+ * demoted operator holding the order feed until they closed the tab.
+ */
+function applyFeedRooms(socket: Socket, role: UserRole): void {
+  for (const permission of FEED_PERMISSIONS) {
+    const room = feedRoom(permission);
+
+    if (can(role, permission)) {
+      void socket.join(room);
+    } else {
+      void socket.leave(room);
+    }
+  }
+}
+
+/**
+ * Drops order rooms that a demotion has just made unreachable.
+ *
+ * `subscribe:order` grants staff a room on any order. When that capability
+ * goes, the rooms it opened have to go with it — otherwise the one live feed
+ * that survives a demotion is the one carrying customer addresses.
+ */
+async function pruneOrderRooms(socket: Socket, role: UserRole): Promise<void> {
+  const identity = socket.identity;
+
+  // Still entitled to every order, so nothing can have become unreachable.
+  if (!identity || can(role, "orders.read")) return;
+
+  // Snapshot: the loop leaves rooms as it goes, and the live set is the thing
+  // being changed.
+  for (const room of [...socket.rooms]) {
+    if (!room.startsWith("order:")) continue;
+
+    const orderId = room.slice("order:".length);
+
+    if (!(await ownsOrder(identity.userId, orderId))) {
+      void socket.leave(room);
+    }
+  }
+}
+
+async function canAccessOrder(identity: SocketIdentity, orderId: string): Promise<boolean> {
+  // Asked as a capability and answered from the database, exactly as the REST
+  // route asks it. This used to be `isStaffRole(identity.role)` against the
+  // token's claim — "is this caller staff?", a question `orders.read` does not
+  // ask, and one a demoted or blocked account went on answering yes to for as
+  // long as its socket stayed open.
+  const role = await effectiveRole(identity.userId);
+
+  if (!role) return false;
+
+  identity.role = role;
+
+  if (can(role, "orders.read")) return true;
+
+  return ownsOrder(identity.userId, orderId);
+}
+
+async function ownsOrder(userId: string, orderId: string): Promise<boolean> {
   const [order] = await db
     .select({ userId: schema.orders.userId })
     .from(schema.orders)
     .where(eq(schema.orders.id, orderId))
     .limit(1);
 
-  return order?.userId === identity.userId;
+  return order?.userId === userId;
 }

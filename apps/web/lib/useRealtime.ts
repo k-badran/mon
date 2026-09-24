@@ -58,18 +58,37 @@ export function useSocket(): { socket: Socket | null; status: ConnectionState } 
 
     setStatus("connecting");
 
+    // Set after a refused handshake. The server closes a socket whose token has
+    // expired — a connection is not torn down by its own credential running
+    // out, so it has to be — and reconnecting with that same expired token
+    // would refuse identically, forever.
+    let renewFirst = false;
+
     const instance = io(API_URL, {
       path: "/realtime",
       // The token is read at connect time from the SDK's store, so a refreshed
       // access token is used on reconnect rather than a stale one.
-      auth: (cb) => cb({ token: sdk.http.getAccessToken() }),
+      auth: (cb) => {
+        if (!renewFirst) {
+          cb({ token: sdk.http.getAccessToken() });
+          return;
+        }
+
+        renewFirst = false;
+        void sdk.http
+          .renewAccessToken()
+          .then((token) => cb({ token: token ?? sdk.http.getAccessToken() }));
+      },
       reconnectionDelay: 500,
       reconnectionDelayMax: 5000,
     });
 
     instance.on("connect", () => setStatus("connected"));
     instance.on("disconnect", () => setStatus("disconnected"));
-    instance.on("connect_error", () => setStatus("disconnected"));
+    instance.on("connect_error", (error) => {
+      renewFirst = error.message === "UNAUTHENTICATED";
+      setStatus("disconnected");
+    });
 
     setSocket(instance);
 

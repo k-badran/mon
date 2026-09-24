@@ -106,7 +106,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border-subtle bg-neutral-0">
-      <div className="mx-auto flex h-20 w-full max-w-[1280px] items-center justify-between gap-4 px-5 md:px-10">
+      <div className="mx-auto flex h-20 w-full max-w-[1440px] items-center justify-between gap-4 px-5 md:px-10 2xl:px-20">
         {/* ── Mark ───────────────────────────────────────────────────── */}
         {/**
          * The brand mark.
