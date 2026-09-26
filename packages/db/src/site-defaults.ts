@@ -21,7 +21,7 @@ export interface SettingSeed {
 export const THEME_DEFAULTS: SettingSeed[] = [
   {
     key: "color.brand",
-    value: "#D71635",
+    value: "#E62039",
     group: "theme",
     kind: "color",
     label: "Primary / brand",
@@ -30,7 +30,7 @@ export const THEME_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "color.brandHover",
-    value: "#B80F2A",
+    value: "#C4162E",
     group: "theme",
     kind: "color",
     label: "Primary — pressed",

@@ -17,8 +17,8 @@ export interface SiteTheme {
 /** Falls back to the brand defaults, so a failed fetch never yields an unstyled page. */
 export const DEFAULT_THEME: SiteTheme = {
   theme: {
-    "color.brand": "#D71635",
-    "color.brandHover": "#B80F2A",
+    "color.brand": "#E62039",
+    "color.brandHover": "#C4162E",
     "color.ink": "#121214",
     "color.accent": "#FFCB08",
     "color.pageBackground": "#F8F9FA",

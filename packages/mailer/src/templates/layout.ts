@@ -13,7 +13,7 @@ import { escapeHtml, safeUrl, sanitizeUrl, tidyText } from "../render.js";
  */
 
 /** Mirrors `color.brand` in `packages/db/src/site-defaults.ts`. */
-const BRAND = "#D71635";
+const BRAND = "#E62039";
 const INK = "#121214";
 const MUTED = "#6B7280";
 const BORDER = "#E5E7EB";

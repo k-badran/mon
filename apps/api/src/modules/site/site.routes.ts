@@ -165,7 +165,7 @@ siteRouter.patch(
     // The kind recorded with the setting is what it is validated against —
     // a colour field must not be able to hold prose.
     if (before.kind === "color" && !HEX.test(value)) {
-      throw AppError.unprocessable("Expected a hex colour such as #D71635.");
+      throw AppError.unprocessable("Expected a hex colour such as #E62039.");
     }
 
     if (before.kind === "email" && !z.string().email().safeParse(value).success) {
