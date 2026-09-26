@@ -4,8 +4,11 @@ export * from "./render.js";
 export { renderTemplate } from "./templates/registry.js";
 export type { PayloadFor, TemplateKey } from "./templates/registry.js";
 export type {
+  OrderStage,
+  OrderStatusPayload,
   OtpPayload,
   PasswordResetPayload,
+  PaymentReceiptPayload,
   VerifyEmailPayload,
 } from "./templates/registry.js";
 export { createSmtpTransport, type SmtpOptions } from "./transports/smtp.js";

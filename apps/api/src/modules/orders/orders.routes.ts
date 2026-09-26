@@ -8,6 +8,7 @@ import { hasPermission, requirePermission } from "../../middleware/require-permi
 import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
 import { eventsFor } from "./orders.state-machine.js";
 import { feedRoom, publishToMany } from "../../realtime/gateway.js";
+import { sendOrderStageMail, stageForStatus } from "./order-mail.js";
 import * as ordersService from "./orders.service.js";
 import { changeStatusSchema, createOrderSchema, listOrdersSchema } from "./orders.schema.js";
 
@@ -37,6 +38,12 @@ ordersRouter.post(
       "order.created",
       { id: order.id, reference: order.reference, status: order.status },
     );
+
+    // "We've received your request" — the row is `quoted`, but to the customer
+    // they have just submitted something and are waiting on us. Awaited so a
+    // failure is logged against this request rather than becoming an unhandled
+    // rejection, and non-fatal: the booking is already saved.
+    await sendOrderStageMail(order, "submitted");
 
     res.status(201).json(order);
   }),
@@ -118,6 +125,8 @@ ordersRouter.patch(
       );
     }
 
+    await sendOrderStageMail(order, stageForStatus(order.status));
+
     res.json(order);
   }),
 );
@@ -153,6 +162,8 @@ ordersRouter.post(
         { id: order.id, reference: order.reference, status: order.status },
       );
     }
+
+    await sendOrderStageMail(order, stageForStatus(order.status));
 
     res.json(order);
   }),

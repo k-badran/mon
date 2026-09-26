@@ -10,6 +10,7 @@ import { requireAuth } from "../../middleware/require-auth.js";
 import { hasPermission, requirePermission } from "../../middleware/require-permission.js";
 import { validate, validatedParams } from "../../middleware/validate.js";
 import { recordAudit } from "../audit/audit.service.js";
+import { sendPaymentReceiptMail } from "../orders/order-mail.js";
 
 const { payments, orders } = schema;
 
@@ -144,10 +145,29 @@ paymentsRouter.post(
         tx,
       );
 
-      return { entry: entry!, paidAmount: formatMoney(nextPaid) };
+      // The order row is carried out of the transaction so the receipt can be
+      // sent afterwards. `paidAmount` is overridden with the new total, because
+      // `order` was read before the update and still holds the old one — a
+      // receipt quoting the previous balance is worse than no receipt.
+      return {
+        entry: entry!,
+        paidAmount: formatMoney(nextPaid),
+        order: { ...order, paidAmount: formatMoney(nextPaid) },
+      };
     });
 
-    res.status(201).json(result);
+    // After the commit, and deliberately not inside it: an email cannot be
+    // un-sent, so it must not go out for a payment the database rolled back.
+    await sendPaymentReceiptMail(result.order, {
+      amount: body.amount,
+      kind: body.kind,
+      method: body.method ?? null,
+    });
+
+    // `order` is internal plumbing for the receipt, not part of the response
+    // contract — the endpoint answered with the entry and the new total before
+    // this change and still does.
+    res.status(201).json({ entry: result.entry, paidAmount: result.paidAmount });
   }),
 );
 

@@ -19,27 +19,42 @@ const MUTED = "#6B7280";
 const BORDER = "#E5E7EB";
 const CANVAS = "#F8F9FA";
 
+/**
+ * Why the recipient is getting this.
+ *
+ * Two kinds, because one sentence cannot cover both. An OTP or a reset link was
+ * *asked for*, and saying so is what lets someone who did not ask recognise that
+ * something is wrong. An order confirmation was not asked for — it follows from
+ * a booking — and telling a customer it "was requested from your account" reads
+ * as a mistake and invites a support call.
+ */
+export type FooterReason = "requested" | "transaction";
+
 interface FooterCopy {
-  /** Why this email was sent — a transactional email should always say. */
-  reason: string;
+  requested: string;
+  transaction: string;
   help: string;
 }
 
 const FOOTER: Record<Locale, FooterCopy> = {
   de: {
-    reason: "Sie erhalten diese E-Mail, weil sie in Ihrem m.on-Konto angefordert wurde.",
+    requested: "Sie erhalten diese E-Mail, weil sie in Ihrem m.on-Konto angefordert wurde.",
+    transaction: "Sie erhalten diese E-Mail zu Ihrem Auftrag bei m.on.",
     help: "Fragen? Antworten Sie einfach auf diese E-Mail.",
   },
   en: {
-    reason: "You are receiving this email because it was requested from your m.on account.",
+    requested: "You are receiving this email because it was requested from your m.on account.",
+    transaction: "You are receiving this email about your order with m.on.",
     help: "Questions? Just reply to this email.",
   },
   ar: {
-    reason: "وصلتك هذه الرسالة لأنه تم طلبها من حسابك في m.on.",
+    requested: "وصلتك هذه الرسالة لأنه تم طلبها من حسابك في m.on.",
+    transaction: "وصلتك هذه الرسالة بخصوص طلبك عند m.on.",
     help: "عندك سؤال؟ رد على هذه الرسالة مباشرة.",
   },
   tr: {
-    reason: "Bu e-postayı m.on hesabınızdan talep edildiği için alıyorsunuz.",
+    requested: "Bu e-postayı m.on hesabınızdan talep edildiği için alıyorsunuz.",
+    transaction: "Bu e-postayı m.on'daki siparişinizle ilgili alıyorsunuz.",
     help: "Sorunuz mu var? Bu e-postayı doğrudan yanıtlayın.",
   },
 };
@@ -50,6 +65,15 @@ const LEGAL_ADDRESS = "Musterstraße 1, 40212 Düsseldorf";
 export interface LayoutBlock {
   /** A paragraph of body copy. Escaped. */
   paragraph?: string | undefined;
+  /**
+   * A short list of labelled facts, one per line.
+   *
+   * Its own block type rather than newlines inside a paragraph: HTML collapses
+   * a newline to a space, so "Reference: X\nDate: Y" would render as one run-on
+   * line in the email while looking correct in the plain-text twin — a
+   * difference nobody notices until a customer forwards the HTML one.
+   */
+  lines?: readonly string[] | undefined;
   /** A large, letter-spaced code — the OTP treatment. */
   code?: string | undefined;
   /** A call-to-action button. */
@@ -68,11 +92,14 @@ export interface LayoutInput {
    * "if you did not request this, ignore it" line.
    */
   notice?: string | undefined;
+  /** Defaults to "requested", which is right for the account flows. */
+  reason?: FooterReason | undefined;
 }
 
 export function renderHtml(input: LayoutInput): string {
   const dir = directionOf(input.locale);
   const footer = FOOTER[input.locale];
+  const reason = footer[input.reason ?? "requested"];
   const align = dir === "rtl" ? "right" : "left";
 
   const body = input.blocks.map((block) => renderBlock(block, align)).join("\n");
@@ -120,7 +147,7 @@ export function renderHtml(input: LayoutInput): string {
         <tr>
           <td style="padding:20px 8px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:12px;line-height:19px;color:${MUTED};text-align:${align};">
             <p style="margin:0 0 6px;">${escapeHtml(footer.help)}</p>
-            <p style="margin:0 0 6px;">${escapeHtml(footer.reason)}</p>
+            <p style="margin:0 0 6px;">${escapeHtml(reason)}</p>
             <p style="margin:0;">${escapeHtml(LEGAL_NAME)} · ${escapeHtml(LEGAL_ADDRESS)}</p>
           </td>
         </tr>
@@ -135,6 +162,19 @@ export function renderHtml(input: LayoutInput): string {
 function renderBlock(block: LayoutBlock, align: string): string {
   if (block.paragraph !== undefined) {
     return `<p style="margin:0 0 16px;font-size:15px;line-height:24px;color:${INK};text-align:${align};">${escapeHtml(block.paragraph)}</p>`;
+  }
+
+  if (block.lines !== undefined) {
+    const rows = block.lines
+      .map(
+        (line) =>
+          `<tr><td style="padding:4px 0;font-size:15px;line-height:22px;color:${INK};text-align:${align};">${escapeHtml(line)}</td></tr>`,
+      )
+      .join("");
+
+    // A table, because a stack of <div>s with margins is the thing Outlook's
+    // renderer collapses, and these lines carry the price and the date.
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;background:${CANVAS};border:1px solid ${BORDER};border-radius:10px;padding:12px 16px;">${rows}</table>`;
   }
 
   if (block.code !== undefined) {
@@ -164,10 +204,12 @@ function renderBlock(block: LayoutBlock, align: string): string {
  */
 export function renderText(input: LayoutInput): string {
   const footer = FOOTER[input.locale];
+  const reason = footer[input.reason ?? "requested"];
 
   const body = input.blocks
     .map((block) => {
       if (block.paragraph !== undefined) return block.paragraph;
+      if (block.lines !== undefined) return block.lines.join("\n");
       if (block.code !== undefined) return block.code;
       if (block.button) return `${block.button.label}: ${sanitizeUrl(block.button.url)}`;
       if (block.fallbackUrl) {
@@ -187,7 +229,7 @@ export function renderText(input: LayoutInput): string {
       "",
       "—",
       footer.help,
-      footer.reason,
+      reason,
       `${LEGAL_NAME} · ${LEGAL_ADDRESS}`,
     ].join("\n"),
   );

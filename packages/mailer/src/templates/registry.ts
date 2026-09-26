@@ -1,7 +1,9 @@
 import { toLocale, type Locale } from "@mon/core";
 
 import type { RenderedTemplate } from "../types.js";
+import { orderStatusTemplate, type OrderStage, type OrderStatusPayload } from "./order-status.js";
 import { otpTemplate, type OtpPayload } from "./otp.js";
+import { paymentReceiptTemplate, type PaymentReceiptPayload } from "./payment-receipt.js";
 import { passwordResetTemplate, type PasswordResetPayload } from "./password-reset.js";
 import { verifyEmailTemplate, type VerifyEmailPayload } from "./verify-email.js";
 
@@ -18,6 +20,8 @@ const TEMPLATES = {
   otp: otpTemplate,
   "verify-email": verifyEmailTemplate,
   "password-reset": passwordResetTemplate,
+  "order-status": orderStatusTemplate,
+  "payment-receipt": paymentReceiptTemplate,
 } as const;
 
 export type TemplateKey = keyof typeof TEMPLATES;
@@ -25,7 +29,14 @@ export type TemplateKey = keyof typeof TEMPLATES;
 /** The payload the named template requires — derived, never restated. */
 export type PayloadFor<K extends TemplateKey> = Parameters<(typeof TEMPLATES)[K]>[0];
 
-export type { OtpPayload, PasswordResetPayload, VerifyEmailPayload };
+export type {
+  OrderStage,
+  OrderStatusPayload,
+  OtpPayload,
+  PasswordResetPayload,
+  PaymentReceiptPayload,
+  VerifyEmailPayload,
+};
 
 /**
  * Renders a registered template.
