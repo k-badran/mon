@@ -1,4 +1,4 @@
-import type { Permission } from "@umzugplus/core";
+import type { Permission } from "@mon/core";
 
 /**
  * Every staff destination, and the capability that opens it.

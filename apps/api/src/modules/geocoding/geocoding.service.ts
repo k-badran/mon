@@ -1,4 +1,4 @@
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 
 import { AppError } from "../../lib/errors.js";
 import { logger } from "../../lib/logger.js";

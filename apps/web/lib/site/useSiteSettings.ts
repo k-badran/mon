@@ -30,8 +30,8 @@ export function useSiteSettings() {
   const settings = data ?? DEFAULT_THEME;
 
   return {
-    brandName: settings.brand["brand.name"] ?? "UmzugPlus",
-    legalName: settings.brand["brand.legalName"] ?? "UmzugPlus GmbH",
+    brandName: settings.brand["brand.name"] ?? "m.on",
+    legalName: settings.brand["brand.legalName"] ?? "m.on GmbH",
     logo: settings.brand["brand.logo"] ?? "/images/logo.svg",
     tagline: settings.brand["brand.tagline"] ?? "",
     phone: settings.contact["contact.phone"] ?? "",

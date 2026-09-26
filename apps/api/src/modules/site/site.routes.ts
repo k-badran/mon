@@ -1,4 +1,4 @@
-import { db, schema } from "@umzugplus/db";
+import { db, schema } from "@mon/db";
 import { and, asc, eq } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";
@@ -285,7 +285,7 @@ siteRouter.post(
   "/settings/reset-theme",
   ...themeEditor,
   asyncHandler(async (req, res) => {
-    const { THEME_DEFAULTS } = await import("@umzugplus/db/site-defaults");
+    const { THEME_DEFAULTS } = await import("@mon/db/site-defaults");
 
     for (const setting of THEME_DEFAULTS) {
       await db

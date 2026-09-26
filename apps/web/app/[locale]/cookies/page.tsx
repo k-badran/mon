@@ -26,7 +26,7 @@ const SECTION = "page-legal-cookie";
 const ROUTE = "/cookies";
 
 export const metadata: Metadata = {
-  title: "Cookie-Richtlinie — UmzugPlus",
+  title: "Cookie-Richtlinie — m.on",
 };
 
 export default async function CookiesPage({

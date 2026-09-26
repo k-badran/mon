@@ -36,7 +36,7 @@ export function createMemoryTokenStore(): TokenStore {
  * 30-day refresh token sitting in `localStorage`, and moving to cookies does
  * not take that copy away by itself.
  */
-const LEGACY_REFRESH_KEY = "umzugplus.refresh";
+const LEGACY_REFRESH_KEY = "mon.refresh";
 
 /**
  * Access token in memory, refresh token in an httpOnly cookie.

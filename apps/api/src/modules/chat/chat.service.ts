@@ -1,5 +1,5 @@
-import { answer, type AssistantReply, type KnowledgeEntry } from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+import { answer, type AssistantReply, type KnowledgeEntry } from "@mon/core";
+import { db, schema } from "@mon/db";
 import { and, asc, eq } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";

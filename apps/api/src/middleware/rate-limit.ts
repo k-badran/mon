@@ -1,4 +1,4 @@
-import { isTest } from "@umzugplus/config";
+import { isTest } from "@mon/config";
 import type { Request } from "express";
 import rateLimit, { type RateLimitRequestHandler } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";

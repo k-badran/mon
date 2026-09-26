@@ -1,4 +1,4 @@
-import { directionOf, type Locale } from "@umzugplus/core";
+import { directionOf, type Locale } from "@mon/core";
 
 import { escapeHtml, safeUrl, sanitizeUrl, tidyText } from "../render.js";
 
@@ -27,24 +27,24 @@ interface FooterCopy {
 
 const FOOTER: Record<Locale, FooterCopy> = {
   de: {
-    reason: "Sie erhalten diese E-Mail, weil sie in Ihrem UmzugPlus-Konto angefordert wurde.",
+    reason: "Sie erhalten diese E-Mail, weil sie in Ihrem m.on-Konto angefordert wurde.",
     help: "Fragen? Antworten Sie einfach auf diese E-Mail.",
   },
   en: {
-    reason: "You are receiving this email because it was requested from your UmzugPlus account.",
+    reason: "You are receiving this email because it was requested from your m.on account.",
     help: "Questions? Just reply to this email.",
   },
   ar: {
-    reason: "وصلتك هذه الرسالة لأنه تم طلبها من حسابك في UmzugPlus.",
+    reason: "وصلتك هذه الرسالة لأنه تم طلبها من حسابك في m.on.",
     help: "عندك سؤال؟ رد على هذه الرسالة مباشرة.",
   },
   tr: {
-    reason: "Bu e-postayı UmzugPlus hesabınızdan talep edildiği için alıyorsunuz.",
+    reason: "Bu e-postayı m.on hesabınızdan talep edildiği için alıyorsunuz.",
     help: "Sorunuz mu var? Bu e-postayı doğrudan yanıtlayın.",
   },
 };
 
-const LEGAL_NAME = "UmzugPlus GmbH";
+const LEGAL_NAME = "m.on GmbH";
 const LEGAL_ADDRESS = "Musterstraße 1, 40212 Düsseldorf";
 
 export interface LayoutBlock {
@@ -107,7 +107,7 @@ export function renderHtml(input: LayoutInput): string {
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;">
         <tr>
           <td style="padding:0 0 20px;text-align:${align};">
-            <span style="font:700 20px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:${BRAND};letter-spacing:-0.3px;">UmzugPlus</span>
+            <span style="font:700 20px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:${BRAND};letter-spacing:-0.3px;">m.on</span>
           </td>
         </tr>
         <tr>

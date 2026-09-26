@@ -41,7 +41,7 @@ try {
 
 const admin = await api("/api/auth/login", {
   method: "POST",
-  body: { email: "admin@umzugplus.de", password: "ChangeMe123!" },
+  body: { email: "admin@moveongo.de", password: "ChangeMe123!" },
 });
 
 /** Books one order and optionally advances it. */

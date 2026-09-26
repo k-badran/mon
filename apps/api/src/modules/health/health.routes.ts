@@ -1,4 +1,4 @@
-import { pingDatabase } from "@umzugplus/db";
+import { pingDatabase } from "@mon/db";
 import { Router } from "express";
 
 import { pingRedis } from "../../lib/redis.js";

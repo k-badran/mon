@@ -1,5 +1,5 @@
-import { formatMoney, parseMoney } from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+import { formatMoney, parseMoney } from "@mon/core";
+import { db, schema } from "@mon/db";
 import { asc, eq, sql } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";

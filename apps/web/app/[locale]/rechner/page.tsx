@@ -33,7 +33,7 @@ import { usePriceEstimate, type QuoteResult } from "@/lib/calculator/usePriceEst
  *      away and comes back has not lost twenty answers.
  */
 
-const STORAGE_KEY = "umzugplus.calculator.v1";
+const STORAGE_KEY = "mon.calculator.v1";
 
 export default function CalculatorPage() {
   return (

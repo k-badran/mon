@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrderStatus } from "@umzugplus/client";
+import type { OrderStatus } from "@mon/client";
 import Link from "next/link";
 import { useState } from "react";
 

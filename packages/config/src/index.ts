@@ -47,7 +47,7 @@ const envSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.string().min(32, "JWT_HINT_SECRET must be at least 32 characters").optional(),
   ),
-  JWT_ISSUER: z.string().min(1).default("umzugplus-api"),
+  JWT_ISSUER: z.string().min(1).default("mon-api"),
   JWT_ACCESS_TTL: z.string().regex(durationPattern).default("15m"),
   JWT_REFRESH_TTL: z.string().regex(durationPattern).default("30d"),
 
@@ -56,12 +56,12 @@ const envSchema = z.object({
   WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
 
   /**
-   * The domain the session hint cookie is scoped to, e.g. `.umzugplus.de`.
+   * The domain the session hint cookie is scoped to, e.g. `.moveongo.de`.
    *
    * Only the hint needs this. In development the API and the web app share a
    * host and differ only by port, which cookies ignore, so it is left unset
    * and the cookie is host-only. In production they are separate hostnames —
-   * api.umzugplus.de and umzugplus.de — and without a parent domain here the
+   * api.moveongo.de and moveongo.de — and without a parent domain here the
    * hint the API sets never reaches the origin whose middleware reads it, so
    * every signed-in user is bounced to /login. The refresh cookie stays
    * host-only either way: it is a credential, and a credential that travels to
@@ -85,7 +85,17 @@ const envSchema = z.object({
    * mail silently stops, and `smtp` in development means a test run can email a
    * real customer.
    */
-  MAIL_DRIVER: z.enum(["smtp", "log"]).optional(),
+  MAIL_DRIVER: z.enum(["smtp", "resend", "log"]).optional(),
+
+  /**
+   * Resend's HTTP API key, used when MAIL_DRIVER is "resend".
+   *
+   * Reinstated after being removed with the unused Resend config: it now has a
+   * consumer. The reason to prefer it over SMTP here is not the protocol but
+   * the port — it sends over 443, and ports 25/465/587 are blocked both
+   * locally and on the DigitalOcean host, which is that provider's default.
+   */
+  RESEND_API_KEY: optionalString,
 
   SMTP_HOST: optionalString,
   SMTP_PORT: z.coerce.number().int().positive().default(465),
@@ -103,13 +113,13 @@ const envSchema = z.object({
   SMTP_USER: optionalString,
   SMTP_PASSWORD: optionalString,
 
-  MAIL_FROM: z.string().default("UmzugPlus <info@moveongo.de>"),
+  MAIL_FROM: z.string().default("m.on <info@moveongo.de>"),
   MAIL_REPLY_TO: optionalString,
   /** Where the `log` driver writes. Relative paths resolve from the cwd. */
   MAIL_OUTBOX_DIR: z.string().min(1).default(".mail-outbox"),
 
   ANTHROPIC_API_KEY: z.string().optional(),
-  GEOCODING_USER_AGENT: z.string().min(1).default("UmzugPlus/1.0"),
+  GEOCODING_USER_AGENT: z.string().min(1).default("m.on/1.0"),
 
   SEED_ADMIN_EMAIL: z.string().email().optional(),
   SEED_ADMIN_PASSWORD: z.string().min(8).optional(),
@@ -131,14 +141,19 @@ const resolvedEnvSchema = envSchema
     MAIL_DRIVER: raw.MAIL_DRIVER ?? (raw.NODE_ENV === "production" ? "smtp" : "log"),
   }))
   .superRefine((config, ctx) => {
-    if (config.MAIL_DRIVER !== "smtp") return;
+    const required =
+      config.MAIL_DRIVER === "smtp"
+        ? (["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD"] as const)
+        : config.MAIL_DRIVER === "resend"
+          ? (["RESEND_API_KEY"] as const)
+          : [];
 
-    for (const key of ["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD"] as const) {
+    for (const key of required) {
       if (config[key] === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: [key],
-          message: `${key} is required when MAIL_DRIVER is "smtp".`,
+          message: `${key} is required when MAIL_DRIVER is "${config.MAIL_DRIVER}".`,
         });
       }
     }

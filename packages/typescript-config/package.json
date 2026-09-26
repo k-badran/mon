@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/typescript-config",
+  "name": "@mon/typescript-config",
   "version": "1.0.0",
   "private": true,
   "files": ["base.json", "node.json", "nextjs.json"]

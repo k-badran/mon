@@ -1,4 +1,4 @@
-import { db, schema } from "@umzugplus/db";
+import { db, schema } from "@mon/db";
 
 import { logger } from "../../lib/logger.js";
 

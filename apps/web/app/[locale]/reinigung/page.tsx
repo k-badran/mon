@@ -30,7 +30,7 @@ import { BeforeAfter, ProgrammeCards } from "@/app/components/site/Blocks2";
 const SECTION = "service-cleaning";
 
 export const metadata: Metadata = {
-  title: "Reinigung — UmzugPlus",
+  title: "Reinigung — m.on",
 };
 
 export default async function CleaningPage({ params }: { params: { locale: Locale } }) {

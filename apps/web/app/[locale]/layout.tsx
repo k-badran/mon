@@ -31,21 +31,21 @@ export function generateStaticParams() {
 
 const TITLES: Record<Locale, { title: string; description: string }> = {
   de: {
-    title: "UmzugPlus — Ihr Umzug. Einfach organisiert.",
+    title: "m.on — Ihr Umzug. Einfach organisiert.",
     description:
       "Umzug, Entsorgung und Reinigung zum transparenten Festpreis — online berechnen, online anfragen.",
   },
   en: {
-    title: "UmzugPlus — Moving, simply organised.",
+    title: "m.on — Moving, simply organised.",
     description:
       "Moving, disposal and cleaning at a transparent fixed price — calculate online, request online.",
   },
   ar: {
-    title: "UmzugPlus — نقل منظّم ببساطة",
+    title: "m.on — نقل منظّم ببساطة",
     description: "نقل وتخلّص من الأثاث وتنظيف بسعر ثابت وشفاف — احسب واطلب أونلاين.",
   },
   tr: {
-    title: "UmzugPlus — Taşınma, kolayca organize.",
+    title: "m.on — Taşınma, kolayca organize.",
     description:
       "Şeffaf sabit fiyatla nakliye, tasfiye ve temizlik — online hesapla, online talep et.",
   },

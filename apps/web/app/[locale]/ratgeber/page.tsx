@@ -28,7 +28,7 @@ import { ArticleIndex, FeaturedArticle } from "@/app/components/site/Blocks2";
 const SECTION = "page-blog";
 
 export const metadata: Metadata = {
-  title: "Ratgeber — UmzugPlus",
+  title: "Ratgeber — m.on",
 };
 
 const ARTICLE_IMAGES = [

@@ -28,7 +28,7 @@ import { ContactFormSection, HotlineBanner } from "@/app/components/site/Blocks2
 const SECTION = "page-contact";
 
 export const metadata: Metadata = {
-  title: "Kontakt — UmzugPlus",
+  title: "Kontakt — m.on",
 };
 
 export default async function ContactPage({ params }: { params: { locale: Locale } }) {

@@ -4,7 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { LegalPage } from "@/app/components/site/LegalPage";
 
 export const metadata: Metadata = {
-  title: "AGB — UmzugPlus",
+  title: "AGB — m.on",
 };
 
 export default async function Page({ params }: { params: { locale: Locale } }) {

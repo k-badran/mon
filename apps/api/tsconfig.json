@@ -1,5 +1,5 @@
 {
-  "extends": "@umzugplus/typescript-config/node.json",
+  "extends": "@mon/typescript-config/node.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist"

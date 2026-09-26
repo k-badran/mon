@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { env } from "@umzugplus/config";
-import { ROLES, type Role } from "@umzugplus/core";
+import { env } from "@mon/config";
+import { ROLES, type Role } from "@mon/core";
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import { z } from "zod";
 
@@ -71,7 +71,7 @@ const accessSecret = new TextEncoder().encode(env.JWT_ACCESS_SECRET);
  * The two derivations are one rule written twice and have to stay in step.
  */
 export function deriveHintSecret(source: string): string {
-  return createHash("sha256").update(`umzugplus:session-hint:v1:${source}`).digest("base64");
+  return createHash("sha256").update(`mon:session-hint:v1:${source}`).digest("base64");
 }
 
 /**

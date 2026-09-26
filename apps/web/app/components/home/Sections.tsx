@@ -741,7 +741,7 @@ export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
           <div className="grid content-start gap-6">
             <img
               src="/images/brand/logo.png"
-              alt={copy["footer.brand"] ?? "UmzugPlus"}
+              alt={copy["footer.brand"] ?? "m.on"}
               width={86}
               height={47}
               className="h-12 w-auto brightness-0 invert"
@@ -845,7 +845,7 @@ export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
 
         <div className="grid gap-4 border-t border-white/10 pt-6 md:flex md:items-center md:justify-between">
           <p className="text-caption text-neutral-50">
-            © {new Date().getFullYear()} {copy["footer.brand"] ?? "UmzugPlus GmbH"}.{" "}
+            © {new Date().getFullYear()} {copy["footer.brand"] ?? "m.on GmbH"}.{" "}
             {copy["footer.rights"]}
           </p>
 

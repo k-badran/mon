@@ -9,4 +9,5 @@ export type {
   VerifyEmailPayload,
 } from "./templates/registry.js";
 export { createSmtpTransport, type SmtpOptions } from "./transports/smtp.js";
+export { createResendTransport, type ResendOptions } from "./transports/resend.js";
 export { createLogTransport, type LogOptions } from "./transports/log.js";

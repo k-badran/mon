@@ -1,6 +1,6 @@
 "use client";
 
-import { isStaffRole } from "@umzugplus/core";
+import { isStaffRole } from "@mon/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
@@ -99,13 +99,13 @@ function LoginForm() {
         </div>
 
         <p className="auth-panel-foot">
-          © {year} UmzugPlus GmbH. {t("footer.rights")}
+          © {year} m.on GmbH. {t("footer.rights")}
         </p>
       </aside>
 
       <main className="auth-form-side">
         <div className="auth-form">
-          <img className="auth-logo" src="/images/logo.svg" alt="UmzugPlus" />
+          <img className="auth-logo" src="/images/logo.svg" alt="m.on" />
 
           <h1>{t("auth.welcomeBack")}</h1>
           <p className="sub">{t("auth.loginSub")}</p>

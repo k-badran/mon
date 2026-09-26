@@ -63,7 +63,7 @@ const login = await call("POST", "/api/auth/login", {
   // changed SEED_ADMIN_EMAIL failed the login step and then cascaded into every
   // admin-guarded check below it, reporting eight failures for one cause.
   body: {
-    email: process.env.SEED_ADMIN_EMAIL ?? "admin@umzugplus.de",
+    email: process.env.SEED_ADMIN_EMAIL ?? "admin@moveongo.de",
     password: process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!",
   },
 });

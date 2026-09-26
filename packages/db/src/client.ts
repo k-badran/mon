@@ -1,4 +1,4 @@
-import { env, isProduction } from "@umzugplus/config";
+import { env, isProduction } from "@mon/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 

@@ -3,7 +3,7 @@ import { randomInt } from "node:crypto";
 import argon2 from "argon2";
 import { eq } from "drizzle-orm";
 
-import { isRole, ROLES, type Role } from "@umzugplus/core";
+import { isRole, ROLES, type Role } from "@mon/core";
 
 import { closeDatabase, db } from "./client.js";
 import { users } from "./schema/index.js";
@@ -59,7 +59,7 @@ function generatePassword(): string {
   return `${words.join("-")}-${randomInt(1000, 10_000)}`;
 }
 
-/** The same parameters `@umzugplus/auth` uses, so a hash made here verifies there. */
+/** The same parameters `@mon/auth` uses, so a hash made here verifies there. */
 async function hash(plaintext: string): Promise<string> {
   return argon2.hash(plaintext, {
     type: argon2.argon2id,

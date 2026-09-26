@@ -29,7 +29,7 @@ import {
 const SECTION = "service-moving";
 
 export const metadata: Metadata = {
-  title: "Umzug — UmzugPlus",
+  title: "Umzug — m.on",
 };
 
 export default async function MovingPage({ params }: { params: { locale: Locale } }) {

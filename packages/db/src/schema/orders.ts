@@ -22,7 +22,7 @@ import {
   orderStatusEnum,
   serviceTypeEnum,
 } from "./enums.js";
-import type { PriceBreakdown, QuoteInput } from "@umzugplus/core";
+import type { PriceBreakdown, QuoteInput } from "@mon/core";
 
 const money = (name: string) => numeric(name, { precision: 10, scale: 2 });
 

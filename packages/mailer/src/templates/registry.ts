@@ -1,4 +1,4 @@
-import { toLocale, type Locale } from "@umzugplus/core";
+import { toLocale, type Locale } from "@mon/core";
 
 import type { RenderedTemplate } from "../types.js";
 import { otpTemplate, type OtpPayload } from "./otp.js";

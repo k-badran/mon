@@ -113,7 +113,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   // ── Brand ─────────────────────────────────────────────────────────────
   {
     key: "brand.name",
-    value: "UmzugPlus",
+    value: "m.on",
     group: "brand",
     kind: "text",
     label: "Company name",
@@ -121,7 +121,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "brand.legalName",
-    value: "UmzugPlus GmbH",
+    value: "m.on GmbH",
     group: "brand",
     kind: "text",
     label: "Legal name",
@@ -156,7 +156,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "contact.email",
-    value: "info@umzugplus.de",
+    value: "info@moveongo.de",
     group: "contact",
     kind: "email",
     label: "Email",
@@ -182,7 +182,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   // ── SEO ───────────────────────────────────────────────────────────────
   {
     key: "seo.titleSuffix",
-    value: "UmzugPlus",
+    value: "m.on",
     group: "seo",
     kind: "text",
     label: "Title suffix",

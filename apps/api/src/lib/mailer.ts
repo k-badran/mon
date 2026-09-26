@@ -1,4 +1,4 @@
-import { createMailer, type Mailer } from "@umzugplus/mailer";
+import { createMailer, type Mailer } from "@mon/mailer";
 
 import { logger } from "./logger.js";
 

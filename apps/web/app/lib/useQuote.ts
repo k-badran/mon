@@ -1,6 +1,6 @@
 "use client";
 
-import type { PriceBreakdown, QuoteInput } from "@umzugplus/core";
+import type { PriceBreakdown, QuoteInput } from "@mon/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ApiError, useApi } from "@/lib/api";

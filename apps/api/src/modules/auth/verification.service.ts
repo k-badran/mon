@@ -1,9 +1,9 @@
 import { randomInt } from "node:crypto";
 
-import { generateVerificationToken, hashToken } from "@umzugplus/auth";
-import { env } from "@umzugplus/config";
-import { db, schema } from "@umzugplus/db";
-import type { VerificationPurpose } from "@umzugplus/db/schema";
+import { generateVerificationToken, hashToken } from "@mon/auth";
+import { env } from "@mon/config";
+import { db, schema } from "@mon/db";
+import type { VerificationPurpose } from "@mon/db/schema";
 import { and, eq, gt, isNull, lt, sql } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";

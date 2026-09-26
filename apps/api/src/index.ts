@@ -1,7 +1,7 @@
 import { createServer as createHttpServer } from "node:http";
 
-import { env } from "@umzugplus/config";
-import { closeDatabase } from "@umzugplus/db";
+import { env } from "@mon/config";
+import { closeDatabase } from "@mon/db";
 
 import { closeRedis } from "./lib/redis.js";
 import { logger } from "./lib/logger.js";

@@ -93,7 +93,7 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      JWT_ISSUER: ${JWT_ISSUER:-umzugplus-api}
+      JWT_ISSUER: ${JWT_ISSUER:-mon-api}
       WEB_ORIGIN: ${WEB_ORIGIN}
       API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}
       BUSINESS_TIMEZONE: ${BUSINESS_TIMEZONE:-Europe/Berlin}
@@ -101,16 +101,21 @@ services:
       # defaults to smtp and the config schema refuses to start without a host,
       # user and password — a deployment that boots and silently drops every
       # password reset is worse than one that refuses to boot.
-      MAIL_DRIVER: ${MAIL_DRIVER:-smtp}
-      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required}
+      # No `:?` on any of these: which ones are mandatory depends on the driver,
+      # and the config schema already refuses to start when the chosen driver is
+      # missing what it needs. Requiring SMTP credentials here would block a
+      # deployment that sends over Resend and has no use for them.
+      MAIL_DRIVER: ${MAIL_DRIVER:-resend}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-465}
       SMTP_SECURE: ${SMTP_SECURE:-true}
-      SMTP_USER: ${SMTP_USER:?SMTP_USER is required}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:?SMTP_PASSWORD is required}
-      MAIL_FROM: ${MAIL_FROM:-UmzugPlus <info@moveongo.de>}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-m.on <info@moveongo.de>}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-UmzugPlus/1.0}
+      GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-m.on/1.0}
     ports:
       # Bound to loopback: a reverse proxy on the host terminates TLS and
       # forwards to it. Never publish the API directly on 0.0.0.0.

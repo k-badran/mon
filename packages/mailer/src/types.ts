@@ -1,4 +1,4 @@
-import type { Locale } from "@umzugplus/core";
+import type { Locale } from "@mon/core";
 
 /**
  * A message that is ready to send — every decision already made.
@@ -39,7 +39,7 @@ export interface SentMail {
   delivered: boolean;
 }
 
-export type MailDriver = "smtp" | "log";
+export type MailDriver = "smtp" | "resend" | "log";
 
 export interface MailTransport {
   readonly driver: MailDriver;

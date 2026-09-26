@@ -428,10 +428,10 @@ export const MESSAGES = {
     tr: "Yorumlar yüklenemedi.",
   },
   "reviews.adminReply": {
-    de: "Antwort von UmzugPlus:",
-    en: "Reply from UmzugPlus:",
-    ar: "ردّ من UmzugPlus:",
-    tr: "UmzugPlus'tan yanıt:",
+    de: "Antwort von m.on:",
+    en: "Reply from m.on:",
+    ar: "ردّ من m.on:",
+    tr: "m.on'tan yanıt:",
   },
   "reviews.stars": {
     de: "{rating} von 5 Sternen",
@@ -502,7 +502,7 @@ export const MESSAGES = {
     de: "Ja, sperren", en: "Yes, block", ar: "نعم، احظر", tr: "Evet, engelle",
   },
   // ── Roles ───────────────────────────────────────────────────────────
-  // One entry per role in `@umzugplus/core`. A role without a label here
+  // One entry per role in `@mon/core`. A role without a label here
   // renders as its raw key on the admin screen, which is how the removed
   // "staff" entry was spotted.
   "admin.role.customer": { de: "Kunde", en: "Customer", ar: "عميل", tr: "Müşteri" },
@@ -647,7 +647,7 @@ export const MESSAGES = {
 
   // ── Chat ────────────────────────────────────────────────────────────
   "chat.title": {
-    de: "UmzugPlus-Assistent", en: "UmzugPlus Assistant", ar: "مساعد UmzugPlus", tr: "UmzugPlus Asistanı",
+    de: "m.on-Assistent", en: "m.on Assistant", ar: "مساعد m.on", tr: "m.on Asistanı",
   },
   "chat.subtitle": {
     de: "Antwortet meist sofort",
@@ -1532,10 +1532,10 @@ export const MESSAGES = {
 
   // Two placeholders, so each language keeps its own word order around the links.
   "calc.confirm.consent": {
-    de: "Ich akzeptiere die {terms} und die {privacy} von UmzugPlus.",
-    en: "I agree to the {terms} and {privacy} of UmzugPlus.",
-    ar: "أوافق على {terms} و{privacy} الخاصة بـ UmzugPlus.",
-    tr: "UmzugPlus'ın {terms} ve {privacy} belgelerini kabul ediyorum.",
+    de: "Ich akzeptiere die {terms} und die {privacy} von m.on.",
+    en: "I agree to the {terms} and {privacy} of m.on.",
+    ar: "أوافق على {terms} و{privacy} الخاصة بـ m.on.",
+    tr: "m.on'ın {terms} ve {privacy} belgelerini kabul ediyorum.",
   },
   "calc.confirm.terms": {
     de: "AGB", en: "Terms of Service",
@@ -1925,8 +1925,8 @@ export const MESSAGES = {
     tr: "Fiyatı netleştirmek için adres ve bilgileri girin.",
   },
   "calc.panel.guaranteeTitle": {
-    de: "UmzugPlus Garantie", en: "UmzugPlus Guarantee",
-    ar: "ضمان UmzugPlus", tr: "UmzugPlus Garantisi",
+    de: "m.on Garantie", en: "m.on Guarantee",
+    ar: "ضمان m.on", tr: "m.on Garantisi",
   },
   "calc.panel.guaranteeBody": {
     de: "Keine versteckten Kosten. Transportversicherung inklusive.",
@@ -2069,7 +2069,7 @@ export const MESSAGES = {
     ar: "تم تطبيق الحد الأدنى لقيمة الطلب", tr: "Asgari sipariş tutarı uygulandı",
   },
 
-  "brand.name": { de: "UmzugPlus", en: "UmzugPlus", ar: "UmzugPlus", tr: "UmzugPlus" },
+  "brand.name": { de: "m.on", en: "m.on", ar: "m.on", tr: "m.on" },
   // The wordmark is two runs: the lead in ink, the accent in brand red.
   "brand.nameLead": { de: "Umzug", en: "Umzug", ar: "Umzug", tr: "Umzug" },
   "brand.nameAccent": { de: "Plus", en: "Plus", ar: "Plus", tr: "Plus" },

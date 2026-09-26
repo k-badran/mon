@@ -1,4 +1,4 @@
-import type { DayAvailability, PriceBreakdown, QuoteInput, Role } from "@umzugplus/core";
+import type { DayAvailability, PriceBreakdown, QuoteInput, Role } from "@mon/core";
 
 import { ApiClient, type ApiClientOptions } from "./http.js";
 
@@ -10,7 +10,7 @@ import { ApiClient, type ApiClientOptions } from "./http.js";
  * rather than a hand-written `fetch("/api/orders?...")` in a component, and
  * with no Next.js route handler in between.
  *
- * Request and response types come from `@umzugplus/core`, so the same
+ * Request and response types come from `@mon/core`, so the same
  * definitions that the pricing engine uses are what the UI compiles against.
  * A change to `QuoteInput` breaks the frontend build instead of failing at
  * runtime in production.
@@ -111,7 +111,7 @@ export interface CreateUserResult {
   temporaryPassword?: string;
 }
 
-export class UmzugPlusSdk {
+export class MonSdk {
   readonly http: ApiClient;
 
   constructor(options: ApiClientOptions) {
@@ -236,6 +236,6 @@ export class UmzugPlusSdk {
 }
 
 /** Convenience factory. */
-export function createSdk(options: ApiClientOptions): UmzugPlusSdk {
-  return new UmzugPlusSdk(options);
+export function createSdk(options: ApiClientOptions): MonSdk {
+  return new MonSdk(options);
 }

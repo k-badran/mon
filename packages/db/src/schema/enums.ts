@@ -18,7 +18,7 @@ import { pgEnum } from "drizzle-orm/pg-core";
  * to change other people's roles.
  *
  * What each role may do is not encoded here. It lives in ROLE_PERMISSIONS in
- * @umzugplus/core, so a capability can be moved between roles without a
+ * @mon/core, so a capability can be moved between roles without a
  * database migration.
  */
 export const userRoleEnum = pgEnum("user_role", [

@@ -69,10 +69,10 @@ export const LEGAL_CONTENT: ContentSeed[] = [
     tr: "Sağlayıcı",
   }, "text"),
   row(I, "1.body", "Section 1 — body", 11, {
-    de: "UmzugPlus GmbH\nKurfürstendamm 212\n10719 Berlin\nDeutschland",
-    en: "UmzugPlus GmbH\nKurfürstendamm 212\n10719 Berlin\nGermany",
-    ar: "UmzugPlus GmbH\nKurfürstendamm 212\n10719 Berlin\nألمانيا",
-    tr: "UmzugPlus GmbH\nKurfürstendamm 212\n10719 Berlin\nAlmanya",
+    de: "m.on GmbH\nKurfürstendamm 212\n10719 Berlin\nDeutschland",
+    en: "m.on GmbH\nKurfürstendamm 212\n10719 Berlin\nGermany",
+    ar: "m.on GmbH\nKurfürstendamm 212\n10719 Berlin\nألمانيا",
+    tr: "m.on GmbH\nKurfürstendamm 212\n10719 Berlin\nAlmanya",
   }),
   row(I, "2.title", "Section 2 — title", 12, {
     de: "Vertreten durch",
@@ -93,10 +93,10 @@ export const LEGAL_CONTENT: ContentSeed[] = [
     tr: "İletişim",
   }, "text"),
   row(I, "3.body", "Section 3 — body", 15, {
-    de: "Telefon: 0800 123 456 78\nE-Mail: support@umzugplus.de",
-    en: "Phone: 0800 123 456 78\nEmail: support@umzugplus.de",
-    ar: "الهاتف: 0800 123 456 78\nالبريد: support@umzugplus.de",
-    tr: "Telefon: 0800 123 456 78\nE-posta: support@umzugplus.de",
+    de: "Telefon: 0800 123 456 78\nE-Mail: support@moveongo.de",
+    en: "Phone: 0800 123 456 78\nEmail: support@moveongo.de",
+    ar: "الهاتف: 0800 123 456 78\nالبريد: support@moveongo.de",
+    tr: "Telefon: 0800 123 456 78\nE-posta: support@moveongo.de",
   }),
   row(I, "4.title", "Section 4 — title", 16, {
     de: "Registereintrag und Umsatzsteuer-ID",
@@ -145,10 +145,10 @@ export const LEGAL_CONTENT: ContentSeed[] = [
     tr: "1. Veri sorumlusu",
   }, "text"),
   row(P, "1.body", "Section 1 — body", 11, {
-    de: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin. Kontakt: support@umzugplus.de",
-    en: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin. Contact: support@umzugplus.de",
-    ar: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin. للتواصل: support@umzugplus.de",
-    tr: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin. İletişim: support@umzugplus.de",
+    de: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin. Kontakt: support@moveongo.de",
+    en: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin. Contact: support@moveongo.de",
+    ar: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin. للتواصل: support@moveongo.de",
+    tr: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin. İletişim: support@moveongo.de",
   }),
   row(P, "2.title", "Section 2 — title", 12, {
     de: "2. Welche Daten wir verarbeiten",
@@ -205,10 +205,10 @@ export const LEGAL_CONTENT: ContentSeed[] = [
     tr: "6. Haklarınız",
   }, "text"),
   row(P, "6.body", "Section 6 — body", 21, {
-    de: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren. Wenden Sie sich an support@umzugplus.de.",
-    en: "You have the right to information, rectification, erasure, restriction of processing, data portability and objection. You may also lodge a complaint with a data protection supervisory authority. Write to support@umzugplus.de.",
-    ar: "لك الحقّ في الاطّلاع والتصحيح والمحو وتقييد المعالجة ونقل البيانات والاعتراض. ويمكنك أيضاً تقديم شكوى إلى هيئة الإشراف على حماية البيانات. راسلنا على support@umzugplus.de.",
-    tr: "Bilgi alma, düzeltme, silme, işlemeyi kısıtlama, veri taşınabilirliği ve itiraz haklarına sahipsiniz. Ayrıca bir veri koruma denetim otoritesine şikâyette bulunabilirsiniz. support@umzugplus.de adresine yazın.",
+    de: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren. Wenden Sie sich an support@moveongo.de.",
+    en: "You have the right to information, rectification, erasure, restriction of processing, data portability and objection. You may also lodge a complaint with a data protection supervisory authority. Write to support@moveongo.de.",
+    ar: "لك الحقّ في الاطّلاع والتصحيح والمحو وتقييد المعالجة ونقل البيانات والاعتراض. ويمكنك أيضاً تقديم شكوى إلى هيئة الإشراف على حماية البيانات. راسلنا على support@moveongo.de.",
+    tr: "Bilgi alma, düzeltme, silme, işlemeyi kısıtlama, veri taşınabilirliği ve itiraz haklarına sahipsiniz. Ayrıca bir veri koruma denetim otoritesine şikâyette bulunabilirsiniz. support@moveongo.de adresine yazın.",
   }),
 
   // ══ Terms ══════════════════════════════════════════════════════════
@@ -219,10 +219,10 @@ export const LEGAL_CONTENT: ContentSeed[] = [
     tr: "Genel Şartlar ve Koşullar",
   }, "text"),
   row(T, "hero.subline", "Terms — lead", 2, {
-    de: "Für alle über UmzugPlus gebuchten Leistungen.",
-    en: "For all services booked through UmzugPlus.",
-    ar: "لجميع الخدمات المحجوزة عبر UmzugPlus.",
-    tr: "UmzugPlus üzerinden alınan tüm hizmetler için.",
+    de: "Für alle über m.on gebuchten Leistungen.",
+    en: "For all services booked through m.on.",
+    ar: "لجميع الخدمات المحجوزة عبر m.on.",
+    tr: "m.on üzerinden alınan tüm hizmetler için.",
   }),
   row(T, "notice", "Terms — review notice", 3, REVIEW_NOTICE),
 

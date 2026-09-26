@@ -1,5 +1,5 @@
-import { env } from "@umzugplus/config";
-import { publicHolidaysForRange } from "@umzugplus/core";
+import { env } from "@mon/config";
+import { publicHolidaysForRange } from "@mon/core";
 
 import { KNOWLEDGE } from "./knowledge-seed.js";
 import { CONTENT_DEFAULTS, SETTING_DEFAULTS } from "./site-defaults.js";

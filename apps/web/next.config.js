@@ -35,7 +35,7 @@ const FROM_ROOT_ENV = ["JWT_ACCESS_SECRET", "JWT_HINT_SECRET", "JWT_ISSUER"];
 
 /** Mirrors `deriveHintSecret` in packages/auth — one rule, written twice. */
 function deriveHintSecret(source) {
-  return createHash("sha256").update(`umzugplus:session-hint:v1:${source}`).digest("base64");
+  return createHash("sha256").update(`mon:session-hint:v1:${source}`).digest("base64");
 }
 
 function readRootEnv() {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
-import type { PriceBreakdown, QuoteInput } from "@umzugplus/core";
+import type { PriceBreakdown, QuoteInput } from "@mon/core";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -34,9 +34,9 @@ import type { CalculatorState } from "@/lib/calculator/machine";
  */
 
 /** Mirrors the wizard's own key; the answers are handed over, not re-asked. */
-const WIZARD_STORAGE_KEY = "umzugplus.calculator.v1";
+const WIZARD_STORAGE_KEY = "mon.calculator.v1";
 
-/** Mirrors PASSWORD_MIN_LENGTH in `@umzugplus/auth`, which is server-only. */
+/** Mirrors PASSWORD_MIN_LENGTH in `@mon/auth`, which is server-only. */
 const PASSWORD_MIN_LENGTH = 10;
 
 /**

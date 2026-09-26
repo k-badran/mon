@@ -14,6 +14,10 @@ node_modules/
 dist/
 build/
 .next/
+# `next build` writes here when NEXT_DIST_DIR is set, which apps/web's
+# `build:check` script does. 662 files of generated output were tracked because
+# only `.next/` was listed.
+.next-build/
 out/
 *.tsbuildinfo
 

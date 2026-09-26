@@ -1,6 +1,6 @@
 import type { CookieOptions, Request, Response } from "express";
 
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 
 /**
  * The session cookies.
@@ -25,8 +25,8 @@ import { env } from "@umzugplus/config";
  * stale or forged buys nothing.
  */
 
-const REFRESH_COOKIE = "umzugplus_rt";
-const HINT_COOKIE = "umzugplus_sh";
+const REFRESH_COOKIE = "mon_rt";
+const HINT_COOKIE = "mon_sh";
 
 /**
  * `sameSite: "lax"` rather than `strict`.
@@ -63,8 +63,8 @@ export function setRefreshCookie(res: Response, token: string): void {
  *
  * The hint is read by a *different origin* from the one that sets it. In
  * development that difference is a port, which cookies ignore, so nothing is
- * needed. In production the API is api.umzugplus.de and the web app is
- * umzugplus.de, and a host-only cookie set by the first never reaches the
+ * needed. In production the API is api.moveongo.de and the web app is
+ * moveongo.de, and a host-only cookie set by the first never reaches the
  * second: `readHint` then returns null for everyone and every signed-in user
  * is redirected to /login — a failure that looks like a broken session rather
  * than missing configuration.

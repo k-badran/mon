@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { can, canAll, type Permission, type Role } from "@umzugplus/core";
+import { can, canAll, type Permission, type Role } from "@mon/core";
 
 import { effectiveRole } from "../lib/account-state.js";
 import { AppError } from "../lib/errors.js";

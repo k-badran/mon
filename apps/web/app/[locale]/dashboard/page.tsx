@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrderSummary } from "@umzugplus/client";
+import type { OrderSummary } from "@mon/client";
 import Link from "next/link";
 
 import { useApi } from "@/lib/api";

@@ -290,28 +290,28 @@ export const KNOWLEDGE: KnowledgeSeed[] = [
         keywords: ["kontakt", "telefon", "email", "mail", "erreichen", "anrufen", "mitarbeiter", "mensch", "sprechen"],
         question: "Wie erreiche ich euch?",
         answer:
-          "Per E-Mail an info@umzugplus.de. Du kannst hier im Chat auch nach einem Mitarbeiter " +
+          "Per E-Mail an info@moveongo.de. Du kannst hier im Chat auch nach einem Mitarbeiter " +
           "fragen — dann übernimmt jemand aus dem Team das Gespräch persönlich.",
       },
       en: {
         keywords: ["contact", "phone", "email", "mail", "reach", "call", "human", "person", "speak", "agent"],
         question: "How can I reach you?",
         answer:
-          "By email at info@umzugplus.de. You can also ask for a person right here in the " +
+          "By email at info@moveongo.de. You can also ask for a person right here in the " +
           "chat, and someone from the team will take over the conversation.",
       },
       ar: {
         keywords: ["تواصل", "اتصال", "هاتف", "ايميل", "بريد", "موظف", "شخص", "أتحدث", "اتحدث"],
         question: "كيف أتواصل معكم؟",
         answer:
-          "عبر البريد الإلكتروني info@umzugplus.de. ويمكنك أيضًا طلب موظف هنا في المحادثة، " +
+          "عبر البريد الإلكتروني info@moveongo.de. ويمكنك أيضًا طلب موظف هنا في المحادثة، " +
           "وعندها يتولّى أحد أفراد الفريق الحديث معك شخصيًّا.",
       },
       tr: {
         keywords: ["iletişim", "telefon", "eposta", "mail", "ulaşmak", "aramak", "insan", "kişi", "görüşmek"],
         question: "Size nasıl ulaşabilirim?",
         answer:
-          "info@umzugplus.de adresinden e-posta ile. Ayrıca burada sohbette bir yetkili " +
+          "info@moveongo.de adresinden e-posta ile. Ayrıca burada sohbette bir yetkili " +
           "isteyebilirsiniz; ekipten biri görüşmeyi devralır.",
       },
     },

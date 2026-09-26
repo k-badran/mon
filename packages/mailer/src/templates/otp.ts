@@ -1,4 +1,4 @@
-import type { Locale } from "@umzugplus/core";
+import type { Locale } from "@mon/core";
 
 import type { RenderedTemplate } from "../types.js";
 import { renderHtml, renderText, type LayoutInput } from "./layout.js";
@@ -23,7 +23,7 @@ interface Copy {
 
 const COPY: Record<Locale, Copy> = {
   de: {
-    subject: "Ihr UmzugPlus-Anmeldecode",
+    subject: "Ihr m.on-Anmeldecode",
     heading: "Ihr Anmeldecode",
     greeting: (name) => `Hallo ${name},`,
     intro: "Geben Sie diesen Code ein, um fortzufahren:",
@@ -31,7 +31,7 @@ const COPY: Record<Locale, Copy> = {
     ignore: "Wenn Sie diesen Code nicht angefordert haben, ignorieren Sie diese E-Mail — Ihr Konto bleibt sicher.",
   },
   en: {
-    subject: "Your UmzugPlus sign-in code",
+    subject: "Your m.on sign-in code",
     heading: "Your sign-in code",
     greeting: (name) => `Hello ${name},`,
     intro: "Enter this code to continue:",
@@ -39,7 +39,7 @@ const COPY: Record<Locale, Copy> = {
     ignore: "If you did not request this code, ignore this email — your account is safe.",
   },
   ar: {
-    subject: "رمز الدخول الخاص بك في UmzugPlus",
+    subject: "رمز الدخول الخاص بك في m.on",
     heading: "رمز الدخول",
     greeting: (name) => `مرحباً ${name}،`,
     intro: "أدخل هذا الرمز للمتابعة:",
@@ -47,7 +47,7 @@ const COPY: Record<Locale, Copy> = {
     ignore: "إذا لم تطلب هذا الرمز، تجاهل الرسالة — حسابك بأمان.",
   },
   tr: {
-    subject: "UmzugPlus giriş kodunuz",
+    subject: "m.on giriş kodunuz",
     heading: "Giriş kodunuz",
     greeting: (name) => `Merhaba ${name},`,
     intro: "Devam etmek için bu kodu girin:",

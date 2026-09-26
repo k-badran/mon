@@ -1,7 +1,8 @@
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 
 import { renderTemplate, type PayloadFor, type TemplateKey } from "./templates/registry.js";
 import { createLogTransport } from "./transports/log.js";
+import { createResendTransport } from "./transports/resend.js";
 import { createSmtpTransport } from "./transports/smtp.js";
 import type { MailDriver, MailTransport, SentMail } from "./types.js";
 
@@ -117,6 +118,23 @@ export function createMailer(
 }
 
 function defaultTransport(events: MailerEvents): MailTransport {
+  if (env.MAIL_DRIVER === "resend") {
+    // Non-null assertion is safe: the config schema refuses to parse when
+    // MAIL_DRIVER is "resend" without a key, so the process cannot have started.
+    return createResendTransport({
+      apiKey: env.RESEND_API_KEY!,
+      from: env.MAIL_FROM,
+      replyTo: env.MAIL_REPLY_TO,
+      onAttempt: (attempt) =>
+        events.onTransportEvent?.({
+          level: attempt.outcome === "sent" ? "debug" : "warn",
+          message: `resend attempt ${attempt.attempt} ${attempt.outcome}${
+            attempt.status ? ` (${attempt.status})` : ""
+          }${attempt.message ? `: ${attempt.message}` : ""}`,
+        }),
+    });
+  }
+
   if (env.MAIL_DRIVER === "smtp") {
     // Non-null assertions are safe here and nowhere else: the config schema
     // refuses to parse when MAIL_DRIVER is "smtp" without these three, so the

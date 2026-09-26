@@ -6,7 +6,7 @@
  * visitor downloads only their own language, so the two shapes have to be
  * transposed somewhere — here, at build time, rather than in the browser.
  *
- * Run with `pnpm --filter @umzugplus/web build:messages` after editing the
+ * Run with `pnpm --filter @mon/web build:messages` after editing the
  * catalogue. It is checked, not just written: a key missing from any locale
  * fails the run rather than shipping a screen with a raw key in it.
  */

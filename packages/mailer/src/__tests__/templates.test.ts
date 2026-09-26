@@ -70,10 +70,10 @@ describe("template rendering", () => {
   });
 
   it("keeps a real reset link intact", () => {
-    const url = "https://umzugplus.de/reset?token=abc-123_XYZ";
+    const url = "https://moveongo.de/reset?token=abc-123_XYZ";
     const mail = renderTemplate("password-reset", { url, expiresInMinutes: 30 }, "de");
 
-    expect(mail.html).toContain("https://umzugplus.de/reset?token=abc-123_XYZ");
+    expect(mail.html).toContain("https://moveongo.de/reset?token=abc-123_XYZ");
     expect(mail.text).toContain(url);
   });
 });

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { isRole, type Role } from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+import { isRole, type Role } from "@mon/core";
+import { db, schema } from "@mon/db";
 
 /**
  * What an account may do *right now*.

@@ -19,7 +19,7 @@ import { ComparisonTable, StepsTimeline } from "@/app/components/site/Blocks2";
 const SECTION = "page-how-it-works";
 
 export const metadata: Metadata = {
-  title: "So funktioniert's — UmzugPlus",
+  title: "So funktioniert's — m.on",
 };
 
 export default async function HowItWorksPage({ params }: { params: { locale: Locale } }) {

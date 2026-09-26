@@ -339,10 +339,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Why us — headline",
     sortOrder: 31,
     values: {
-      de: "Warum UmzugPlus?",
-      en: "Why Choose UmzugPlus?",
-      ar: "لماذا UmzugPlus؟",
-      tr: "Neden UmzugPlus?",
+      de: "Warum m.on?",
+      en: "Why Choose m.on?",
+      ar: "لماذا m.on؟",
+      tr: "Neden m.on?",
     },
   },
   {
@@ -1077,10 +1077,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer — address",
     sortOrder: 2,
     values: {
-      de: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin",
-      en: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin",
-      ar: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin",
-      tr: "UmzugPlus GmbH, Kurfürstendamm 212, 10719 Berlin",
+      de: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin",
+      en: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin",
+      ar: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin",
+      tr: "m.on GmbH, Kurfürstendamm 212, 10719 Berlin",
     },
   },
   {
@@ -1113,10 +1113,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer — legal name",
     sortOrder: 0,
     values: {
-      de: "UmzugPlus GmbH",
-      en: "UmzugPlus GmbH",
-      ar: "UmzugPlus GmbH",
-      tr: "UmzugPlus GmbH",
+      de: "m.on GmbH",
+      en: "m.on GmbH",
+      ar: "m.on GmbH",
+      tr: "m.on GmbH",
     },
   },
   {
@@ -1213,10 +1213,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer — email",
     sortOrder: 22,
     values: {
-      de: "support@umzugplus.de",
-      en: "support@umzugplus.de",
-      ar: "support@umzugplus.de",
-      tr: "support@umzugplus.de",
+      de: "support@moveongo.de",
+      en: "support@moveongo.de",
+      ar: "support@moveongo.de",
+      tr: "support@moveongo.de",
     },
   },
   {
@@ -1258,10 +1258,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer social — Instagram URL",
     sortOrder: 40,
     values: {
-      de: "https://instagram.com/umzugplus",
-      en: "https://instagram.com/umzugplus",
-      ar: "https://instagram.com/umzugplus",
-      tr: "https://instagram.com/umzugplus",
+      de: "https://instagram.com/mon",
+      en: "https://instagram.com/mon",
+      ar: "https://instagram.com/mon",
+      tr: "https://instagram.com/mon",
     },
   },
   {
@@ -1271,10 +1271,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer social — X URL",
     sortOrder: 41,
     values: {
-      de: "https://x.com/umzugplus",
-      en: "https://x.com/umzugplus",
-      ar: "https://x.com/umzugplus",
-      tr: "https://x.com/umzugplus",
+      de: "https://x.com/mon",
+      en: "https://x.com/mon",
+      ar: "https://x.com/mon",
+      tr: "https://x.com/mon",
     },
   },
   {
@@ -1284,10 +1284,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer social — Facebook URL",
     sortOrder: 42,
     values: {
-      de: "https://facebook.com/umzugplus",
-      en: "https://facebook.com/umzugplus",
-      ar: "https://facebook.com/umzugplus",
-      tr: "https://facebook.com/umzugplus",
+      de: "https://facebook.com/mon",
+      en: "https://facebook.com/mon",
+      ar: "https://facebook.com/mon",
+      tr: "https://facebook.com/mon",
     },
   },
   {
@@ -1297,10 +1297,10 @@ export const HOME_CONTENT: ContentSeed[] = [
     label: "Footer social — YouTube URL",
     sortOrder: 43,
     values: {
-      de: "https://youtube.com/@umzugplus",
-      en: "https://youtube.com/@umzugplus",
-      ar: "https://youtube.com/@umzugplus",
-      tr: "https://youtube.com/@umzugplus",
+      de: "https://youtube.com/@mon",
+      en: "https://youtube.com/@mon",
+      ar: "https://youtube.com/@mon",
+      tr: "https://youtube.com/@mon",
     },
   },
 ];

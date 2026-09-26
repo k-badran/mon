@@ -31,7 +31,7 @@ import {
 const SECTION = "service-disposal";
 
 export const metadata: Metadata = {
-  title: "Entsorgung — UmzugPlus",
+  title: "Entsorgung — m.on",
 };
 
 export default async function DisposalPage({ params }: { params: { locale: Locale } }) {

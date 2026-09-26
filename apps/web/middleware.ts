@@ -1,7 +1,7 @@
 import { jwtVerify } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { can, isRole, isStaffRole, type Role } from "@umzugplus/core";
+import { can, isRole, isStaffRole, type Role } from "@mon/core";
 
 import { HINT_COOKIE, LOCALE_COOKIE } from "./lib/access/cookies";
 import { isUnder, requiredPermission } from "./lib/access/staff-routes";
@@ -41,7 +41,7 @@ import { DEFAULT_LOCALE, isLocale, negotiateLocale } from "./lib/i18n/config";
  * without holding the secret that signs access tokens.
  */
 const secret = new TextEncoder().encode(process.env.JWT_HINT_SECRET ?? "");
-const issuer = process.env.JWT_ISSUER ?? "umzugplus-api";
+const issuer = process.env.JWT_ISSUER ?? "mon-api";
 
 // Which staff route needs which capability lives in `lib/access/staff-routes`,
 // beside the navigation that links to those same routes. Two lists that were

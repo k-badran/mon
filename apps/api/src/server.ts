@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "node:http";
 
-import { env, isProduction } from "@umzugplus/config";
+import { env, isProduction } from "@mon/config";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";

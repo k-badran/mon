@@ -8,8 +8,8 @@ import {
   type PricingContext,
   type QuoteInput,
   type RateCard,
-} from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+} from "@mon/core";
+import { db, schema } from "@mon/db";
 import { and, eq, gt, isNull, lte, sql } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";

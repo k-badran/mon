@@ -1,6 +1,6 @@
-# UmzugPlus — Monorepo
+# m.on — Monorepo
 
-A pnpm + Turborepo monorepo containing the UmzugPlus backend API and web
+A pnpm + Turborepo monorepo containing the m.on backend API and web
 frontend: online quotes, booking and dispatch for moving, disposal and cleaning
 services in North Rhine-Westphalia.
 
@@ -56,7 +56,7 @@ Browser ──HTTPS──► Express API ──► PostgreSQL
 
 ### Packages
 
-#### `packages/core` — `@umzugplus/core`
+#### `packages/core` — `@mon/core`
 
 Pure, dependency-free domain logic. Every function is deterministic and unit
 tested, which is what makes a disputed invoice reproducible.
@@ -69,7 +69,7 @@ tested, which is what makes a disputed invoice reproducible.
 | `availability` | Day classification: past, too soon, closed, holiday, blocked, full, free. |
 | `pricing` | The single pricing engine. One implementation, server-side only. |
 
-#### `packages/client` — `@umzugplus/client`
+#### `packages/client` — `@mon/client`
 
 The typed SDK. The frontend calls the Express API **directly** through this —
 there are deliberately no Next.js route handlers proxying the backend, which
@@ -88,10 +88,10 @@ It attaches the access token, refreshes once transparently on a 401
 tripped), times requests out, and throws a typed `ApiError` carrying the API's
 machine-readable `code` — callers branch on `code`, never on message text.
 
-Request and response types come from `@umzugplus/core`, so a change to
+Request and response types come from `@mon/core`, so a change to
 `QuoteInput` breaks the frontend build rather than failing at runtime.
 
-#### `packages/auth` — `@umzugplus/auth`
+#### `packages/auth` — `@mon/auth`
 
 - `hashPassword` / `verifyPassword` — Argon2id at the OWASP 2024 baseline,
   with transparent re-hashing when parameters are strengthened.
@@ -99,7 +99,7 @@ Request and response types come from `@umzugplus/core`, so a change to
   payload shape validated after the signature.
 - `generateRefreshToken` — 256 bits of CSPRNG entropy, stored as a SHA-256 hash.
 
-#### `packages/db` — `@umzugplus/db`
+#### `packages/db` — `@mon/db`
 
 Drizzle schema across 23 tables. Money is `numeric(10,2)`; booking days are
 `date`; order status, roles and service types are Postgres enums so an invalid
@@ -329,7 +329,7 @@ try {
 
 ## Outbound email
 
-Mail goes out over SMTP through `@umzugplus/mailer`. The package renders a
+Mail goes out over SMTP through `@mon/mailer`. The package renders a
 template and hands the result to a transport; `MAIL_DRIVER` picks which one.
 
 | Driver | What it does |
@@ -414,7 +414,7 @@ server ends up at a known, version-controlled schema.
 ### When the local data must come along
 
 ```sh
-pnpm db:dump                  # → backups/umzugplus-<timestamp>.dump
+pnpm db:dump                  # → backups/mon-<timestamp>.dump
 pnpm db:dump --schema-only    # structure only
 pnpm db:dump --data-only      # rows only
 ```
@@ -426,9 +426,9 @@ Postgres container instead — no separate install needed on Windows or macOS.
 Then on the server:
 
 ```sh
-scp backups/umzugplus-<timestamp>.dump user@server:/tmp/
+scp backups/mon-<timestamp>.dump user@server:/tmp/
 ssh user@server
-pnpm db:restore /tmp/umzugplus-<timestamp>.dump
+pnpm db:restore /tmp/mon-<timestamp>.dump
 pnpm db:migrate               # confirm the schema is at the latest migration
 ```
 
@@ -472,7 +472,7 @@ Set `DATABASE_URL` directly and delete the `postgres` service from
 `docker-compose.prod.yml`. Managed providers require TLS:
 
 ```
-DATABASE_URL=postgresql://user:pass@host:5432/umzugplus?sslmode=require
+DATABASE_URL=postgresql://user:pass@host:5432/mon?sslmode=require
 ```
 
 ### Backups
@@ -481,7 +481,7 @@ DATABASE_URL=postgresql://user:pass@host:5432/umzugplus?sslmode=require
 Postgres container. A nightly cron entry:
 
 ```
-0 3 * * * cd /srv/umzugplus && pnpm db:dump >> /var/log/umzugplus-backup.log 2>&1
+0 3 * * * cd /srv/mon && pnpm db:dump >> /var/log/mon-backup.log 2>&1
 ```
 
 A backup you have never restored is a guess. Test one into a scratch database

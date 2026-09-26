@@ -1,5 +1,5 @@
 {
-  "extends": "@umzugplus/typescript-config/nextjs.json",
+  "extends": "@mon/typescript-config/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

@@ -7,8 +7,8 @@ import {
   signAccessToken,
   verifyPassword,
   type UserRole,
-} from "@umzugplus/auth";
-import { db, schema } from "@umzugplus/db";
+} from "@mon/auth";
+import { db, schema } from "@mon/db";
 import { and, eq, gt, isNull, lt, or } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";

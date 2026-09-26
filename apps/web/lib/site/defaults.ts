@@ -29,8 +29,8 @@ export const DEFAULT_THEME: SiteTheme = {
     "font.body": "DM Sans",
   },
   brand: {
-    "brand.name": "UmzugPlus",
-    "brand.legalName": "UmzugPlus GmbH",
+    "brand.name": "m.on",
+    "brand.legalName": "m.on GmbH",
     "brand.logo": "/images/logo.svg",
     "brand.tagline": "Moving made simpler, faster, and stress-free.",
   },

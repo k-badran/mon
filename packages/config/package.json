@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/config",
+  "name": "@mon/config",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
   "dependencies": { "dotenv": "^16.4.7", "zod": "^3.24.1" },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@umzugplus/typescript-config": "workspace:*",
+    "@mon/typescript-config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }

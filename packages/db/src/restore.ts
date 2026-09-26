@@ -2,14 +2,14 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 
-import { env, isProduction } from "@umzugplus/config";
+import { env, isProduction } from "@mon/config";
 
 import { detectRunner, parseDatabaseUrl, runPgTool } from "./pg-tools.js";
 
 /**
  * Restores a dump produced by `pnpm db:dump`.
  *
- *   pnpm db:restore backups/umzugplus-2026-09-12T10-00-00.dump
+ *   pnpm db:restore backups/mon-2026-09-12T10-00-00.dump
  *   pnpm db:restore <file> --clean     drop existing objects first
  *
  * `--clean` is opt-in because dropping what is already there is exactly the

@@ -36,7 +36,7 @@ const AVATARS = [
 const RATINGS = [5, 4, 5];
 
 export const metadata: Metadata = {
-  title: "Kundenstimmen — UmzugPlus",
+  title: "Kundenstimmen — m.on",
 };
 
 export default async function ReviewsPage({ params }: { params: { locale: Locale } }) {

@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/web",
+  "name": "@mon/web",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",
-    "@umzugplus/client": "workspace:*",
-    "@umzugplus/core": "workspace:*",
+    "@mon/client": "workspace:*",
+    "@mon/core": "workspace:*",
     "jose": "^5.9.6",
     "next": "14.2.35",
     "react": "^18.3.1",
@@ -26,7 +26,7 @@
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@umzugplus/typescript-config": "workspace:*",
+    "@mon/typescript-config": "workspace:*",
     "playwright-core": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5.9.2"

@@ -1,6 +1,6 @@
 import { Router, type Response } from "express";
 
-import { hashPassword, signSessionHint } from "@umzugplus/auth";
+import { hashPassword, signSessionHint } from "@mon/auth";
 
 import { AppError } from "../../lib/errors.js";
 import { asyncHandler } from "../../middleware/error-handler.js";
@@ -191,7 +191,7 @@ authRouter.post(
 
     // Hashed in the route rather than the service so that `verification.service`
     // never handles a plaintext password — the one place that does is
-    // `@umzugplus/auth`, and keeping it that way means there is one answer to
+    // `@mon/auth`, and keeping it that way means there is one answer to
     // "where could a password be logged by accident".
     await verificationService.confirmPasswordReset(token, await hashPassword(newPassword));
 

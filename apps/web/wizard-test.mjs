@@ -93,7 +93,7 @@ check("the step is carried in the URL", stepParam === "9", `step=${stepParam}`);
 // Refresh here: the answers should survive.
 await page.reload({ waitUntil: "networkidle" });
 const areaAfterReload = await page.evaluate(() => {
-  const raw = sessionStorage.getItem("umzugplus.calculator.v1");
+  const raw = sessionStorage.getItem("mon.calculator.v1");
   return raw ? (JSON.parse(raw).areaSqm ?? null) : null;
 });
 check("answers survive a refresh", areaAfterReload === "75", `areaSqm=${areaAfterReload}`);
@@ -124,7 +124,7 @@ console.log("\n— a cross-country move goes to review —\n");
 await page.goto(`${WEB}/en/rechner`, { waitUntil: "networkidle" });
 await page.evaluate(() => {
   sessionStorage.setItem(
-    "umzugplus.calculator.v1",
+    "mon.calculator.v1",
     JSON.stringify({
       serviceType: "moving",
       customerType: "private",
