@@ -33,6 +33,31 @@ export interface GeocodeResult {
   displayName: string;
 }
 
+/**
+ * Rewrites the ASCII spellings of German vowels back into the real characters.
+ *
+ * Nominatim matches "Düsseldorf" and fails on "Duesseldorf", and "Straße" and
+ * fails on "Strasse" — which are precisely how somebody types their own address
+ * on a keyboard without umlauts. That is most of the customers this site is
+ * translated into Arabic and Turkish for, and the failure is total: no price,
+ * no booking, and an error message that gives them nothing to try.
+ *
+ * Only used as a second attempt, never the first: "Strasse" is also a real
+ * surname, and rewriting every query would turn a search that would have
+ * succeeded into one that does not.
+ */
+function germanize(query: string): string {
+  return query
+    .replace(/\bstrasse\b/gi, "straße")
+    .replace(/strasse/gi, "straße")
+    .replace(/ue/g, "ü")
+    .replace(/oe/g, "ö")
+    .replace(/ae/g, "ä")
+    .replace(/Ue/g, "Ü")
+    .replace(/Oe/g, "Ö")
+    .replace(/Ae/g, "Ä");
+}
+
 export async function geocode(query: string): Promise<GeocodeResult> {
   const normalized = query.trim().toLowerCase().replace(/\s+/g, " ");
   const cacheKey = `geo:${normalized}`;
@@ -66,10 +91,37 @@ export async function geocode(query: string): Promise<GeocodeResult> {
     address?: { state?: string; country?: string };
   }>;
 
-  const first = payload[0];
+  let first = payload[0];
 
   if (!first) {
-    throw AppError.unprocessable("That address could not be found.");
+    // Second attempt with umlauts restored. Skipped when it would change
+    // nothing, so a genuinely unknown address still fails in one round trip
+    // rather than two.
+    const retry = germanize(query);
+
+    if (retry !== query) {
+      const retryUrl = new URL(url);
+      retryUrl.searchParams.set("q", retry);
+
+      const retryResponse = await fetchWithTimeout(retryUrl, {
+        headers: { "User-Agent": env.GEOCODING_USER_AGENT, "Accept-Language": "de" },
+      });
+
+      if (retryResponse.ok) {
+        const retryPayload = (await retryResponse.json()) as typeof payload;
+        first = retryPayload[0];
+      }
+    }
+  }
+
+  if (!first) {
+    // Says what to do, not just that something went wrong. The previous message
+    // left a customer with a correctly spelled address and no next step — and
+    // the two real causes, an unusual spelling and an address outside Germany,
+    // both have an answer the customer can act on.
+    throw AppError.unprocessable(
+      "We could not find that address. Please check the spelling, or try just the postcode and city. We currently only serve addresses in Germany.",
+    );
   }
 
   const result: GeocodeResult = {
