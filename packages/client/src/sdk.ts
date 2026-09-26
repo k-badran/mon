@@ -151,6 +151,46 @@ export class MonSdk {
 
     changePassword: (body: { currentPassword: string; newPassword: string }): Promise<void> =>
       this.http.post("/api/auth/change-password", body),
+
+    /**
+     * Asks for a reset link.
+     *
+     * Resolves whether or not the address has an account — the server answers
+     * identically on purpose, so that this endpoint cannot be used to find out
+     * which addresses are registered. A caller must therefore not tell the user
+     * "we sent you an email" as a fact; the honest wording is "if that address
+     * has an account, a link is on its way".
+     */
+    requestPasswordReset: (body: { email: string }): Promise<{ status: string }> =>
+      this.http.post("/api/auth/request-password-reset", body, { anonymous: true }),
+
+    confirmPasswordReset: (body: { token: string; newPassword: string }): Promise<void> =>
+      this.http.post("/api/auth/confirm-password-reset", body, { anonymous: true }),
+
+    /** Re-sends the address-confirmation link. Requires a session. */
+    sendVerification: (): Promise<{ status: string }> =>
+      this.http.post("/api/auth/send-verification", {}),
+
+    /**
+     * Confirms an address from the emailed link.
+     *
+     * Anonymous: the link is opened from a mail client, often on a device that
+     * has never signed in. The token is the proof.
+     */
+    verifyEmail: (body: { token: string }): Promise<void> =>
+      this.http.post("/api/auth/verify-email", body, { anonymous: true }),
+
+    /** Emails a six-digit login code. Same non-committal answer as the reset. */
+    requestOtp: (body: { email: string }): Promise<{
+      email: string;
+      expiresAt: string;
+      /** False when the server recorded the mail instead of sending it. */
+      delivered: boolean;
+    }> => this.http.post("/api/auth/otp/request", body, { anonymous: true }),
+
+    /** Exchanges a correct code for a full session. */
+    verifyOtp: (body: { email: string; code: string }): Promise<AuthResult> =>
+      this.http.post("/api/auth/otp/verify", body, { anonymous: true }),
   };
 
   readonly quotes = {

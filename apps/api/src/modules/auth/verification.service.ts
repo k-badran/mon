@@ -193,7 +193,11 @@ export async function requestPasswordReset(emailInput: string): Promise<void> {
     to: user.email,
     locale: user.locale,
     payload: {
-      url: `${env.WEB_ORIGIN}/${user.locale}/reset-password?token=${encodeURIComponent(token)}`,
+      // The path must match the web app's own route, which is German like the
+      // rest of the site (`apps/web/app/[locale]/passwort-zuruecksetzen`). A
+      // guessed English slug here produces a link that 404s — and nobody finds
+      // out until a customer clicks one.
+      url: `${env.WEB_ORIGIN}/${user.locale}/passwort-zuruecksetzen?token=${encodeURIComponent(token)}`,
       expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
       ...(user.fullName ? { name: user.fullName } : {}),
     },
@@ -244,7 +248,7 @@ export async function sendEmailVerification(userId: string): Promise<void> {
     to: user.email,
     locale: user.locale,
     payload: {
-      url: `${env.WEB_ORIGIN}/${user.locale}/verify-email?token=${encodeURIComponent(token)}`,
+      url: `${env.WEB_ORIGIN}/${user.locale}/email-bestaetigen?token=${encodeURIComponent(token)}`,
       expiresInHours: EMAIL_VERIFICATION_TTL_HOURS,
       ...(user.fullName ? { name: user.fullName } : {}),
     },

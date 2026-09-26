@@ -171,6 +171,10 @@ function LoginForm() {
             </button>
           </form>
 
+          <p className="auth-alt">
+            <Link href={`/${locale}/code-anmeldung`}>{t("auth.otpLink")}</Link>
+          </p>
+
           <div className="auth-divider">{t("auth.orContinueWith")}</div>
 
           {/*

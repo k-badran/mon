@@ -1,5 +1,6 @@
 import { randomInt } from "node:crypto";
 
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@mon/core";
 import argon2 from "argon2";
 
 /**
@@ -54,14 +55,13 @@ export function needsRehash(hash: string): boolean {
 }
 
 /**
- * Minimum viable policy: length only.
+ * Re-exported, not redeclared.
  *
- * Deliberately no "must contain a symbol" rule — NIST SP 800-63B advises
- * against composition rules, which push people toward predictable patterns
- * like "Password1!". Length plus a breached-password check is more effective.
+ * The policy is defined in `@mon/core` because the browser needs it too and
+ * cannot import this module — argon2 is a native dependency. Existing callers
+ * import these names from here, so they keep working.
  */
-export const PASSWORD_MIN_LENGTH = 10;
-export const PASSWORD_MAX_LENGTH = 256;
+export { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH };
 
 function assertPasswordShape(plaintext: string): void {
   if (plaintext.length < PASSWORD_MIN_LENGTH) {

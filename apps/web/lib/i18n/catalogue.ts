@@ -348,6 +348,104 @@ export const MESSAGES = {
     de: "Mein Profil", en: "My Profile", ar: "ملفي الشخصي", tr: "Profilim",
   },
 
+  // ── Auth: reset, confirm and one-time code ──────────────────────────
+  "auth.forgotTitle": {
+    de: "Passwort vergessen", en: "Forgot password", ar: "نسيت كلمة السر", tr: "Şifremi unuttum",
+  },
+  "auth.forgotSub": {
+    de: "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.", en: "Enter your email address and we'll send you a reset link.", ar: "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.", tr: "E-posta adresini gir, sıfırlama bağlantısı gönderelim.",
+  },
+  "auth.forgotSubmit": {
+    de: "Link senden", en: "Send link", ar: "إرسال الرابط", tr: "Bağlantı gönder",
+  },
+  "auth.forgotSending": {
+    de: "Wird gesendet…", en: "Sending…", ar: "جارٍ الإرسال…", tr: "Gönderiliyor…",
+  },
+  "auth.forgotSent": {
+    de: "Falls ein Konto zu dieser Adresse gehört, ist ein Link auf dem Weg. Prüfe auch den Spam-Ordner.", en: "If an account exists for that address, a link is on its way. Check your spam folder too.", ar: "إذا كان هناك حساب مرتبط بهذا العنوان، فالرابط في الطريق. تحقّق من مجلد السبام أيضاً.", tr: "Bu adrese ait bir hesap varsa bağlantı yolda. Spam klasörünü de kontrol et.",
+  },
+  "auth.backToLogin": {
+    de: "Zurück zur Anmeldung", en: "Back to sign in", ar: "رجوع لتسجيل الدخول", tr: "Girişe dön",
+  },
+  "auth.resetTitle": {
+    de: "Neues Passwort wählen", en: "Choose a new password", ar: "اختر كلمة سر جديدة", tr: "Yeni şifre seç",
+  },
+  "auth.resetSub": {
+    de: "Wähle ein neues Passwort für dein Konto.", en: "Pick a new password for your account.", ar: "اختر كلمة سر جديدة لحسابك.", tr: "Hesabın için yeni bir şifre belirle.",
+  },
+  "auth.resetSubmit": {
+    de: "Passwort speichern", en: "Save password", ar: "حفظ كلمة السر", tr: "Şifreyi kaydet",
+  },
+  "auth.resetSaving": {
+    de: "Wird gespeichert…", en: "Saving…", ar: "جارٍ الحفظ…", tr: "Kaydediliyor…",
+  },
+  "auth.resetDone": {
+    de: "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden.", en: "Your password has been changed. You can sign in now.", ar: "تم تغيير كلمة السر. بتقدر تسجّل دخول هلق.", tr: "Şifren değiştirildi. Şimdi giriş yapabilirsin.",
+  },
+  "auth.confirmPassword": {
+    de: "Passwort bestätigen", en: "Confirm password", ar: "تأكيد كلمة السر", tr: "Şifreyi onayla",
+  },
+  "auth.passwordMismatch": {
+    de: "Die Passwörter stimmen nicht überein.", en: "The passwords do not match.", ar: "كلمتا السر غير متطابقتين.", tr: "Şifreler eşleşmiyor.",
+  },
+  "auth.linkInvalid": {
+    de: "Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen an.", en: "This link is invalid or has expired. Request a new one.", ar: "هذا الرابط غير صالح أو منتهي. اطلب رابطاً جديداً.", tr: "Bu bağlantı geçersiz veya süresi dolmuş. Yenisini talep et.",
+  },
+  "auth.linkMissing": {
+    de: "Es fehlt ein Token. Öffne den Link direkt aus der E-Mail.", en: "The token is missing. Open the link straight from the email.", ar: "الرمز مفقود. افتح الرابط من الإيميل مباشرة.", tr: "Belirteç eksik. Bağlantıyı doğrudan e-postadan aç.",
+  },
+  "auth.verifyTitle": {
+    de: "E-Mail bestätigen", en: "Confirm your email", ar: "تأكيد البريد الإلكتروني", tr: "E-postanı onayla",
+  },
+  "auth.verifyChecking": {
+    de: "Wird bestätigt…", en: "Confirming…", ar: "جارٍ التأكيد…", tr: "Onaylanıyor…",
+  },
+  "auth.verifyDone": {
+    de: "Deine E-Mail-Adresse ist bestätigt. Vielen Dank.", en: "Your email address is confirmed. Thank you.", ar: "تم تأكيد بريدك الإلكتروني. شكراً لك.", tr: "E-posta adresin onaylandı. Teşekkürler.",
+  },
+  "auth.verifyResend": {
+    de: "Bestätigungslink erneut senden", en: "Resend confirmation link", ar: "إعادة إرسال رابط التأكيد", tr: "Onay bağlantısını yeniden gönder",
+  },
+  "auth.verifySent": {
+    de: "Wir haben dir einen neuen Link geschickt.", en: "We've sent you a new link.", ar: "بعتنالك رابط جديد.", tr: "Sana yeni bir bağlantı gönderdik.",
+  },
+  "auth.otpTitle": {
+    de: "Mit Code anmelden", en: "Sign in with a code", ar: "الدخول برمز", tr: "Kod ile giriş",
+  },
+  "auth.otpSub": {
+    de: "Wir senden dir einen sechsstelligen Code per E-Mail — kein Passwort nötig.", en: "We'll email you a six-digit code — no password needed.", ar: "نبعتلك رمز من ٦ أرقام على الإيميل — بدون كلمة سر.", tr: "Sana e-postayla altı haneli bir kod göndereceğiz — şifre gerekmez.",
+  },
+  "auth.otpRequest": {
+    de: "Code senden", en: "Send code", ar: "إرسال الرمز", tr: "Kod gönder",
+  },
+  "auth.otpSent": {
+    de: "Falls ein Konto zu dieser Adresse gehört, ist ein Code auf dem Weg.", en: "If an account exists for that address, a code is on its way.", ar: "إذا كان هناك حساب مرتبط بهذا العنوان، فالرمز في الطريق.", tr: "Bu adrese ait bir hesap varsa kod yolda.",
+  },
+  "auth.otpCode": {
+    de: "Sechsstelliger Code", en: "Six-digit code", ar: "الرمز المكوّن من ٦ أرقام", tr: "Altı haneli kod",
+  },
+  "auth.otpVerify": {
+    de: "Anmelden", en: "Sign in", ar: "تسجيل الدخول", tr: "Giriş yap",
+  },
+  "auth.otpVerifying": {
+    de: "Wird geprüft…", en: "Checking…", ar: "جارٍ التحقّق…", tr: "Kontrol ediliyor…",
+  },
+  "auth.otpInvalid": {
+    de: "Dieser Code ist falsch oder abgelaufen.", en: "That code is wrong or has expired.", ar: "هذا الرمز خطأ أو منتهي.", tr: "Bu kod yanlış veya süresi dolmuş.",
+  },
+  "auth.otpChangeEmail": {
+    de: "Andere E-Mail-Adresse verwenden", en: "Use a different email", ar: "استخدام بريد آخر", tr: "Başka bir e-posta kullan",
+  },
+  "auth.otpLink": {
+    de: "Stattdessen Code per E-Mail", en: "Email me a code instead", ar: "أرسل لي رمزاً بدلاً من ذلك", tr: "Bunun yerine kod gönder",
+  },
+  "auth.passwordLink": {
+    de: "Mit Passwort anmelden", en: "Sign in with a password", ar: "الدخول بكلمة السر", tr: "Şifre ile giriş",
+  },
+  "auth.otpNotDelivered": {
+    de: "Hinweis: Der Mailversand ist deaktiviert (MAIL_DRIVER=log) — die Nachricht wurde nur lokal gespeichert.", en: "Note: mail sending is disabled (MAIL_DRIVER=log) — the message was only recorded locally.", ar: "ملاحظة: إرسال الإيميل معطّل (MAIL_DRIVER=log) — الرسالة انحفظت محلياً بس.", tr: "Not: e-posta gönderimi kapalı (MAIL_DRIVER=log) — mesaj yalnızca yerel olarak kaydedildi.",
+  },
+
   // ── Orders ──────────────────────────────────────────────────────────
   "orders.title": {
     de: "Meine Aufträge", en: "My Orders", ar: "طلباتي", tr: "Siparişlerim",

@@ -126,6 +126,16 @@ const SIGNED_OUT: AuthState = {
 interface ApiContextValue extends AuthState {
   sdk: MonSdk;
   signIn: (email: string, password: string) => Promise<AuthUser>;
+  /**
+   * Signs in with a one-time code emailed to the address.
+   *
+   * Separate from `signIn` because the credential is different, but it must
+   * store the token pair exactly as `signIn` does — a page that called
+   * `sdk.auth.verifyOtp` itself would get a valid session from the API and then
+   * fail on the next request, because nothing put the access token where the
+   * client reads it.
+   */
+  signInWithCode: (email: string, code: string) => Promise<AuthUser>;
   signUp: (input: {
     email: string;
     password: string;
@@ -237,6 +247,21 @@ export function ApiProvider({ children }: { children: ReactNode }) {
     [sdk, applyUser],
   );
 
+  const signInWithCode = useCallback(
+    async (email: string, code: string) => {
+      const result = await sdk.auth.verifyOtp({ email, code });
+
+      tokensRef.current.set({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
+      applyUser(result.user);
+
+      return result.user;
+    },
+    [sdk, applyUser],
+  );
+
   const signUp = useCallback<ApiContextValue["signUp"]>(
     async (input) => {
       const result = await sdk.auth.register(input);
@@ -285,8 +310,8 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<ApiContextValue>(
-    () => ({ ...state, sdk, signIn, signUp, signOut, refreshUser, can }),
-    [state, sdk, signIn, signUp, signOut, refreshUser, can],
+    () => ({ ...state, sdk, signIn, signInWithCode, signUp, signOut, refreshUser, can }),
+    [state, sdk, signIn, signInWithCode, signUp, signOut, refreshUser, can],
   );
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;
