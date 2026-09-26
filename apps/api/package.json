@@ -18,6 +18,7 @@
     "@umzugplus/config": "workspace:*",
     "@umzugplus/core": "workspace:*",
     "@umzugplus/db": "workspace:*",
+    "@umzugplus/mailer": "workspace:*",
     "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

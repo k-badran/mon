@@ -35,6 +35,9 @@ importers:
       '@umzugplus/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@umzugplus/mailer':
+        specifier: workspace:*
+        version: link:../../packages/mailer
       compression:
         specifier: ^1.7.5
         version: 1.8.2
@@ -285,6 +288,34 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
+
+  packages/mailer:
+    dependencies:
+      '@umzugplus/config':
+        specifier: workspace:*
+        version: link:../config
+      '@umzugplus/core':
+        specifier: workspace:*
+        version: link:../core
+      nodemailer:
+        specifier: ^6.9.16
+        version: 6.10.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.20.2
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.24
+      '@umzugplus/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.2)(lightningcss@1.32.0)
 
   packages/typescript-config: {}
 
@@ -1275,6 +1306,9 @@ packages:
   '@types/node@22.20.2':
     resolution: {integrity: sha512-xlvWf4Vs9n1PEVYwP1n4vvG07M6y8WgvJ2t0vbrWTmijsIHp1cS+uJ2kMIRdY3nHZK0nCYKrPeD171+SzF4/zw==}
 
+  '@types/nodemailer@6.4.24':
+    resolution: {integrity: sha512-Ww4u0rT9wQNXh4JiQaIwx3QWdcOFXzOjQA2zc+jtFYNmQiT4mIUqcDin51bDFdkzKubFnQCZNK7FIHlPKQ/q9w==}
+
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
 
@@ -2005,6 +2039,10 @@ packages:
   node-gyp-build@4.8.4:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
+
+  nodemailer@6.10.1:
+    resolution: {integrity: sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA==}
+    engines: {node: '>=6.0.0'}
 
   notepack.io@3.0.1:
     resolution: {integrity: sha512-TKC/8zH5pXIAMVQio2TvVDTtPRX+DJPHDqjRbxogtFiByHyzKmy96RA0JtCQJ+WouyyL4A10xomQzgbUT+1jCg==}
@@ -3050,6 +3088,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/nodemailer@6.4.24':
+    dependencies:
+      '@types/node': 22.20.2
+
   '@types/prop-types@15.7.15': {}
 
   '@types/qs@6.15.1': {}
@@ -3794,6 +3836,8 @@ snapshots:
   node-addon-api@8.9.2: {}
 
   node-gyp-build@4.8.4: {}
+
+  nodemailer@6.10.1: {}
 
   notepack.io@3.0.1: {}
 

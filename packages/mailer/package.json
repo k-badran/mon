@@ -1,0 +1,32 @@
+{
+  "name": "@umzugplus/mailer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@umzugplus/config": "workspace:*",
+    "@umzugplus/core": "workspace:*",
+    "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/nodemailer": "^6.4.17",
+    "@umzugplus/typescript-config": "workspace:*",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -32,7 +32,6 @@ services in North Rhine-Westphalia.
 │   ├── client/             # Typed SDK the frontend calls the API with
 │   ├── core/               # Pure domain logic: pricing, dates, holidays, availability
 │   ├── db/                 # Drizzle schema, client, migrations, seed
-│   ├── eslint-config/      # Shared ESLint configuration
 │   └── typescript-config/  # Shared tsconfig bases
 │
 ├── docker-compose.dev.yml  # Local PostgreSQL + Redis
@@ -52,7 +51,7 @@ where all 51 database writes ran client-side against a public key.
 Browser ──HTTPS──► Express API ──► PostgreSQL
                         │
                         ├──► Redis      (rate limits, cache, pub/sub)
-                        └──► Resend / Anthropic / Geocoding
+                        └──► SMTP / Anthropic / Geocoding
 ```
 
 ### Packages
@@ -102,7 +101,7 @@ Request and response types come from `@umzugplus/core`, so a change to
 
 #### `packages/db` — `@umzugplus/db`
 
-Drizzle schema across 19 tables. Money is `numeric(10,2)`; booking days are
+Drizzle schema across 23 tables. Money is `numeric(10,2)`; booking days are
 `date`; order status, roles and service types are Postgres enums so an invalid
 value is a write error rather than a silent typo.
 
@@ -127,6 +126,12 @@ Base URL `http://localhost:4000`. All errors share one shape:
 | `GET  /me` | Bearer | The verified identity from the token. |
 | `GET  /sessions` | Bearer | List live sessions, so a user can see their devices. |
 | `POST /change-password` | Bearer | Change password and revoke all other sessions. |
+| `POST /request-password-reset` | — | Email a reset link. Always answers `202`, even for an unknown address — a different answer would make this an account-enumeration oracle. |
+| `POST /confirm-password-reset` | — | Set a new password from the link's token and revoke every session. Does not sign the caller in: they proved control of the mailbox, not of the account. |
+| `POST /send-verification` | Bearer | Send (or re-send) the address-confirmation link. `409` if already confirmed. |
+| `POST /verify-email` | — | Confirm an address from the link. Unauthenticated on purpose — the link is opened from a mail client, often on a device that has never signed in. |
+| `POST /otp/request` | — | Email a six-digit login code, valid 10 minutes. Same `202` for every address, for the same reason as the reset. |
+| `POST /otp/verify` | — | Exchange a correct code for a full session. Five wrong guesses kill the code, counted on the row rather than per IP. |
 
 ### Quotes — `/api/quotes`
 
@@ -231,12 +236,18 @@ openssl rand -base64 48   # JWT_REFRESH_SECRET
 pnpm db:up
 ```
 
-Postgres listens on `5432` and Redis on `6390`.
+Postgres listens on `POSTGRES_PORT` (default `5432`) and Redis on `6390`.
 
-> **Ports on this machine.** Another project already holds `3000` (nginx) and
-> `6379` (Redis), so this project uses `3200` for the web app and `6390` for
-> Redis. `WEB_ORIGIN` in `.env` must always match the web app's actual origin,
-> or the browser blocks every API call with a CORS error.
+> **Ports on this machine.** Other projects already hold `3000` (nginx), `6379`
+> (Redis) and `5432` (a Homebrew Postgres serving other databases). So this
+> project uses `3200` for the web app, `6390` for Redis, and `POSTGRES_PORT=5433`
+> in `.env` for its container — set it before `pnpm db:up`, and keep
+> `DATABASE_URL` in agreement with it. Two Postgres servers on one port fails at
+> container start with a bind error, which is the good case; the bad one is
+> connecting to the wrong server and migrating somebody else's database.
+>
+> `WEB_ORIGIN` in `.env` must always match the web app's actual origin, or the
+> browser blocks every API call with a CORS error.
 
 ### 4. Migrate
 
@@ -316,6 +327,73 @@ try {
 
 ---
 
+## Outbound email
+
+Mail goes out over SMTP through `@umzugplus/mailer`. The package renders a
+template and hands the result to a transport; `MAIL_DRIVER` picks which one.
+
+| Driver | What it does |
+| --- | --- |
+| `log` | Writes each message to `MAIL_OUTBOX_DIR` as an openable `.html` file and sends nothing. The default outside production. |
+| `smtp` | Real delivery over a pooled TLS connection, with two retries on transient failures only. Required in production. |
+
+`log` is not a stub — it is what makes local work possible. Development needs no
+credentials, the test suite cannot email a customer by accident, and a network
+that blocks outbound SMTP stops being a blocker. It reports `delivered: false`
+so a caller can tell that nothing left the machine.
+
+### Templates
+
+Three so far — `otp`, `verify-email`, `password-reset` — each in German,
+English, Arabic and Turkish, with an obligatory plain-text alternative (an
+HTML-only message reads as bulk mail to every spam filter). Arabic renders
+right-to-left, while a one-time code stays `dir="ltr"` inside it: letting an RTL
+context reorder the digits hands the customer a code that does not work.
+
+Templates are registered in `packages/mailer/src/templates/registry.ts`, and
+`mailer.send` is generic over the key — asking for `otp` with a reset payload
+does not compile.
+
+### Setting it up with Namecheap Private Email
+
+1. **DNS first**, because it takes time to propagate. In Advanced DNS for the
+   sending domain, use *Auto-configure EMAIL records* → Private Email. That adds
+   the MX records and SPF. Add DKIM from the Private Email dashboard, and a
+   `_dmarc` TXT record of `v=DMARC1; p=none; rua=mailto:<your address>` —
+   tighten `p` once reports look clean. Without these, valid credentials still
+   produce mail that lands in spam.
+2. **Use an application password**, not the mailbox's master password.
+3. **Single-quote it in the env file.** These passwords routinely contain `#`,
+   which dotenv reads as the start of a comment and truncates. The symptom is an
+   authentication failure with a password that looks correct on screen.
+4. `MAIL_FROM` must be on the same domain as `SMTP_USER`, or SPF will not align
+   and the message is treated as spoofed.
+
+Host is `mail.privateemail.com`, port 465 with `SMTP_SECURE=true`, or 587 with
+`SMTP_SECURE=false`. Unencrypted connections are refused by the server.
+
+### Checking whether it works
+
+```bash
+GET  /api/admin/mail/status   # driver, and whether it can connect and authenticate
+POST /api/admin/mail/test     # sends a message with an inert 000000 code
+```
+
+Both need the `settings.write` permission. In production the config schema
+refuses to start at all when `MAIL_DRIVER=smtp` without a host, user and
+password — a deployment that boots and silently drops every password reset is
+worse than one that refuses to boot.
+
+**If sending times out locally**, check the port before suspecting the code:
+
+```bash
+nc -vz mail.privateemail.com 465
+```
+
+Most home and mobile networks block outbound 25, 465 and 587. There is no way
+around that from the client side — Private Email offers no alternative port — so
+verify real delivery from the server, and develop against `MAIL_DRIVER=log`.
+
 ## Moving the database to a server
 
 The database runs locally in Docker and is built to transfer without surprises.
@@ -326,7 +404,7 @@ It is reproducible from the Drizzle migrations in `packages/db/drizzle/`. A fres
 server needs only:
 
 ```sh
-pnpm db:migrate    # creates all 19 tables, enums, indexes and constraints
+pnpm db:migrate    # creates all 23 tables, enums, indexes and constraints
 pnpm seed          # rate card, catalog, holidays, discount codes, FAQ, admin
 ```
 

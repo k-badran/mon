@@ -70,3 +70,21 @@ export const complaintAuthorEnum = pgEnum("complaint_author", [
 export const discountKindEnum = pgEnum("discount_kind", ["percentage", "fixed"]);
 
 export const catalogKindEnum = pgEnum("catalog_kind", ["furniture", "cleaning"]);
+
+/**
+ * What a row in `verification_tokens` is for.
+ *
+ * A plain TypeScript union rather than a `pgEnum`, deliberately. The column is
+ * `text` in the database and predates this list; converting it to an enum type
+ * would be a migration that buys nothing here — nothing queries by purpose
+ * across a range, and adding a purpose should not require a schema change to a
+ * shared type. What was missing is a name the service layer can be checked
+ * against, instead of three string literals repeated at each call site.
+ */
+export const VERIFICATION_PURPOSES = [
+  "password_reset",
+  "email_verification",
+  "login_otp",
+] as const;
+
+export type VerificationPurpose = (typeof VERIFICATION_PURPOSES)[number];

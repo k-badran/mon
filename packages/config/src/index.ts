@@ -9,6 +9,19 @@ loadDotenv();
 
 const durationPattern = /^\d+(?:s|m|h|d)$/;
 
+/**
+ * A value that may be absent, and whose presence-with-no-value means absent.
+ *
+ * `.env.example` ships keys with empty values as the way of saying "fill this
+ * in", so an empty string has to read as unconfigured. Without this, an
+ * untouched `SMTP_PASSWORD=` would satisfy a `z.string().optional()` and the
+ * driver check below would pass on a blank password.
+ */
+const optionalString = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().min(1).optional(),
+);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
@@ -61,8 +74,40 @@ const envSchema = z.object({
 
   BUSINESS_TIMEZONE: z.string().min(1).default("Europe/Berlin"),
 
-  RESEND_API_KEY: z.string().optional(),
-  MAIL_FROM: z.string().default("UmzugPlus <info@umzugplus.de>"),
+  /**
+   * Which transport delivers mail.
+   *
+   * `log` records messages to `MAIL_OUTBOX_DIR` and sends nothing, which is the
+   * right default for development and the only safe one for tests. Left unset
+   * it resolves by environment (see the transform below) rather than defaulting
+   * to a single value, because the two environments want opposite answers and a
+   * shared default is wrong in one of them: `log` in production means outbound
+   * mail silently stops, and `smtp` in development means a test run can email a
+   * real customer.
+   */
+  MAIL_DRIVER: z.enum(["smtp", "log"]).optional(),
+
+  SMTP_HOST: optionalString,
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  /**
+   * True for implicit TLS (port 465), false for STARTTLS (port 587).
+   *
+   * Not `z.coerce.boolean()`: that treats any non-empty string as true, so the
+   * string "false" — the only way to write false in an env file — would turn
+   * TLS on and quietly contradict the configuration.
+   */
+  SMTP_SECURE: z.preprocess((value) => {
+    if (typeof value !== "string") return value;
+    return value.trim().toLowerCase() !== "false";
+  }, z.boolean().default(true)),
+  SMTP_USER: optionalString,
+  SMTP_PASSWORD: optionalString,
+
+  MAIL_FROM: z.string().default("UmzugPlus <info@moveongo.de>"),
+  MAIL_REPLY_TO: optionalString,
+  /** Where the `log` driver writes. Relative paths resolve from the cwd. */
+  MAIL_OUTBOX_DIR: z.string().min(1).default(".mail-outbox"),
+
   ANTHROPIC_API_KEY: z.string().optional(),
   GEOCODING_USER_AGENT: z.string().min(1).default("UmzugPlus/1.0"),
 
@@ -71,10 +116,38 @@ const envSchema = z.object({
   SEED_ADMIN_NAME: z.string().optional(),
 });
 
-export type Env = z.infer<typeof envSchema>;
+/**
+ * Resolves `MAIL_DRIVER` and then refuses a configuration that cannot send.
+ *
+ * The check belongs here rather than in the mailer because of when it runs:
+ * this throws while the process is starting, whereas a check inside the
+ * transport would first fail on a real customer's password reset. `smtp`
+ * without a host or credentials is not a degraded mode worth supporting — it is
+ * a deployment that looks healthy and drops every message.
+ */
+const resolvedEnvSchema = envSchema
+  .transform((raw) => ({
+    ...raw,
+    MAIL_DRIVER: raw.MAIL_DRIVER ?? (raw.NODE_ENV === "production" ? "smtp" : "log"),
+  }))
+  .superRefine((config, ctx) => {
+    if (config.MAIL_DRIVER !== "smtp") return;
+
+    for (const key of ["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD"] as const) {
+      if (config[key] === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [key],
+          message: `${key} is required when MAIL_DRIVER is "smtp".`,
+        });
+      }
+    }
+  });
+
+export type Env = z.infer<typeof resolvedEnvSchema>;
 
 function loadEnv(): Env {
-  const parsed = envSchema.safeParse(process.env);
+  const parsed = resolvedEnvSchema.safeParse(process.env);
 
   if (!parsed.success) {
     // Fail loudly at boot rather than throwing a confusing runtime error later.

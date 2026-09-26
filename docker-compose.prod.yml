@@ -97,8 +97,18 @@ services:
       WEB_ORIGIN: ${WEB_ORIGIN}
       API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}
       BUSINESS_TIMEZONE: ${BUSINESS_TIMEZONE:-Europe/Berlin}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      MAIL_FROM: ${MAIL_FROM:-UmzugPlus <info@umzugplus.de>}
+      # Outbound email. Required, not optional: in production MAIL_DRIVER
+      # defaults to smtp and the config schema refuses to start without a host,
+      # user and password — a deployment that boots and silently drops every
+      # password reset is worse than one that refuses to boot.
+      MAIL_DRIVER: ${MAIL_DRIVER:-smtp}
+      SMTP_HOST: ${SMTP_HOST:?SMTP_HOST is required}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER:?SMTP_USER is required}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:?SMTP_PASSWORD is required}
+      MAIL_FROM: ${MAIL_FROM:-UmzugPlus <info@moveongo.de>}
+      MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GEOCODING_USER_AGENT: ${GEOCODING_USER_AGENT:-UmzugPlus/1.0}
     ports:

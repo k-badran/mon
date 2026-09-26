@@ -305,6 +305,37 @@ async function issueSession(
   };
 }
 
+/**
+ * Issues a session for a user whose identity has already been established by
+ * something other than a password.
+ *
+ * Used by the one-time-code login. It exists so that `issueSession` — which
+ * decides what a session is, how the refresh row is written and what the access
+ * token claims — stays the single implementation. A second login path that
+ * minted its own tokens would be a second place for the session contract to
+ * drift, and the one that drifts is the one written later.
+ *
+ * The status check is repeated here rather than trusted from the caller: this
+ * is a function that hands out sessions, and every such function should confirm
+ * for itself that the account is allowed to have one.
+ */
+export async function issueSessionForVerifiedUser(
+  userId: string,
+  context: SessionContext,
+): Promise<AuthResult> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+  if (!user) throw AppError.unauthenticated();
+
+  if (user.status === "blocked") {
+    throw new AppError("ACCOUNT_BLOCKED", 403, "This account has been blocked.");
+  }
+
+  await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
+
+  return issueSession(user, context);
+}
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }

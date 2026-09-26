@@ -2,6 +2,7 @@ export type * from "./domain-types.js";
 export * from "./calendar-date.js";
 export * from "./holidays.js";
 export * from "./money.js";
+export * from "./locale.js";
 export * from "./availability.js";
 export * from "./pricing/engine.js";
 export * from "./pricing/rate-card.js";

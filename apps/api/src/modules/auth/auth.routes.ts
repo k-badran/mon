@@ -1,6 +1,6 @@
 import { Router, type Response } from "express";
 
-import { signSessionHint } from "@umzugplus/auth";
+import { hashPassword, signSessionHint } from "@umzugplus/auth";
 
 import { AppError } from "../../lib/errors.js";
 import { asyncHandler } from "../../middleware/error-handler.js";
@@ -8,6 +8,7 @@ import { requireAuth } from "../../middleware/require-auth.js";
 import { validate } from "../../middleware/validate.js";
 import { authRateLimit } from "../../middleware/rate-limit.js";
 import * as authService from "./auth.service.js";
+import * as verificationService from "./verification.service.js";
 import {
   clearSessionCookies,
   readRefreshToken,
@@ -16,9 +17,14 @@ import {
 } from "./session-cookie.js";
 import {
   changePasswordSchema,
+  confirmEmailSchema,
+  confirmPasswordResetSchema,
   loginSchema,
   refreshSchema,
   registerSchema,
+  requestOtpSchema,
+  requestPasswordResetSchema,
+  verifyOtpSchema,
 } from "./auth.schema.js";
 
 export const authRouter: Router = Router();
@@ -140,6 +146,108 @@ authRouter.post(
     const { currentPassword, newPassword } = req.body;
     await authService.changePassword(req.user!.id, currentPassword, newPassword);
     res.status(204).send();
+  }),
+);
+
+/**
+ * ─── Email-proof flows ────────────────────────────────────────────────────
+ *
+ * All five carry `authRateLimit`. Each one either sends an email or accepts a
+ * guess at a secret, and both are things an unauthenticated caller can ask for
+ * repeatedly: unthrottled, the request endpoints are a way to use this server
+ * to mail somebody several thousand times, and the verify endpoints are a way to
+ * brute-force a six-digit code.
+ */
+
+authRouter.post(
+  "/request-password-reset",
+  authRateLimit,
+  validate({ body: requestPasswordResetSchema }),
+  asyncHandler(async (req, res) => {
+    await verificationService.requestPasswordReset(req.body.email);
+
+    /**
+     * 202 unconditionally — including for an address with no account.
+     *
+     * The response cannot depend on whether the address is registered. A 404
+     * here, or any difference in body or timing, turns this into an
+     * account-enumeration oracle that needs no credentials at all: submit a
+     * list of addresses, keep the ones that answer differently.
+     *
+     * 202 rather than 200 because it is honest about what happened — the
+     * request was accepted, and whether an email follows is deliberately not
+     * something this response claims to know.
+     */
+    res.status(202).json({ status: "accepted" });
+  }),
+);
+
+authRouter.post(
+  "/confirm-password-reset",
+  authRateLimit,
+  validate({ body: confirmPasswordResetSchema }),
+  asyncHandler(async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    // Hashed in the route rather than the service so that `verification.service`
+    // never handles a plaintext password — the one place that does is
+    // `@umzugplus/auth`, and keeping it that way means there is one answer to
+    // "where could a password be logged by accident".
+    await verificationService.confirmPasswordReset(token, await hashPassword(newPassword));
+
+    // No session is issued. Whoever completed this proved control of the
+    // mailbox, not of the account: signing them straight in would mean a
+    // compromised inbox is a compromised account with no further step.
+    res.status(204).send();
+  }),
+);
+
+authRouter.post(
+  "/send-verification",
+  requireAuth,
+  authRateLimit,
+  asyncHandler(async (req, res) => {
+    await verificationService.sendEmailVerification(req.user!.id);
+    res.status(202).json({ status: "accepted" });
+  }),
+);
+
+authRouter.post(
+  "/verify-email",
+  authRateLimit,
+  validate({ body: confirmEmailSchema }),
+  asyncHandler(async (req, res) => {
+    // Deliberately unauthenticated: the link is opened from an email client,
+    // often on a device that has never signed in. The token is the proof.
+    await verificationService.confirmEmail(req.body.token);
+    res.status(204).send();
+  }),
+);
+
+authRouter.post(
+  "/otp/request",
+  authRateLimit,
+  validate({ body: requestOtpSchema }),
+  asyncHandler(async (req, res) => {
+    const challenge = await verificationService.requestLoginOtp(req.body.email);
+    res.status(202).json(challenge);
+  }),
+);
+
+authRouter.post(
+  "/otp/verify",
+  authRateLimit,
+  validate({ body: verifyOtpSchema }),
+  asyncHandler(async (req, res) => {
+    const { email, code } = req.body;
+    const userId = await verificationService.verifyLoginOtp(email, code);
+
+    // A correct code is a full sign-in, so it goes through the same session
+    // issuance as a password login — same cookies, same hint, same claims.
+    const result = await authService.issueSessionForVerifiedUser(userId, sessionContext(req));
+
+    await issueSessionCookies(res, result);
+    res.json(result);
   }),
 );
 
