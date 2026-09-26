@@ -2,8 +2,8 @@
 
 import { isStaffRole } from "@mon/core";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -21,6 +21,23 @@ import { useI18n } from "@/lib/i18n/provider";
  * would be a claim this page cannot make, and a page that only says it for real
  * accounts is an enumeration oracle.
  */
+/**
+ * Reads the `next` destination from the URL, at the moment it is needed.
+ *
+ * Deliberately not `useSearchParams()`. That hook opts the whole subtree out of
+ * prerendering, so the route shipped an empty shell: no logo, no form, no copy
+ * in the server-rendered HTML — a blank flash before hydration, and nothing for
+ * a crawler to index on the page most likely to be linked to.
+ *
+ * The destination is only consulted inside the submit handler, which by
+ * definition runs in the browser after a click, so reading `window.location`
+ * there costs nothing and lets the page render on the server like any other.
+ */
+function nextDestination(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("next");
+}
+
 function OtpLogin() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -32,7 +49,6 @@ function OtpLogin() {
   const { sdk, signInWithCode } = useApi();
   const { t, locale } = useI18n();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   async function requestCode(event: FormEvent) {
     event.preventDefault();
@@ -66,7 +82,7 @@ function OtpLogin() {
       // token pair the rest of the app authenticates with.
       const user = await signInWithCode(email, code);
 
-      const next = searchParams.get("next");
+      const next = nextDestination();
       // Asked by rank rather than by naming roles, so operator and
       // customer_service are not silently treated as customers.
       router.push(next ?? `/${locale}${isStaffRole(user.role) ? "/admin" : "/dashboard"}`);
@@ -213,18 +229,7 @@ function OtpLogin() {
 }
 
 export default function Page() {
-  return (
-    <Suspense
-      fallback={
-        <div className="auth-split">
-          <aside className="auth-panel" />
-          <main className="auth-form-side" aria-busy="true" />
-        </div>
-      }
-    >
-      <OtpLogin />
-    </Suspense>
-  );
+  return <OtpLogin />;
 }
 
 function MailIcon() {

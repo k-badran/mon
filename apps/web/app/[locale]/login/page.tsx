@@ -2,8 +2,8 @@
 
 import { isStaffRole } from "@mon/core";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -15,6 +15,23 @@ import { useI18n } from "@/lib/i18n/provider";
  * and a quiet form beside it. The panel is hidden below 900px, where the logo
  * takes over the branding job and the form gets the whole screen.
  */
+/**
+ * Reads the `next` destination from the URL, at the moment it is needed.
+ *
+ * Deliberately not `useSearchParams()`. That hook opts the whole subtree out of
+ * prerendering, so the route shipped an empty shell: no logo, no form, no copy
+ * in the server-rendered HTML — a blank flash before hydration, and nothing for
+ * a crawler to index on the page most likely to be linked to.
+ *
+ * The destination is only consulted inside the submit handler, which by
+ * definition runs in the browser after a click, so reading `window.location`
+ * there costs nothing and lets the page render on the server like any other.
+ */
+function nextDestination(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("next");
+}
+
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +43,6 @@ function LoginForm() {
   const { signIn } = useApi();
   const { t, locale } = useI18n();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -36,7 +52,7 @@ function LoginForm() {
 
     try {
       const user = await signIn(email, password);
-      const next = searchParams.get("next");
+      const next = nextDestination();
 
       // Staff land on the board they actually work in; customers on theirs.
       // Asked by rank rather than by naming roles, so operator and
@@ -204,23 +220,8 @@ function LoginForm() {
   );
 }
 
-/**
- * `useSearchParams` opts the form into client rendering, so the boundary keeps
- * that scoped to the form rather than the whole route.
- */
 export default function Page() {
-  return (
-    <Suspense
-      fallback={
-        <div className="auth-split">
-          <aside className="auth-panel" />
-          <main className="auth-form-side" aria-busy="true" />
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
-  );
+  return <LoginForm />;
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────
