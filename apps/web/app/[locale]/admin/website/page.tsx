@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { isSafeImageSrc } from "@mon/core";
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_BYTES, isSafeImageSrc } from "@mon/core";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -64,6 +64,32 @@ export default function WebsiteControlPage() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [status, setStatus] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [resetting, setResetting] = useState(false);
+  const [uploadsEnabled, setUploadsEnabled] = useState(false);
+
+  // Asked once, apart from `load`: a deployment without storage, or a failed
+  // check, just means no upload button — never a failed page.
+  useEffect(() => {
+    sdk.http
+      .get<{ enabled: boolean }>("/api/site/uploads")
+      .then((caps) => setUploadsEnabled(caps.enabled))
+      .catch(() => setUploadsEnabled(false));
+  }, [sdk]);
+
+  /** Stores a photo and returns its public URL; the caller decides where it goes. */
+  const uploadImage = useCallback(
+    async (file: File): Promise<string> => {
+      const form = new FormData();
+      form.append("file", file);
+
+      // A photo over a slow connection outlasts the client's JSON timeout.
+      const { url } = await sdk.http.post<{ url: string }>("/api/site/uploads", form, {
+        timeoutMs: 120_000,
+      });
+
+      return url;
+    },
+    [sdk],
+  );
 
   const load = useCallback(async () => {
     try {
@@ -297,6 +323,7 @@ export default function WebsiteControlPage() {
                     publishedLabel={t("site.published")}
                     onSave={(patch) => void saveBlock(block.id, patch)}
                     onReset={() => void resetBlock(block.id)}
+                    onUpload={uploadsEnabled ? uploadImage : undefined}
                   />
                 ))}
               </div>
@@ -398,12 +425,15 @@ function BlockField({
   publishedLabel,
   onSave,
   onReset,
+  onUpload,
 }: {
   block: ContentBlock;
   saving: boolean;
   publishedLabel: string;
   onSave: (patch: { value?: string; isPublished?: boolean }) => void;
   onReset: () => void;
+  /** Absent when the API has no upload storage configured. */
+  onUpload?: ((file: File) => Promise<string>) | undefined;
 }) {
   const [draft, setDraft] = useState(block.value);
   const dirty = draft !== block.value;
@@ -423,6 +453,7 @@ function BlockField({
         publishedLabel={publishedLabel}
         onSave={onSave}
         onReset={onReset}
+        onUpload={onUpload}
       />
     );
   }
@@ -484,11 +515,17 @@ function BlockField({
 /**
  * A photo slot: a path or URL field beside a live thumbnail of what it points at.
  *
- * There is no upload yet — the site has no file storage — so the field takes
- * a file already shipped under `/images/` or an https URL. The same rule the
- * API enforces is checked as the editor types, so a bad value is flagged
- * before a round trip rather than after. The photo is the same in every
- * language: saving here changes it on all four locales' pages at once.
+ * The field takes a file already shipped under `/images/` or an https URL —
+ * typed, or filled in by uploading a photo when the API has storage. The same
+ * rule the API enforces is checked as the editor types, so a bad value is
+ * flagged before a round trip rather than after. The photo is the same in
+ * every language: saving here changes it on all four locales' pages at once.
+ *
+ * An upload fills the draft and stops there; it is not saved automatically.
+ * That is how every other field here behaves, and it matters more for this
+ * one: saving swaps the photo on four live pages at once, so the editor sees
+ * the new photo in the thumbnail and commits with ✓ — or discards with ✕ —
+ * exactly as with a pasted URL.
  */
 function ImageBlockField({
   block,
@@ -499,6 +536,7 @@ function ImageBlockField({
   publishedLabel,
   onSave,
   onReset,
+  onUpload,
 }: {
   block: ContentBlock;
   draft: string;
@@ -508,15 +546,53 @@ function ImageBlockField({
   publishedLabel: string;
   onSave: (patch: { value?: string; isPublished?: boolean }) => void;
   onReset: () => void;
+  onUpload?: ((file: File) => Promise<string>) | undefined;
 }) {
   const { t } = useI18n();
   const [broken, setBroken] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [upload, setUpload] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const trimmed = draft.trim();
   const valid = isSafeImageSrc(trimmed);
 
   // A new value gets a fresh chance to load.
   useEffect(() => setBroken(false), [trimmed]);
+
+  async function pickFile(file: File | undefined) {
+    if (!file || !onUpload) return;
+
+    // Checked here only to spare the editor an 8 MB round trip; the server
+    // decides, and reads the type from the bytes rather than trusting this.
+    if (file.size > IMAGE_UPLOAD_MAX_BYTES) {
+      setUpload({ kind: "error", text: t("site.image.uploadTooLarge") });
+      return;
+    }
+
+    setUploading(true);
+    setUpload(null);
+
+    try {
+      setDraft(await onUpload(file));
+      setUpload({ kind: "ok", text: t("site.image.uploaded") });
+    } catch (caught) {
+      const code = caught instanceof ApiError ? caught.code : undefined;
+      setUpload({
+        kind: "error",
+        text:
+          code === "PAYLOAD_TOO_LARGE"
+            ? t("site.image.uploadTooLarge")
+            : code === "UNSUPPORTED_MEDIA_TYPE"
+              ? t("site.image.uploadType")
+              : caught instanceof ApiError && caught.status !== 0 && caught.status < 500
+                ? caught.message
+                : t("site.image.uploadFailed"),
+      });
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const inputId = `block-${block.id}`;
   const hintId = `${inputId}-hint`;
@@ -613,16 +689,54 @@ function ImageBlockField({
               {valid ? t("site.image.hint") : t("site.image.invalid")}
             </span>
 
+            {onUpload && (
+              <>
+                {/* Hidden behind a button so the control matches the others;
+                    `accept` only narrows the picker — the server checks bytes. */}
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept={IMAGE_UPLOAD_ACCEPT}
+                  hidden
+                  onChange={(event) => {
+                    void pickFile(event.target.files?.[0]);
+                    // Cleared so choosing the same file again still fires.
+                    event.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn ghost small"
+                  onClick={() => fileInput.current?.click()}
+                  disabled={saving || uploading}
+                  aria-busy={uploading}
+                  style={{ marginInlineStart: "auto" }}
+                >
+                  {uploading ? t("site.image.uploading") : t("site.image.upload")}
+                </button>
+              </>
+            )}
+
             <button
               type="button"
               className="btn ghost small"
               onClick={onReset}
-              disabled={saving}
-              style={{ marginInlineStart: "auto" }}
+              disabled={saving || uploading}
+              style={onUpload ? undefined : { marginInlineStart: "auto" }}
             >
               {t("site.image.reset")}
             </button>
           </div>
+
+          {/* The success note is only true while the uploaded URL is unsaved. */}
+          {upload && (upload.kind === "error" || dirty) && (
+            <span
+              role={upload.kind === "error" ? "alert" : "status"}
+              style={{ fontSize: "var(--text-sm)", color: upload.kind === "error" ? "var(--danger)" : "var(--success)" }}
+            >
+              {upload.text}
+            </span>
+          )}
         </div>
       </div>
     </div>

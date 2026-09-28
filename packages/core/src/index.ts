@@ -6,6 +6,7 @@ export * from "./locale.js";
 export * from "./faq.js";
 export * from "./format.js";
 export * from "./image-src.js";
+export * from "./image-upload.js";
 export * from "./password-policy.js";
 export * from "./availability.js";
 export * from "./pricing/engine.js";

@@ -175,6 +175,7 @@ Shared across instances via Redis, so limits cannot be multiplied by process cou
 | `chat` | 12 / min |
 | `quote` | 30 / min |
 | `geocoding` | 30 / min |
+| `upload` (dashboard photo uploads) | 30 / 10 min |
 | global | 300 / min |
 
 ---
@@ -415,6 +416,72 @@ nc -vz mail.privateemail.com 465
 Most home and mobile networks block outbound 25, 465 and 587. There is no way
 around that from the client side — Private Email offers no alternative port — so
 verify real delivery from the server, and develop against `MAIL_DRIVER=log`.
+
+## Photo uploads
+
+Page photos are image content blocks; an editor can paste a path or URL, or,
+once S3 is configured, press **Upload photo** in *Website → Content*. The file
+goes to the API, which reads its type from the bytes (JPEG, PNG, WebP or AVIF
+only — SVG is refused because it can carry script), caps it at 8 MB, and writes
+it to `uploads/<yyyy>/<mm>/<uuid>.<ext>` with the detected `Content-Type` and
+`Cache-Control: public, max-age=31536000, immutable`. The returned URL fills the
+field; the editor then saves with ✓ as for a pasted URL.
+
+```bash
+GET  /api/site/uploads   # { enabled, maxBytes } — the dashboard hides the button when false
+POST /api/site/uploads   # multipart/form-data, one field "file" → 201 { url }
+```
+
+Both need `content.write`. Errors: 413 `PAYLOAD_TOO_LARGE`, 415
+`UNSUPPORTED_MEDIA_TYPE`, 503 `SERVICE_UNAVAILABLE` (the message names the
+missing variables). Every upload is written to the audit log as
+`site.image_uploaded`.
+
+Uploads are off until `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID` and
+`S3_SECRET_ACCESS_KEY` are all set. To set them up:
+
+1. **Create the bucket** in the region closest to visitors (e.g. `eu-central-1`).
+2. **Make `uploads/` publicly readable**, one of two ways:
+   - *CloudFront (preferred).* Keep *Block Public Access* on, create a
+     distribution with the bucket as an origin using Origin Access Control, and
+     set `S3_PUBLIC_BASE_URL` to the distribution's `https://…` URL (or your own
+     domain on it). Files are then cached near visitors and the bucket itself
+     stays private.
+   - *Bucket policy.* Turn off *Block public access* for bucket policies and add
+
+     ```json
+     { "Version": "2012-10-17", "Statement": [{
+         "Effect": "Allow", "Principal": "*", "Action": "s3:GetObject",
+         "Resource": "arn:aws:s3:::<bucket>/uploads/*" }] }
+     ```
+
+     Leave `S3_PUBLIC_BASE_URL` blank to use
+     `https://<bucket>.s3.<region>.amazonaws.com`.
+3. **Create an IAM user for the API** with only this policy, and put its access
+   key in the env file:
+
+   ```json
+   { "Version": "2012-10-17", "Statement": [{
+       "Effect": "Allow", "Action": "s3:PutObject",
+       "Resource": "arn:aws:s3:::<bucket>/uploads/*" }] }
+   ```
+
+   The API never reads, lists or deletes, so a leaked key can write under
+   `uploads/` and nothing else — not delete, not list, not touch the rest of the
+   bucket. Rotate it if it leaks: it could still overwrite a photo whose URL it
+   knows. Turning on bucket versioning makes such an overwrite recoverable.
+4. **No CORS rule is needed.** The browser sends the file to the API, not to the
+   bucket; that is also what lets the API check the bytes before anything is
+   stored.
+
+`S3_ENDPOINT` is only for an S3-compatible store (MinIO, R2); when it is set the
+client uses path-style addressing. Note that the site renders only `https://`
+image URLs, so a local store served over plain http accepts uploads whose URLs
+the image field then refuses — put it behind https, or test the upload call on
+its own.
+
+An uploaded photo that is never saved to a page stays in the bucket; clean those
+up with a lifecycle rule if it matters.
 
 ## Moving the database to a server
 

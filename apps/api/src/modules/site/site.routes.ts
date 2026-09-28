@@ -1,12 +1,15 @@
-import { isSafeImageSrc } from "@mon/core";
+import { IMAGE_UPLOAD_MAX_BYTES, checkImageUpload, isSafeImageSrc } from "@mon/core";
 import { db, schema } from "@mon/db";
 import { and, asc, eq } from "drizzle-orm";
-import { Router } from "express";
+import { Router, type RequestHandler } from "express";
+import multer from "multer";
 import { z } from "zod";
 
 import { AppError } from "../../lib/errors.js";
 import { redis } from "../../lib/redis.js";
+import { storeImage, uploadsEnabled, uploadsUnavailable } from "../../lib/upload-storage.js";
 import { asyncHandler } from "../../middleware/error-handler.js";
+import { uploadRateLimit } from "../../middleware/rate-limit.js";
 import { requireAuth } from "../../middleware/require-auth.js";
 import { requirePermission } from "../../middleware/require-permission.js";
 import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
@@ -156,7 +159,7 @@ const settingBody = z.object({ value: z.string().trim().max(2000) });
  * image over plain http, is refused here and again when the site renders.
  */
 const IMAGE_RULE =
-  "Expected an image path under /images/ (e.g. /images/home/hero-truck.jpg) or an https:// URL.";
+  "Expected an image path under /images/ (e.g. /images/home/hero-right.jpg) or an https:// URL.";
 
 siteRouter.patch(
   "/settings/:key",
@@ -338,6 +341,112 @@ siteRouter.post(
     });
 
     res.json(updated);
+  }),
+);
+
+// ── Staff: photo uploads ────────────────────────────────────────────────
+
+/**
+ * Whether the upload button should be offered at all.
+ *
+ * Asked separately rather than discovered by a failed upload, so an editor on
+ * a deployment without storage never sees a control that can only fail.
+ */
+siteRouter.get(
+  "/uploads",
+  ...contentEditor,
+  (_req, res) => {
+    res.json({ enabled: uploadsEnabled, maxBytes: IMAGE_UPLOAD_MAX_BYTES });
+  },
+);
+
+/**
+ * Multipart parsing, held in memory and capped at the upload limit.
+ *
+ * Memory rather than a temp file because the whole file is needed anyway — its
+ * type is read from its bytes — and 8 MB is small. One file and no other
+ * fields: anything else in the form is a client this endpoint was not built for.
+ */
+const parseUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: IMAGE_UPLOAD_MAX_BYTES, files: 1, fields: 0, parts: 1 },
+}).single("file");
+
+/** Runs multer and turns its errors into the API's own. */
+const receiveFile: RequestHandler = (req, res, next) => {
+  parseUpload(req, res, (error: unknown) => {
+    if (!error) return next();
+
+    if (error instanceof multer.MulterError) {
+      return next(
+        error.code === "LIMIT_FILE_SIZE"
+          ? new AppError("PAYLOAD_TOO_LARGE", 413, "The photo is larger than 8 MB.")
+          : AppError.badRequest('Send exactly one file, in a form field named "file".'),
+      );
+    }
+
+    next(AppError.badRequest("The upload could not be read."));
+  });
+};
+
+/** Refused before the body is read, so a disabled store costs no 8 MB buffer. */
+const requireUploads: RequestHandler = (_req, _res, next) => {
+  next(uploadsEnabled ? undefined : uploadsUnavailable());
+};
+
+/**
+ * Stores a photo and returns the URL to put in an image field.
+ *
+ * Only stores it: attaching it to a page is the ordinary block PATCH, so the
+ * editor previews the photo in place and the change is validated and audited
+ * the same way as a pasted URL.
+ */
+siteRouter.post(
+  "/uploads",
+  ...contentEditor,
+  uploadRateLimit,
+  requireUploads,
+  receiveFile,
+  asyncHandler(async (req, res) => {
+    if (!req.file) {
+      throw AppError.badRequest('Send the photo in a form field named "file".');
+    }
+
+    // Decided by the bytes, not by req.file.mimetype or the file name — both
+    // are whatever the browser was told.
+    const checked = checkImageUpload(req.file.buffer);
+
+    if (!checked.ok) {
+      throw checked.reason === "too_large"
+        ? new AppError("PAYLOAD_TOO_LARGE", 413, "The photo is larger than 8 MB.")
+        : checked.reason === "empty"
+          ? AppError.badRequest("The file is empty.")
+          : new AppError(
+              "UNSUPPORTED_MEDIA_TYPE",
+              415,
+              "Only JPEG, PNG, WebP and AVIF photos can be uploaded. SVG is not accepted.",
+            );
+    }
+
+    const { key, url } = await storeImage(req.file.buffer, checked.format);
+
+    // The file is public the moment it is stored, whether or not a page ever
+    // uses it, so the upload itself is recorded — not only the later edit.
+    await recordAudit({
+      actor: { id: req.user!.id, email: req.user!.email },
+      action: "site.image_uploaded",
+      entityType: "upload",
+      entityId: key,
+      changes: {
+        contentType: checked.format.contentType,
+        bytes: req.file.size,
+        originalName: req.file.originalname.slice(0, 200),
+      },
+      ipAddress: req.ip,
+      requestId: req.requestId,
+    });
+
+    res.status(201).json({ url });
   }),
 );
 

@@ -118,6 +118,37 @@ const envSchema = z.object({
   /** Where the `log` driver writes. Relative paths resolve from the cwd. */
   MAIL_OUTBOX_DIR: z.string().min(1).default(".mail-outbox"),
 
+  /**
+   * Photo uploads from the dashboard, stored in Amazon S3.
+   *
+   * All optional: without a bucket, region and key pair the upload endpoint
+   * answers 503 and the dashboard hides its button, and editors paste paths or
+   * URLs as before. Uploads are a convenience, not something the site needs to
+   * boot, so a missing value disables them instead of refusing to start.
+   */
+  S3_BUCKET: optionalString,
+  S3_REGION: optionalString,
+  S3_ACCESS_KEY_ID: optionalString,
+  S3_SECRET_ACCESS_KEY: optionalString,
+  /**
+   * Only for an S3-compatible store (MinIO, R2, a local mock). Set, requests go
+   * there with path-style addressing, which those stores expect; unset, the
+   * SDK talks to AWS itself.
+   */
+  S3_ENDPOINT: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().url().optional(),
+  ),
+  /**
+   * The public origin uploaded files are served from — a CloudFront
+   * distribution or the bucket's own URL. Unset, it is derived from the bucket
+   * and region (see `uploadStorage`).
+   */
+  S3_PUBLIC_BASE_URL: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().url().optional(),
+  ),
+
   ANTHROPIC_API_KEY: z.string().optional(),
   GEOCODING_USER_AGENT: z.string().min(1).default("m.on/1.0"),
 
@@ -179,3 +210,53 @@ export const env: Env = loadEnv();
 
 export const isProduction = env.NODE_ENV === "production";
 export const isTest = env.NODE_ENV === "test";
+
+/** Where dashboard uploads go, once every value it needs is present. */
+export interface UploadStorage {
+  bucket: string;
+  region: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  endpoint: string | undefined;
+  /** No trailing slash; an object's URL is `${publicBaseUrl}/${key}`. */
+  publicBaseUrl: string;
+}
+
+const UPLOAD_KEYS = ["S3_BUCKET", "S3_REGION", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY"] as const;
+
+/**
+ * Resolves the upload storage, or lists what is missing.
+ *
+ * The missing names are returned rather than a bare "disabled" so the API's
+ * 503 can say exactly which variable to set — the same reasoning as the mail
+ * check above, applied to a feature that may be switched off.
+ */
+export function uploadStorage(
+  source: Env = env,
+): { enabled: true; storage: UploadStorage } | { enabled: false; missing: string[] } {
+  const missing = UPLOAD_KEYS.filter((key) => source[key] === undefined);
+
+  if (missing.length > 0) return { enabled: false, missing };
+
+  const bucket = source.S3_BUCKET!;
+  const region = source.S3_REGION!;
+  const endpoint = source.S3_ENDPOINT?.replace(/\/+$/, "");
+
+  // Path-style against a custom endpoint, matching how the client addresses
+  // it; the virtual-hosted AWS URL otherwise.
+  const derived = endpoint
+    ? `${endpoint}/${bucket}`
+    : `https://${bucket}.s3.${region}.amazonaws.com`;
+
+  return {
+    enabled: true,
+    storage: {
+      bucket,
+      region,
+      accessKeyId: source.S3_ACCESS_KEY_ID!,
+      secretAccessKey: source.S3_SECRET_ACCESS_KEY!,
+      endpoint,
+      publicBaseUrl: (source.S3_PUBLIC_BASE_URL ?? derived).replace(/\/+$/, ""),
+    },
+  };
+}

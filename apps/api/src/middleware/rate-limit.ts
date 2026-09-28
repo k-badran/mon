@@ -79,6 +79,18 @@ export const quoteRateLimit = createLimiter({
   byUserOrIp: true,
 });
 
+/**
+ * Photo uploads. Each one can be 8 MB and becomes a paid S3 object, so the
+ * ceiling is far below the global one — generous for an editor swapping a
+ * page's photos, small enough that a stolen session cannot fill the bucket.
+ */
+export const uploadRateLimit = createLimiter({
+  windowMs: 10 * 60_000,
+  max: 30,
+  prefix: "upload",
+  byUserOrIp: true,
+});
+
 /** Broad backstop for everything else. */
 export const globalRateLimit = createLimiter({
   windowMs: 60_000,
