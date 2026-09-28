@@ -7,6 +7,12 @@
  * the designer's own wording taken from `service-cleaning`; the other three
  * locales are translations of it.
  *
+ * The programmes follow `cleaning-services` (136:533), the photographed
+ * section that replaced the three text-only cards. That frame carries no
+ * rates and no per-card button, so the `programs.N.price` and `programs.cta`
+ * rows are gone, as is `crossSell.cta` (the cross-sell cards carry no link
+ * text either); an existing database keeps them until the section is pruned.
+ *
  * It lives in its own file so the replacement is a clean swap rather than an
  * edit threaded through the shared page-content file.
  */
@@ -46,10 +52,10 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     "Hero — subline",
     3,
     {
-      de: "100 % Kautionsrückgabe-Garantie. Unser Team reinigt jede Fläche, jede Fußleiste und jedes Einbaugerät im Detail.",
-      en: "100% Deposit Return Guarantee. Our commercial team details every surface, baseboard, and built-in appliance to hand the property back spotless.",
-      ar: "ضمان استرداد الوديعة 100%. يعتني فريقنا بكل سطح وكل وزرة وكل جهاز مدمج ليُسلَّم العقار نظيفاً تماماً.",
-      tr: "%100 depozito iade garantisi. Ekibimiz her yüzeyi, süpürgeliği ve ankastre cihazı detaylıca temizleyerek mülkü tertemiz teslim eder.",
+      de: "100 % Kautionsrückgabe-Garantie. Unser Profi-Team reinigt jede Fläche, jede Fußleiste und jedes Einbaugerät im Detail – nach den Abnahmestandards der Vermieter.",
+      en: "100% Deposit Return Guarantee. Our commercial team details every surface, baseboard, and built-in appliance to rental company inspection standards.",
+      ar: "ضمان استرداد الوديعة 100%. يعتني فريقنا المحترف بكل سطح وكل وزرة وكل جهاز مدمج وفق معايير المعاينة لدى شركات التأجير.",
+      tr: "%100 depozito iade garantisi. Profesyonel ekibimiz her yüzeyi, süpürgeliği ve ankastre cihazı kiralama şirketlerinin denetim standartlarına göre detaylıca temizler.",
     },
     "textarea",
   ),
@@ -86,11 +92,13 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     ar: "تنظيف نهاية الإيجار",
     tr: "Kira Sonu",
   }),
-  row(C, "programs.1.price", "Programme 1 — rate", 13, {
-    de: "4,50 € / m²",
-    en: "€4.50 / m²",
-    ar: "4,50 € / م²",
-    tr: "4,50 € / m²",
+  // The pill on the featured card's photograph. Only the first programme
+  // carries one in the frame; a badge row on another would render there too.
+  row(C, "programs.1.badge", "Programme 1 — photo badge", 13, {
+    de: "Am beliebtesten",
+    en: "Most Popular",
+    ar: "الأكثر طلباً",
+    tr: "En Popüler",
   }),
   row(
     C,
@@ -98,10 +106,10 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     "Programme 1 — body",
     14,
     {
-      de: "Für Mieter, die eine Wohnung zurückgeben. Umfasst intensive Backofenreinigung, Kalkentfernung, Fensterpolitur und Bodenpflege.",
-      en: "Designed for tenants handing back rental spaces. Covers intensive oven scrubbing, limescale removal, window polishing and floor care.",
-      ar: "مصمَّم للمستأجرين الذين يسلّمون العقار. يشمل تنظيف الفرن المكثّف وإزالة الترسّبات وتلميع النوافذ والعناية بالأرضيات.",
-      tr: "Kiralık yeri teslim eden kiracılar için. Yoğun fırın temizliği, kireç sökümü, cam parlatma ve zemin bakımını kapsar.",
+      de: "Für Mieter, die eine Wohnung zurückgeben. Umfasst intensive Backofenreinigung, Kalkentfernung, Fensterpolitur und eine garantierte Übergabe.",
+      en: "Designed for tenants handing back rental spaces. Covers intensive oven scrubbing, limescale removal, window polishing, and a guaranteed handover.",
+      ar: "مصمَّم للمستأجرين الذين يسلّمون العقار. يشمل تنظيف الفرن المكثّف وإزالة الترسّبات وتلميع النوافذ وتسليماً مضموناً.",
+      tr: "Kiralık yeri teslim eden kiracılar için. Yoğun fırın temizliği, kireç sökümü, cam parlatma ve garantili teslimi kapsar.",
     },
     "textarea",
   ),
@@ -112,22 +120,16 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     ar: "تنظيف منزلي عميق",
     tr: "Derin Ev Temizliği",
   }),
-  row(C, "programs.2.price", "Programme 2 — rate", 16, {
-    de: "6,00 € / m²",
-    en: "€6.00 / m²",
-    ar: "6,00 € / م²",
-    tr: "6,00 € / m²",
-  }),
   row(
     C,
     "programs.2.body",
     "Programme 2 — body",
     17,
     {
-      de: "Intensive Desinfektion Ihrer neuen Wohnung, bevor die Möbel kommen. Wand-zu-Wand-Desinfektion und gründliche Teppichreinigung.",
-      en: "Intensive sanitization for your new property before furniture arrives. Wall-to-wall disinfection, deep carpet treatment and full air-vent care.",
-      ar: "تعقيم مكثّف لعقارك الجديد قبل وصول الأثاث. تطهير من جدار إلى جدار وتنظيف عميق للسجاد وعناية كاملة بفتحات التهوية.",
-      tr: "Mobilyalar gelmeden önce yeni mülkünüz için yoğun sanitasyon. Duvardan duvara dezenfeksiyon, derin halı bakımı ve tam havalandırma temizliği.",
+      de: "Intensive Desinfektion Ihrer neuen Wohnung, bevor die Möbel kommen. Wand-zu-Wand-Desinfektion, Teppich-Tiefenreinigung und Reinigung der Lüftungsschächte.",
+      en: "Intensive sanitization for your new property before furniture arrives. Wall-to-wall disinfection, deep carpet extraction, and vent scrubbing.",
+      ar: "تعقيم مكثّف لعقارك الجديد قبل وصول الأثاث. تطهير من جدار إلى جدار واستخلاص عميق للسجاد وتنظيف فتحات التهوية.",
+      tr: "Mobilyalar gelmeden önce yeni mülkünüz için yoğun sanitasyon. Duvardan duvara dezenfeksiyon, derin halı yıkama ve havalandırma temizliği.",
     },
     "textarea",
   ),
@@ -152,10 +154,11 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     "textarea",
   ),
 
-  // The four checks every programme card lists.
+  // The four feature chips every programme card lists — 136:533 repeats the
+  // same four on all three cards, so they are held once.
   row(C, "programs.check.1", "Programme check 1", 20, {
     de: "Backofen & Küche im Detail",
-    en: "Oven & Kitchen Deep Detail",
+    en: "Oven & Kitchen Detail",
     ar: "الفرن والمطبخ بالتفصيل",
     tr: "Fırın ve Mutfak Detayı",
   }),
@@ -172,16 +175,10 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     tr: "Sıhhi Tesisat Kireç Sökümü",
   }),
   row(C, "programs.check.4", "Programme check 4", 23, {
-    de: "Garantie der Übergabe-Abnahme",
-    en: "Guarantee of Handover Approval",
-    ar: "ضمان قبول التسليم",
-    tr: "Teslim Onayı Garantisi",
-  }),
-  row(C, "programs.cta", "Programme card — button", 24, {
-    de: "Angebot anfordern",
-    en: "Request Quote",
-    ar: "اطلب عرض سعر",
-    tr: "Teklif İste",
+    de: "Garantierte Übergabe",
+    en: "Guaranteed Handover",
+    ar: "تسليم مضمون",
+    tr: "Garantili Teslim",
   }),
 
   // ── Before / after ──────────────────────────────────────────────────
@@ -236,10 +233,10 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     "Guarantee — body",
     41,
     {
-      de: "Findet Ihr Vermieter oder Makler bei der Abnahme Reinigungsmängel, kommt unser Team zurück und reinigt kostenfrei nach.",
-      en: "If your landlord or estate agent finds any cleaning issues during inspection, our crew will return to clean the area again free of charge.",
-      ar: "إذا وجد المالك أو الوكيل العقاري أي ملاحظات تنظيف أثناء المعاينة، يعود فريقنا لتنظيف المكان مجدّداً مجاناً.",
-      tr: "Ev sahibiniz veya emlakçınız denetimde herhangi bir temizlik sorunu bulursa, ekibimiz geri dönüp o alanı ücretsiz yeniden temizler.",
+      de: "Findet Ihr Vermieter oder Makler bei der Abnahme Reinigungsmängel, reinigt unser Team die beanstandeten Stellen innerhalb von 48 Stunden kostenlos nach. Ohne Wenn und Aber.",
+      en: "If your landlord or estate agent finds any cleaning issues during inspection, our crew will return to clean the disputed items for free within 48 hours. No questions asked.",
+      ar: "إذا وجد المالك أو الوكيل العقاري أي ملاحظات تنظيف أثناء المعاينة، يعود فريقنا لتنظيف المواضع المعترض عليها مجاناً خلال 48 ساعة، دون أي أسئلة.",
+      tr: "Ev sahibiniz veya emlakçınız denetimde herhangi bir temizlik sorunu bulursa, ekibimiz itiraz edilen noktaları 48 saat içinde ücretsiz olarak yeniden temizler. Soru sorulmaz.",
     },
     "textarea",
   ),
@@ -269,10 +266,10 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     "Cross-sell — subline",
     52,
     {
-      de: "Wir belohnen Gesamtbuchungen. Kombinieren Sie die Reinigung mit Transport und Entrümpelung für den besten Preis.",
-      en: "We reward comprehensive bookings. Bundle your cleaning with professional transport and clearance to secure deeper discounts.",
-      ar: "نكافئ الحجوزات الشاملة. اجمع التنظيف مع النقل والإخلاء للحصول على خصومات أكبر.",
-      tr: "Kapsamlı rezervasyonları ödüllendiriyoruz. Temizliği profesyonel nakliye ve boşaltmayla birleştirip daha yüksek indirim kazanın.",
+      de: "Wir belohnen Gesamtbuchungen. Kombinieren Sie die Reinigung mit professionellem Transport und Entrümpelung und sichern Sie sich hohe Paketrabatte.",
+      en: "We reward comprehensive bookings. Bundle your cleaning with professional transport and clearance to secure deep package discounts.",
+      ar: "نكافئ الحجوزات الشاملة. اجمع التنظيف مع النقل الاحترافي والإخلاء لتحصل على خصومات كبيرة على الباقة.",
+      tr: "Kapsamlı rezervasyonları ödüllendiriyoruz. Temizliği profesyonel nakliye ve boşaltmayla birleştirip yüksek paket indirimlerinden yararlanın.",
     },
     "textarea",
   ),
@@ -314,10 +311,4 @@ export const CLEANING_CONTENT: ContentSeed[] = [
     },
     "textarea",
   ),
-  row(C, "crossSell.cta", "Cross-sell — link label", 57, {
-    de: "Mehr erfahren",
-    en: "Learn More",
-    ar: "اعرف المزيد",
-    tr: "Daha Fazla",
-  }),
 ];
