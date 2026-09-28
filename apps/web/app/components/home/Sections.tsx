@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { MESSAGES } from "@/lib/i18n/catalogue";
 import type { Locale } from "@/lib/i18n/config";
+import { DEFAULT_LOGO } from "@/lib/site/defaults";
 import { imageSrc } from "@/lib/site/image";
 
 /**
@@ -698,7 +699,16 @@ function chrome(copy: Copy, slot: string, key: ChromeKey, locale: Locale): strin
   return copy[slot] || MESSAGES[key][locale];
 }
 
-export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
+export function Footer({
+  copy,
+  locale,
+  logo = DEFAULT_LOGO,
+}: {
+  copy: Copy;
+  locale: Locale;
+  /** `brand.logo` from the settings, already checked by `logoSrc`. */
+  logo?: string;
+}) {
   const services = [
     { href: "/umzug", key: "footer.link.residential" },
     { href: "/umzug", key: "footer.link.corporate" },
@@ -747,7 +757,7 @@ export function Footer({ copy, locale }: { copy: Copy; locale: Locale }) {
         <div className="grid gap-16 md:grid-cols-2 xl:grid-cols-4">
           <div className="grid content-start gap-6">
             <img
-              src="/images/brand/logo.png"
+              src={logo}
               alt={copy["footer.brand"] ?? "m.on"}
               width={86}
               height={47}

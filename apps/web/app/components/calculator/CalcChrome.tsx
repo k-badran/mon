@@ -53,9 +53,9 @@ export function CalcHeader({
   homeHref?: string | undefined;
 }) {
   const { t } = useI18n();
-  const { phone, brandName } = useSiteSettings();
+  const { phone, brandName, logo: logoUrl } = useSiteSettings();
 
-  const logo = <img src="/images/brand/logo.png" alt={brandName} className="h-[47px] w-auto" />;
+  const logo = <img src={logoUrl} alt={brandName} className="h-[47px] w-auto" />;
 
   return (
     <header className="border-b border-border-subtle bg-surface-card">

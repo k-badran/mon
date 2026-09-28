@@ -130,10 +130,11 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "brand.logo",
-    value: "/images/logo.svg",
+    value: "/images/brand/logo.png",
     group: "brand",
     kind: "image",
     label: "Logo",
+    description: "Shown in the header, the footer and on the sign-in pages. Upload one, or give a path under /images/ or an https:// address.",
     sortOrder: 3,
   },
   {

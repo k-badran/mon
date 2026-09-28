@@ -43,6 +43,13 @@
       "when": 1790594543567,
       "tag": "0005_wooden_the_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790602002979,
+      "tag": "0006_logo_setting_default",
+      "breakpoints": true
     }
   ]
 }

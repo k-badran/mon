@@ -105,7 +105,8 @@
 .auth-form { inline-size: 100%; max-inline-size: 26rem; }
 
 /* On a narrow screen the red panel is gone, so the logo carries the brand. */
-.auth-form .auth-logo { display: block; block-size: 34px; margin-block-end: var(--space-8); }
+/* 46px, not the old 34: the brand.logo PNG is padded to the nav bar's 86x47 box, so the mark inside it matches the tight SVG it replaced. */
+.auth-form .auth-logo { display: block; block-size: 46px; margin-block-end: var(--space-8); }
 @media (min-width: 900px) { .auth-form .auth-logo { display: none; } }
 
 .auth-form h1 {

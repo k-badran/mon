@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { can, canAll, type Permission, type Role } from "@mon/core";
+import { can, canAll, canAny, type Permission, type Role } from "@mon/core";
 
 import { effectiveRole } from "../lib/account-state.js";
 import { AppError } from "../lib/errors.js";
@@ -38,15 +38,35 @@ async function roleForRequest(req: Request, userId: string): Promise<Role | null
  * that out is clearer than inventing a compound permission for each pairing.
  */
 export function requirePermission(...required: readonly Permission[]) {
-  if (required.length === 0) {
-    throw new Error("requirePermission needs at least one permission.");
+  return guard("requirePermission", required, canAll, " and ");
+}
+
+/**
+ * Requires at least one of the listed capabilities.
+ *
+ * For a tool two editors share: a photo upload serves both the content editor
+ * (page photos, `content.write`) and the theme editor (the logo,
+ * `theme.write`), and either one alone should be enough to use it.
+ */
+export function requireAnyPermission(...accepted: readonly Permission[]) {
+  return guard("requireAnyPermission", accepted, canAny, " or ");
+}
+
+function guard(
+  name: string,
+  permissions: readonly Permission[],
+  allows: (role: Role, permissions: readonly Permission[]) => boolean,
+  joiner: string,
+) {
+  if (permissions.length === 0) {
+    throw new Error(`${name} needs at least one permission.`);
   }
 
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     if (!req.user) {
       // A programming error, not a client error: the guard was mounted
       // without `requireAuth` in front of it.
-      next(AppError.internal("requirePermission was used without requireAuth."));
+      next(AppError.internal(`${name} was used without requireAuth.`));
       return;
     }
 
@@ -58,8 +78,8 @@ export function requirePermission(...required: readonly Permission[]) {
         return;
       }
 
-      if (!canAll(role, required)) {
-        next(AppError.insufficientRole(required.join(" and ")));
+      if (!allows(role, permissions)) {
+        next(AppError.insufficientRole(permissions.join(joiner)));
         return;
       }
 

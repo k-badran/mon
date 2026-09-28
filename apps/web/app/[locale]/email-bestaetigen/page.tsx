@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
+import { AuthLogo } from "@/app/components/site/AuthLogo";
 
 type State = "checking" | "done" | "invalid" | "missing";
 
@@ -75,7 +76,7 @@ function VerifyEmail() {
 
       <main className="auth-form-side">
         <div className="auth-form">
-          <img className="auth-logo" src="/images/logo.svg" alt="m.on" />
+          <AuthLogo />
 
           <h1>{t("auth.verifyTitle")}</h1>
 

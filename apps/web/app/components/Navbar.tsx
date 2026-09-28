@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useApi } from "@/lib/api";
 import { LOCALE_META, type Locale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/provider";
+import { useSiteSettings } from "@/lib/site/useSiteSettings";
 
 /**
  * Site navigation.
@@ -47,6 +48,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const { user, loading, isStaff, signOut } = useApi();
   const { t, locale, setLocale } = useI18n();
+  const { logo } = useSiteSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -120,7 +122,7 @@ export default function Navbar() {
          */}
         <Link href={href("/")} className="flex shrink-0 items-center">
           <img
-            src="/images/brand/logo.png"
+            src={logo}
             alt={t("brand.name")}
             width={86}
             height={47}

@@ -11,7 +11,7 @@ import { storeImage, uploadsEnabled, uploadsUnavailable } from "../../lib/upload
 import { asyncHandler } from "../../middleware/error-handler.js";
 import { uploadRateLimit } from "../../middleware/rate-limit.js";
 import { requireAuth } from "../../middleware/require-auth.js";
-import { requirePermission } from "../../middleware/require-permission.js";
+import { requireAnyPermission, requirePermission } from "../../middleware/require-permission.js";
 import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
 import { recordAudit } from "../audit/audit.service.js";
 
@@ -131,6 +131,8 @@ siteRouter.get(
 // page copy is not thereby allowed to repaint the site, and vice versa.
 const themeEditor = [requireAuth, requirePermission("theme.write")] as const;
 const contentEditor = [requireAuth, requirePermission("content.write")] as const;
+/** Page photos are content, the logo is theme; either editor may upload. */
+const photoUploader = [requireAuth, requireAnyPermission("content.write", "theme.write")] as const;
 
 /** Every setting with its editor metadata, so the UI builds itself. */
 siteRouter.get(
@@ -354,7 +356,7 @@ siteRouter.post(
  */
 siteRouter.get(
   "/uploads",
-  ...contentEditor,
+  ...photoUploader,
   (_req, res) => {
     res.json({ enabled: uploadsEnabled, maxBytes: IMAGE_UPLOAD_MAX_BYTES });
   },
@@ -403,7 +405,7 @@ const requireUploads: RequestHandler = (_req, _res, next) => {
  */
 siteRouter.post(
   "/uploads",
-  ...contentEditor,
+  ...photoUploader,
   uploadRateLimit,
   requireUploads,
   receiveFile,

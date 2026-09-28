@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
+import { AuthLogo } from "@/app/components/site/AuthLogo";
 
 /**
  * Request a password reset link.
@@ -62,7 +63,7 @@ export default function ForgotPasswordPage() {
 
       <main className="auth-form-side">
         <div className="auth-form">
-          <img className="auth-logo" src="/images/logo.svg" alt="m.on" />
+          <AuthLogo />
 
           <h1>{t("auth.forgotTitle")}</h1>
           <p className="sub">{t("auth.forgotSub")}</p>

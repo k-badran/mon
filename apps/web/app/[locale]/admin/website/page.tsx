@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_BYTES, isSafeImageSrc } from "@mon/core";
 
@@ -274,6 +274,7 @@ export default function WebsiteControlPage() {
                 setting={setting}
                 saving={savingKey === setting.key}
                 onSave={(value) => void saveSetting(setting.key, value)}
+                onUpload={uploadsEnabled ? uploadImage : undefined}
               />
             ))}
           </div>
@@ -340,10 +341,13 @@ function SettingField({
   setting,
   saving,
   onSave,
+  onUpload,
 }: {
   setting: Setting;
   saving: boolean;
   onSave: (value: string) => void;
+  /** Absent when the API has no upload storage configured. */
+  onUpload?: ((file: File) => Promise<string>) | undefined;
 }) {
   const [draft, setDraft] = useState(setting.value);
   const dirty = draft !== setting.value;
@@ -364,6 +368,20 @@ function SettingField({
         </p>
       )}
 
+      {/* The logo: previewed and uploadable like a page photo. */}
+      {setting.kind === "image" ? (
+        <ImagePicker
+          inputId={inputId}
+          saved={setting.value}
+          draft={draft}
+          setDraft={setDraft}
+          dirty={dirty}
+          saving={saving}
+          onSave={onSave}
+          onUpload={onUpload}
+          fit="contain"
+        />
+      ) : (
       <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
         {setting.kind === "color" ? (
           <>
@@ -415,6 +433,7 @@ function SettingField({
           </button>
         )}
       </div>
+      )}
     </div>
   );
 }
@@ -549,6 +568,79 @@ function ImageBlockField({
   onUpload?: ((file: File) => Promise<string>) | undefined;
 }) {
   const { t } = useI18n();
+  const inputId = `block-${block.id}`;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBlockEnd: 4 }}>
+        <label htmlFor={inputId} style={{ fontWeight: 600, color: "var(--text-strong)" }}>
+          {block.label}
+        </label>
+        <code style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>{block.slot}</code>
+
+        <label style={{ marginInlineStart: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+          <input
+            type="checkbox"
+            checked={block.isPublished}
+            onChange={(event) => onSave({ isPublished: event.target.checked })}
+            disabled={saving}
+          />
+          {publishedLabel}
+        </label>
+      </div>
+
+      <ImagePicker
+        inputId={inputId}
+        saved={block.value}
+        draft={draft}
+        setDraft={setDraft}
+        dirty={dirty}
+        saving={saving}
+        onSave={(value) => onSave({ value })}
+        onUpload={onUpload}
+        extra={(busy) => (
+          <button type="button" className="btn ghost small" onClick={onReset} disabled={saving || busy}>
+            {t("site.image.reset")}
+          </button>
+        )}
+      />
+    </div>
+  );
+}
+
+/**
+ * Thumbnail, path field and upload button for one image value.
+ *
+ * Shared by the page-photo blocks and the logo setting, so a logo and a photo
+ * are checked, previewed and uploaded the same way. The upload only fills the
+ * draft; saving stays the caller's ✓, as for every other field on this page.
+ */
+function ImagePicker({
+  inputId,
+  saved,
+  draft,
+  setDraft,
+  dirty,
+  saving,
+  onSave,
+  onUpload,
+  extra,
+  fit = "cover",
+}: {
+  inputId: string;
+  saved: string;
+  draft: string;
+  setDraft: (value: string) => void;
+  dirty: boolean;
+  saving: boolean;
+  onSave: (value: string) => void;
+  onUpload?: ((file: File) => Promise<string>) | undefined;
+  /** Further actions after the upload button, told whether an upload is running. */
+  extra?: ((busy: boolean) => ReactNode) | undefined;
+  /** "contain" for a logo, whose edges matter more than filling the frame. */
+  fit?: "cover" | "contain";
+}) {
+  const { t } = useI18n();
   const [broken, setBroken] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [upload, setUpload] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -594,150 +686,124 @@ function ImageBlockField({
     }
   }
 
-  const inputId = `block-${block.id}`;
   const hintId = `${inputId}-hint`;
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBlockEnd: 4 }}>
-        <label htmlFor={inputId} style={{ fontWeight: 600, color: "var(--text-strong)" }}>
-          {block.label}
-        </label>
-        <code style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>{block.slot}</code>
-
-        <label style={{ marginInlineStart: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-          <input
-            type="checkbox"
-            checked={block.isPublished}
-            onChange={(event) => onSave({ isPublished: event.target.checked })}
-            disabled={saving}
+    <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start", flexWrap: "wrap" }}>
+      {/* The thumbnail shows the draft, not the saved value, so the editor
+          sees the photo before committing to it. */}
+      <div
+        style={{
+          inlineSize: 160,
+          blockSize: 100,
+          flexShrink: 0,
+          borderRadius: "var(--radius-md)",
+          border: "1px solid var(--border-default)",
+          background: "var(--surface-sunken)",
+          overflow: "hidden",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        {valid && !broken ? (
+          <img
+            src={trimmed}
+            alt=""
+            onError={() => setBroken(true)}
+            style={{ inlineSize: "100%", blockSize: "100%", objectFit: fit }}
           />
-          {publishedLabel}
-        </label>
+        ) : (
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)", padding: "var(--space-2)", textAlign: "center" }}>
+            {valid ? t("site.image.broken") : t("site.image.invalid")}
+          </span>
+        )}
       </div>
 
-      <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start", flexWrap: "wrap" }}>
-        {/* The thumbnail shows the draft, not the saved value, so the editor
-            sees the photo before committing to it. */}
-        <div
-          style={{
-            inlineSize: 160,
-            blockSize: 100,
-            flexShrink: 0,
-            borderRadius: "var(--radius-md)",
-            border: "1px solid var(--border-default)",
-            background: "var(--surface-sunken)",
-            overflow: "hidden",
-            display: "grid",
-            placeItems: "center",
-          }}
-        >
-          {valid && !broken ? (
-            <img
-              src={trimmed}
-              alt=""
-              onError={() => setBroken(true)}
-              style={{ inlineSize: "100%", blockSize: "100%", objectFit: "cover" }}
-            />
-          ) : (
-            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)", padding: "var(--space-2)", textAlign: "center" }}>
-              {valid ? t("site.image.broken") : t("site.image.invalid")}
-            </span>
+      <div style={{ flex: 1, minInlineSize: 240, display: "grid", gap: "var(--space-2)" }}>
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+          {/* Paths and URLs read left to right in every locale. */}
+          <input
+            id={inputId}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            dir="ltr"
+            spellCheck={false}
+            inputMode="url"
+            aria-describedby={hintId}
+            aria-invalid={!valid}
+            style={{
+              flex: 1,
+              fontFamily: "ui-monospace, monospace",
+              padding: "var(--space-2) var(--space-3)",
+              border: `1px solid ${valid ? "var(--border-default)" : "var(--danger)"}`,
+              borderRadius: "var(--radius-md)",
+            }}
+          />
+
+          {dirty && (
+            <>
+              <button
+                type="button"
+                className="btn primary small"
+                onClick={() => onSave(trimmed)}
+                disabled={saving || !valid}
+              >
+                {saving ? "…" : "✓"}
+              </button>
+              <button type="button" className="btn ghost small" onClick={() => setDraft(saved)} disabled={saving}>
+                ✕
+              </button>
+            </>
           )}
         </div>
 
-        <div style={{ flex: 1, minInlineSize: 240, display: "grid", gap: "var(--space-2)" }}>
-          <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-            {/* Paths and URLs read left to right in every locale. */}
-            <input
-              id={inputId}
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              dir="ltr"
-              spellCheck={false}
-              inputMode="url"
-              aria-describedby={hintId}
-              aria-invalid={!valid}
-              style={{
-                flex: 1,
-                fontFamily: "ui-monospace, monospace",
-                padding: "var(--space-2) var(--space-3)",
-                border: `1px solid ${valid ? "var(--border-default)" : "var(--danger)"}`,
-                borderRadius: "var(--radius-md)",
-              }}
-            />
+        <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}>
+          <span id={hintId} style={{ fontSize: "var(--text-sm)", color: valid ? "var(--text-muted)" : "var(--danger)" }}>
+            {valid ? t("site.image.hint") : t("site.image.invalid")}
+          </span>
 
-            {dirty && (
-              <>
-                <button
-                  type="button"
-                  className="btn primary small"
-                  onClick={() => onSave({ value: trimmed })}
-                  disabled={saving || !valid}
-                >
-                  {saving ? "…" : "✓"}
-                </button>
-                <button type="button" className="btn ghost small" onClick={() => setDraft(block.value)} disabled={saving}>
-                  ✕
-                </button>
-              </>
-            )}
-          </div>
+          {/* Pushes the actions to the end of the row, whichever are present. */}
+          <span aria-hidden="true" style={{ marginInlineStart: "auto" }} />
 
-          <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}>
-            <span id={hintId} style={{ fontSize: "var(--text-sm)", color: valid ? "var(--text-muted)" : "var(--danger)" }}>
-              {valid ? t("site.image.hint") : t("site.image.invalid")}
-            </span>
-
-            {onUpload && (
-              <>
-                {/* Hidden behind a button so the control matches the others;
-                    `accept` only narrows the picker — the server checks bytes. */}
-                <input
-                  ref={fileInput}
-                  type="file"
-                  accept={IMAGE_UPLOAD_ACCEPT}
-                  hidden
-                  onChange={(event) => {
-                    void pickFile(event.target.files?.[0]);
-                    // Cleared so choosing the same file again still fires.
-                    event.target.value = "";
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn ghost small"
-                  onClick={() => fileInput.current?.click()}
-                  disabled={saving || uploading}
-                  aria-busy={uploading}
-                  style={{ marginInlineStart: "auto" }}
-                >
-                  {uploading ? t("site.image.uploading") : t("site.image.upload")}
-                </button>
-              </>
-            )}
-
-            <button
-              type="button"
-              className="btn ghost small"
-              onClick={onReset}
-              disabled={saving || uploading}
-              style={onUpload ? undefined : { marginInlineStart: "auto" }}
-            >
-              {t("site.image.reset")}
-            </button>
-          </div>
-
-          {/* The success note is only true while the uploaded URL is unsaved. */}
-          {upload && (upload.kind === "error" || dirty) && (
-            <span
-              role={upload.kind === "error" ? "alert" : "status"}
-              style={{ fontSize: "var(--text-sm)", color: upload.kind === "error" ? "var(--danger)" : "var(--success)" }}
-            >
-              {upload.text}
-            </span>
+          {onUpload && (
+            <>
+              {/* Hidden behind a button so the control matches the others;
+                  `accept` only narrows the picker — the server checks bytes. */}
+              <input
+                ref={fileInput}
+                type="file"
+                accept={IMAGE_UPLOAD_ACCEPT}
+                hidden
+                onChange={(event) => {
+                  void pickFile(event.target.files?.[0]);
+                  // Cleared so choosing the same file again still fires.
+                  event.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                className="btn ghost small"
+                onClick={() => fileInput.current?.click()}
+                disabled={saving || uploading}
+                aria-busy={uploading}
+              >
+                {uploading ? t("site.image.uploading") : t("site.image.upload")}
+              </button>
+            </>
           )}
+
+          {extra?.(uploading)}
         </div>
+
+        {/* The success note is only true while the uploaded URL is unsaved. */}
+        {upload && (upload.kind === "error" || dirty) && (
+          <span
+            role={upload.kind === "error" ? "alert" : "status"}
+            style={{ fontSize: "var(--text-sm)", color: upload.kind === "error" ? "var(--danger)" : "var(--success)" }}
+          >
+            {upload.text}
+          </span>
+        )}
       </div>
     </div>
   );

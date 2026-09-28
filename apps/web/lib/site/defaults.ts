@@ -1,3 +1,5 @@
+import { isSafeImageSrc } from "@mon/core";
+
 /**
  * The shape of the site's theme, and the values it falls back to.
  *
@@ -31,9 +33,23 @@ export const DEFAULT_THEME: SiteTheme = {
   brand: {
     "brand.name": "m.on",
     "brand.legalName": "m.on GmbH",
-    "brand.logo": "/images/logo.svg",
+    "brand.logo": "/images/brand/logo.png",
     "brand.tagline": "Moving made simpler, faster, and stress-free.",
   },
   contact: {},
   seo: {},
 };
+
+/** The logo the chrome is drawn around, used when the setting is empty or unsafe. */
+export const DEFAULT_LOGO = "/images/brand/logo.png";
+
+/**
+ * The brand logo to render.
+ *
+ * The API only stores an `/images/...` path or an https URL; the value is
+ * checked again because it goes straight into an `<img src>`.
+ */
+export function logoSrc(value: string | undefined): string {
+  const trimmed = value?.trim();
+  return trimmed && isSafeImageSrc(trimmed) ? trimmed : DEFAULT_LOGO;
+}
