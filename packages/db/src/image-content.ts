@@ -47,21 +47,17 @@ const HOW = "page-how-it-works";
 const REVIEWS = "page-reviews";
 
 export const IMAGE_CONTENT: ContentSeed[] = [
-  // ══ Homepage (86:4671) ═════════════════════════════════════════════
-  image(HOME, "hero.taglineImage", "Hero — tagline wordmark (image)", 1, "/images/home/tagline-move-on-go-on.png"),
-  image(HOME, "hero.image", "Hero — truck photo", 2, "/images/home/hero-truck.jpg"),
-  image(HOME, "services.moving.image", "Services — Moving card photo", 11, "/images/home/circular-photo-wrapper.jpg"),
-  image(HOME, "services.disposal.image", "Services — Clearance card photo", 15, "/images/home/circular-photo-wrapper-2.jpg"),
-  image(HOME, "services.cleaning.image", "Services — Cleaning card photo", 19, "/images/home/circular-photo-wrapper-3.jpg"),
-  // Cards 4–6 reuse the first three photos, exactly as the frame does.
-  image(HOME, "services.packing.image", "Services — Packing card photo", 23, "/images/home/circular-photo-wrapper.jpg"),
-  image(HOME, "services.assembly.image", "Services — Assembly card photo", 27, "/images/home/circular-photo-wrapper-2.jpg"),
-  image(HOME, "services.storage.image", "Services — Storage card photo", 31, "/images/home/circular-photo-wrapper-3.jpg"),
-  image(HOME, "values.image", "What makes us m.on — photo", 38, "/images/home/values-team.jpg"),
-  image(HOME, "promise.image", "Promise — photo", 56, "/images/home/promise-truck-interior.jpg"),
-  image(HOME, "experience.team.image", "Experience — first photo (team)", 61, "/images/home/experience-team.jpg"),
-  image(HOME, "experience.work.image", "Experience — second photo (work)", 64, "/images/home/experience-work.jpg"),
-  image(HOME, "experience.result.image", "Experience — third photo (result)", 67, "/images/home/experience-result.jpg"),
+  // ══ Homepage (3:4) ═════════════════════════════════════════════════
+  image(HOME, "hero.image", "Hero — photo beside the headline", 8, "/images/home/hero-right.jpg"),
+  // Each card's photo sits above its title, so it shares the title's place.
+  image(HOME, "services.moving.image", "Services — Moving card photo", 13, "/images/home/circular-photo-wrapper.jpg"),
+  image(HOME, "services.disposal.image", "Services — Clearance card photo", 17, "/images/home/circular-photo-wrapper-2.jpg"),
+  image(HOME, "services.cleaning.image", "Services — Cleaning card photo", 21, "/images/home/circular-photo-wrapper-3.jpg"),
+  // The avatars go with the review cards by position, whether a card shows a
+  // published review or the CMS testimonial standing in for one.
+  image(HOME, "reviews.1.avatar", "Review 1 — avatar", 86, "/images/home/avatar-frame.jpg"),
+  image(HOME, "reviews.2.avatar", "Review 2 — avatar", 89, "/images/home/avatar-frame-2.jpg"),
+  image(HOME, "reviews.3.avatar", "Review 3 — avatar", 92, "/images/home/avatar-frame-3.jpg"),
 
   // ══ Moving (106:10195) ═════════════════════════════════════════════
   image(MOVING, "hero.image", "Hero — background photo", 5, "/images/service-moving/page-hero.jpg"),
