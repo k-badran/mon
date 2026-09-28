@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { CardGrid, DarkHero, path, readList, type Copy } from "@/app/components/site/Blocks";
 import {
@@ -28,9 +29,12 @@ export const metadata: Metadata = {
 };
 
 /* The gallery's photographs, in the frame's order: the tall one, then the two
-   stacked beside it. Design, not copy — only their captions are CMS rows. */
+   stacked beside it. Each is the `gallery.N.image` row; these are the files
+   the page falls back to without one. The frame's own fill for the tall card
+   shows a truck in the old UmzugPlus livery, so its default is the m.on truck
+   from the homepage hero, cropped to the 760×620 card. */
 const GALLERY_IMAGES = [
-  "/images/service-moving/rectangle.jpg",
+  "/images/service-moving/gallery-residential-mon.jpg",
   "/images/service-moving/rectangle-2.jpg",
   "/images/service-moving/rectangle-3.jpg",
 ];
@@ -77,14 +81,14 @@ export default async function MovingPage({ params }: { params: { locale: Locale 
             ? { label: copy["hero.ctaSecondary"], href: path(locale, "/preise") }
             : undefined
         }
-        image="/images/service-moving/page-hero.jpg"
+        image={imageSrc(copy, "hero.image", "/images/service-moving/page-hero.jpg")}
       />
 
       <IncludedShowcase
         eyebrow={copy["included.eyebrow"]}
         headline={copy["included.headline"]}
         subline={copy["included.subline"]}
-        image="/images/service-moving/checklist-photo.jpg"
+        image={imageSrc(copy, "included.image", "/images/service-moving/checklist-photo.jpg")}
         items={included}
         chips={chips}
       />
@@ -100,8 +104,8 @@ export default async function MovingPage({ params }: { params: { locale: Locale 
         eyebrow={copy["gallery.eyebrow"]}
         headline={copy["gallery.headline"]}
         subline={copy["gallery.subline"]}
-        images={GALLERY_IMAGES.map((src, index) => ({
-          src,
+        images={GALLERY_IMAGES.map((fallback, index) => ({
+          src: imageSrc(copy, `gallery.${index + 1}.image`, fallback),
           caption: captions[index]?.caption,
         }))}
       />

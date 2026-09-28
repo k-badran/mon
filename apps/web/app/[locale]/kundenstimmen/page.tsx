@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { readList, type Copy } from "@/app/components/site/Blocks";
 import { FilterBar, RatingSummary, ReviewFeed } from "@/app/components/site/Blocks2";
@@ -54,7 +55,7 @@ export default async function ReviewsPage({ params }: { params: { locale: Locale
       meta: entry.meta,
       body: entry.body,
       response: entry.response,
-      avatar: AVATARS[index],
+      avatar: imageSrc(copy, `reviews.${index + 1}.avatar`, AVATARS[index]),
       rating: RATINGS[index] ?? 5,
     }),
   );

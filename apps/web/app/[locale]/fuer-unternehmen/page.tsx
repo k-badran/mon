@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { readList, type Copy } from "@/app/components/site/Blocks";
 import { ArticleGrid, IconCardGrid, LeadFormHero, LogoStrip } from "@/app/components/site/Blocks2";
@@ -77,11 +78,15 @@ export default async function ForBusinessPage({ params }: { params: { locale: Lo
     body: entry.body ?? "",
   }));
 
-  const services = readList(copy, "services").map((entry, index) => ({
-    title: entry.title ?? "",
-    body: entry.body ?? "",
-    ...(SERVICE_IMAGES[index] ? { image: SERVICE_IMAGES[index] } : {}),
-  }));
+  const services = readList(copy, "services").map((entry, index) => {
+    const image = imageSrc(copy, `services.${index + 1}.image`, SERVICE_IMAGES[index]);
+
+    return {
+      title: entry.title ?? "",
+      body: entry.body ?? "",
+      ...(image ? { image } : {}),
+    };
+  });
 
   return (
     <>
@@ -89,7 +94,7 @@ export default async function ForBusinessPage({ params }: { params: { locale: Lo
         eyebrow={copy["hero.eyebrow"]}
         headline={copy["hero.headline"]}
         subline={copy["hero.subline"]}
-        image={HERO_IMAGE}
+        image={imageSrc(copy, "hero.image", HERO_IMAGE)}
         form={{
           title: copy["form.title"],
           submit: copy["form.submit"],

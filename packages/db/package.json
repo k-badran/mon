@@ -17,6 +17,10 @@
     "./site-defaults": {
       "types": "./dist/site-defaults.d.ts",
       "default": "./dist/site-defaults.js"
+    },
+    "./image-content": {
+      "types": "./dist/image-content.d.ts",
+      "default": "./dist/image-content.js"
     }
   },
   "scripts": {

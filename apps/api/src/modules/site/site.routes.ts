@@ -1,3 +1,4 @@
+import { isSafeImageSrc } from "@mon/core";
 import { db, schema } from "@mon/db";
 import { and, asc, eq } from "drizzle-orm";
 import { Router } from "express";
@@ -147,6 +148,16 @@ const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 const settingBody = z.object({ value: z.string().trim().max(2000) });
 
+/**
+ * What an image field accepts, stated in the error the editor shows.
+ *
+ * The value is rendered into an <img src> on public pages, so only files the
+ * site ships and https URLs get through — a javascript: or data: value, or an
+ * image over plain http, is refused here and again when the site renders.
+ */
+const IMAGE_RULE =
+  "Expected an image path under /images/ (e.g. /images/home/hero-truck.jpg) or an https:// URL.";
+
 siteRouter.patch(
   "/settings/:key",
   ...themeEditor,
@@ -178,6 +189,10 @@ siteRouter.patch(
 
     if (before.kind === "number" && Number.isNaN(Number(value))) {
       throw AppError.unprocessable("Expected a number.");
+    }
+
+    if (before.kind === "image" && !isSafeImageSrc(value)) {
+      throw AppError.unprocessable(IMAGE_RULE);
     }
 
     const [updated] = await db
@@ -248,11 +263,13 @@ siteRouter.patch(
       throw AppError.notFound("Content block");
     }
 
-    const [updated] = await db
-      .update(contentBlocks)
-      .set({ ...req.body, updatedAt: new Date(), updatedBy: req.user!.id })
-      .where(eq(contentBlocks.id, id))
-      .returning();
+    // An image block's value lands in an <img src> on a public page, so it is
+    // held to the image rule rather than accepted as free text.
+    if (before.kind === "image" && req.body.value !== undefined && !isSafeImageSrc(req.body.value)) {
+      throw AppError.unprocessable(IMAGE_RULE);
+    }
+
+    const updated = await writeBlock(before, req.body, req.user!.id);
 
     await invalidateSiteCache();
 
@@ -263,7 +280,7 @@ siteRouter.patch(
       entityId: id,
       changes: {
         slot: `${before.section}.${before.slot}`,
-        locale: before.locale,
+        locale: before.kind === "image" ? "all" : before.locale,
         ...(req.body.value !== undefined ? { value: { from: before.value, to: req.body.value } } : {}),
         ...(req.body.isPublished !== undefined ? { isPublished: req.body.isPublished } : {}),
       },
@@ -274,6 +291,82 @@ siteRouter.patch(
     res.json(updated);
   }),
 );
+
+/**
+ * Puts an image block back to the photo the page shipped with.
+ *
+ * The escape hatch for a pasted URL that later breaks or turns out wrong: the
+ * editor need not remember which file the design used.
+ */
+siteRouter.post(
+  "/blocks/:id/reset",
+  ...contentEditor,
+  validate({ params: z.object({ id: z.string().uuid() }) }),
+  asyncHandler(async (req, res) => {
+    const id = validatedParams<{ id: string }>(req).id;
+
+    const [before] = await db.select().from(contentBlocks).where(eq(contentBlocks.id, id)).limit(1);
+
+    if (!before) {
+      throw AppError.notFound("Content block");
+    }
+
+    const { imageDefault } = await import("@mon/db/image-content");
+    const value = before.kind === "image" ? imageDefault(before.section, before.slot) : undefined;
+
+    if (value === undefined) {
+      throw AppError.unprocessable("Only a seeded image block has a default to reset to.");
+    }
+
+    const updated = await writeBlock(before, { value }, req.user!.id);
+
+    await invalidateSiteCache();
+
+    await recordAudit({
+      actor: { id: req.user!.id, email: req.user!.email },
+      action: "site.content_updated",
+      entityType: "content_block",
+      entityId: id,
+      changes: {
+        slot: `${before.section}.${before.slot}`,
+        locale: "all",
+        value: { from: before.value, to: value },
+        reset: true,
+      },
+      ipAddress: req.ip,
+      requestId: req.requestId,
+    });
+
+    res.json(updated);
+  }),
+);
+
+/**
+ * Applies an edit to a block, and to its sibling locales when it is an image.
+ *
+ * A photograph is the same in every language, so an image block's rows are
+ * kept identical: editing the German row and leaving the Arabic page on the
+ * old photo would be a bug no editor could see from the form they were on.
+ * Text blocks are per locale and only the one row changes.
+ */
+async function writeBlock(
+  before: typeof contentBlocks.$inferSelect,
+  patch: { value?: string; isPublished?: boolean },
+  userId: string,
+): Promise<typeof contentBlocks.$inferSelect> {
+  const where =
+    before.kind === "image"
+      ? and(eq(contentBlocks.section, before.section), eq(contentBlocks.slot, before.slot))
+      : eq(contentBlocks.id, before.id);
+
+  const rows = await db
+    .update(contentBlocks)
+    .set({ ...patch, updatedAt: new Date(), updatedBy: userId })
+    .where(where)
+    .returning();
+
+  return rows.find((row) => row.id === before.id) ?? rows[0]!;
+}
 
 /**
  * Restores every theme setting to its seeded default.

@@ -13,7 +13,8 @@
 export interface ContentSeed {
   section: string;
   slot: string;
-  kind: "text" | "textarea";
+  /** "image" holds a picture's path or https URL, the same in every locale. */
+  kind: "text" | "textarea" | "image";
   label: string;
   sortOrder: number;
   values: { de: string; en: string; ar: string; tr: string };

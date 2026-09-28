@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 
 import { FaqList, type HomeFaq } from "./FaqList";
+import { GERMANY_MAP, MAP_CITIES } from "./germany-map";
 
 export type { HomeFaq };
 
@@ -24,7 +26,9 @@ export type { HomeFaq };
  *
  * Every string comes from the `copy` map, which the page fetches from
  * `/api/site/content`. Nothing here hardcodes marketing text: changing a
- * headline is a dashboard edit, not a deploy. A missing block renders as
+ * headline is a dashboard edit, not a deploy. The photos are `image` rows in
+ * the same map; the file paths written here are only their fallbacks.
+ * A missing block renders as
  * nothing rather than throwing, so a half-filled CMS degrades quietly.
  *
  * Server components, except the FAQ list: its topic tabs filter the
@@ -161,7 +165,7 @@ export function Hero({ copy, locale }: { copy: Copy; locale: Locale }) {
               row is its text, read as the alt. */}
           {copy["hero.tagline"] ? (
             <img
-              src="/images/home/tagline-move-on-go-on.png"
+              src={imageSrc(copy, "hero.taglineImage", "/images/home/tagline-move-on-go-on.png")}
               alt={copy["hero.tagline"]}
               width={494}
               height={56}
@@ -219,7 +223,7 @@ export function Hero({ copy, locale }: { copy: Copy; locale: Locale }) {
 
         {/* Decorative: the headline already says what the truck shows. */}
         <img
-          src="/images/home/hero-truck.jpg"
+          src={imageSrc(copy, "hero.image", "/images/home/hero-truck.jpg")}
           alt=""
           width={600}
           height={480}
@@ -237,7 +241,8 @@ export function Hero({ copy, locale }: { copy: Copy; locale: Locale }) {
  *
  * The frame's row is 1403 wide from x=32 and clips: three cards and a sliver
  * of the fourth show at 1440, the rest are reached by scrolling. Cards 4–6
- * reuse the first three photos, exactly as the frame does.
+ * reuse the first three photos, exactly as the frame does. Each photo is the
+ * card's `services.<key>.image` row; the path here is only its fallback.
  */
 const SERVICE_CARDS = [
   { key: "moving", href: "/umzug", image: "/images/home/circular-photo-wrapper.jpg" },
@@ -279,7 +284,7 @@ export function Services({ copy, locale }: { copy: Copy; locale: Locale }) {
               className="flex w-[min(405px,82vw)] shrink-0 snap-start flex-col gap-6 rounded-xl border border-border-subtle bg-neutral-50 p-6 md:w-[405px] md:p-8"
             >
               <img
-                src={card.image}
+                src={imageSrc(copy, `services.${card.key}.image`, card.image)}
                 alt=""
                 width={341}
                 height={213}
@@ -365,7 +370,7 @@ function Values({ copy, locale }: { copy: Copy; locale: Locale }) {
           corners round again rather than ending in a hard cut mid-page. */}
       <div className="relative">
         <img
-          src="/images/home/values-team.jpg"
+          src={imageSrc(copy, "values.image", "/images/home/values-team.jpg")}
           alt={copy["values.imageAlt"] ?? ""}
           width={600}
           height={750}
@@ -509,7 +514,7 @@ function PromiseBlock({ copy }: { copy: Copy }) {
 
       {/* Bleeds to the end edge; r 24/0/0/24 on the inner side only. */}
       <img
-        src="/images/home/promise-truck-interior.jpg"
+        src={imageSrc(copy, "promise.image", "/images/home/promise-truck-interior.jpg")}
         alt={copy["promise.imageAlt"] ?? ""}
         width={506}
         height={506}
@@ -558,7 +563,7 @@ function Experience({ copy }: { copy: Copy }) {
         {photos.map((photo) => (
           <li key={photo.key} className="grid w-[280px] shrink-0 snap-start content-start gap-3 lg:w-auto lg:gap-4">
             <img
-              src={photo.image}
+              src={imageSrc(copy, `experience.${photo.key}.image`, photo.image)}
               alt={copy[`experience.${photo.key}.alt`] ?? ""}
               width={405}
               height={270}
@@ -653,21 +658,23 @@ export function HowItWorks({ copy, locale }: { copy: Copy; locale: Locale }) {
 /* ── Where we operate ───────────────────────────────────────────────── */
 
 /**
- * The map pins, placed where the frame puts them in its 580x620 map column,
- * as the pin's centre in percent.
- *
- * Physical `left`, not `start`: a map does not mirror in RTL. Each pin is
- * labelled with the city at the same position in the CMS list, so renaming
- * a city renames its pin; the first — Berlin in the frame — is the head
- * office and gets the ringed pin and the star.
+ * How many cities, from the top of the CMS list, get a named pin. The frame
+ * names five (Berlin, München, Hamburg, Köln, Frankfurt) and marks the rest
+ * with bare dots — naming all fifteen would pile the Ruhr labels on top of
+ * one another.
  */
-const MAP_PINS = [
-  { x: 73.2, y: 29.4 },
-  { x: 61.2, y: 74.5 },
-  { x: 45.6, y: 16.5 },
-  { x: 24.4, y: 42.3 },
-  { x: 38.8, y: 53.5 },
-];
+const NAMED_PINS = 5;
+
+const normaliseCity = (name: string) => name.trim().toLocaleLowerCase("de");
+
+/** The map position for a CMS city name, by its name or an alias; none for a city the map does not know. */
+function mapCity(name: string) {
+  const key = normaliseCity(name);
+  return MAP_CITIES.find((city) => [city.name, ...(city.aliases ?? [])].some((n) => normaliseCity(n) === key));
+}
+
+/** Keeps a label readable where it crosses a state border or a neighbour's coast. */
+const PIN_LABEL_HALO = "[text-shadow:0_0_2px_var(--color-neutral-0),0_0_4px_var(--color-neutral-0)]";
 
 export function Areas({ copy }: { copy: Copy }) {
   const cities = list(copy["areas.cities"]);
@@ -675,45 +682,71 @@ export function Areas({ copy }: { copy: Copy }) {
 
   if (!copy["areas.headline"]) return null;
 
+  /*
+   * Pins come from the CMS list, placed at each city's real position on the
+   * generated Natural Earth map (see germany-map.ts), so adding or reordering
+   * a city moves its pin with it. The first city is the head office — Berlin
+   * in the frame — and gets the ringed pin and the star. Drawn in reverse so
+   * the named pins sit above the bare dots.
+   */
+  const pins = cities
+    .flatMap((name, index) => {
+      const at = mapCity(name);
+      return at ? [{ name, index, at }] : [];
+    })
+    .reverse();
+
   return (
     <section aria-labelledby="areas-heading" className="bg-neutral-0">
       <div className={`${SHELL} ${PAD} grid items-center gap-10 lg:grid-cols-[minmax(0,580px)_1fr] lg:gap-16`}>
-        <div className="relative aspect-[580/620] w-full overflow-hidden rounded-3xl bg-neutral-100 p-6">
-          <img
-            src="/images/home/coverage-map.jpg"
-            alt={copy["areas.mapAlt"] ?? ""}
-            width={532}
-            height={572}
-            className="size-full object-cover"
-          />
+        <div className="w-full rounded-3xl bg-neutral-100 p-6">
+          {/*
+            The map and its pins share one box locked to the SVG's aspect, so a
+            pin's percent position is a point on the drawing at every width.
+            `dir="ltr"` and physical `left`: geography does not mirror in RTL.
+          */}
+          <div dir="ltr" className="relative aspect-[532/572] w-full overflow-hidden rounded">
+            <img
+              src={GERMANY_MAP.src}
+              alt={copy["areas.mapAlt"] ?? ""}
+              width={GERMANY_MAP.width}
+              height={GERMANY_MAP.height}
+              loading="lazy"
+              decoding="async"
+              className="size-full"
+            />
 
-          <ul aria-hidden="true">
-            {MAP_PINS.slice(0, cities.length).map((pin, index) => (
-              <li
-                key={cities[index]}
-                className="absolute flex -translate-x-1/2 flex-col items-center gap-1"
-                style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-              >
-                {index === 0 ? (
-                  <>
-                    <span className="grid size-5 place-items-center rounded-full border-2 border-brand-red bg-neutral-0">
-                      <span className="size-3 rounded-full bg-brand-yellow" />
-                    </span>
-                    <span className="text-caption leading-4 font-bold tracking-normal text-text-strong">
-                      {cities[index]} ★
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="size-2.5 rounded-full border border-text-strong bg-brand-yellow" />
-                    <span className="text-[0.6875rem] leading-[0.875rem] font-semibold text-text-muted">
-                      {cities[index]}
-                    </span>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
+            {/* The city list beside the map names every city; the pins only repeat it. */}
+            <ul aria-hidden="true">
+              {pins.map(({ name, index, at }) => (
+                <li key={name} className="absolute" style={{ left: `${at.x}%`, top: `${at.y}%` }}>
+                  {index === 0 ? (
+                    <>
+                      <span className="absolute grid size-5 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-brand-red bg-neutral-0 shadow-sm">
+                        <span className="size-3 rounded-full bg-brand-yellow" />
+                      </span>
+                      <span
+                        className={`absolute top-3 -translate-x-1/2 text-caption leading-4 font-bold tracking-normal whitespace-nowrap text-text-strong ${PIN_LABEL_HALO}`}
+                      >
+                        {at.label ?? name} ★
+                      </span>
+                    </>
+                  ) : index < NAMED_PINS ? (
+                    <>
+                      <span className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-text-strong bg-brand-yellow" />
+                      <span
+                        className={`absolute top-2 -translate-x-1/2 text-[0.6875rem] leading-[0.875rem] font-semibold whitespace-nowrap text-text-muted ${PIN_LABEL_HALO}`}
+                      >
+                        {at.label ?? name}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-yellow ring-1 ring-text-strong/60" />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         <div className="grid gap-10">
@@ -798,14 +831,6 @@ export function Faq({
 }) {
   if (entries.length === 0) return null;
 
-  // `faq_entries` has no category column, so the topic of the nth question is
-  // the CMS row `faq.tag<n>` — the frame's four questions carry Insurance,
-  // Billing, Booking and Cleaning, in that order.
-  const tagged = entries.map((entry, index) => ({
-    ...entry,
-    tag: copy[`faq.tag${index + 1}`] || undefined,
-  }));
-
   return (
     <section aria-labelledby="faq-heading" className="bg-neutral-0">
       {/* 120px inline here, not the 80 every other section uses. */}
@@ -820,7 +845,9 @@ export function Faq({
         />
 
         <div className="grid gap-6">
-          <FaqList entries={tagged} allLabel={copy["faq.all"]} />
+          {/* Each entry carries its own `category`; the chips and badges are
+              built from it inside the list. */}
+          <FaqList entries={entries} allLabel={copy["faq.all"]} />
 
           {copy["faq.moreTitle"] ? (
             <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border-subtle pt-6">

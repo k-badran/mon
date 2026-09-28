@@ -894,6 +894,24 @@ export const MESSAGES = {
   "site.section.home": { de: "Startseite", en: "Home page", ar: "الصفحة الرئيسية", tr: "Ana sayfa" },
   "site.section.auth": { de: "Anmeldeseite", en: "Login page", ar: "صفحة الدخول", tr: "Giriş sayfası" },
   "site.section.footer": { de: "Fußzeile", en: "Footer", ar: "التذييل", tr: "Alt bilgi" },
+  // One per `content_blocks` section the seeds create. Without them the
+  // editor printed the raw key ("site.section.service-moving") as the heading.
+  "site.section.service-moving": { de: "Umzug", en: "Moving page", ar: "صفحة النقل", tr: "Taşınma sayfası" },
+  "site.section.service-cleaning": { de: "Reinigung", en: "Cleaning page", ar: "صفحة التنظيف", tr: "Temizlik sayfası" },
+  "site.section.service-disposal": { de: "Entrümpelung", en: "Clearance page", ar: "صفحة الإخلاء", tr: "Boşaltma sayfası" },
+  "site.section.page-about": { de: "Über uns", en: "About us", ar: "من نحن", tr: "Hakkımızda" },
+  "site.section.page-blog": { de: "Ratgeber", en: "Guide / blog", ar: "المدوّنة", tr: "Rehber / blog" },
+  "site.section.page-contact": { de: "Kontakt", en: "Contact", ar: "اتصل بنا", tr: "İletişim" },
+  "site.section.page-faq": { de: "FAQ", en: "FAQ page", ar: "صفحة الأسئلة الشائعة", tr: "SSS sayfası" },
+  "site.section.page-for-business": { de: "Für Unternehmen", en: "For business", ar: "للشركات", tr: "Kurumsal" },
+  "site.section.page-how-it-works": { de: "So funktioniert's", en: "How it works", ar: "كيف نعمل", tr: "Nasıl çalışır" },
+  "site.section.page-partner": { de: "Partner werden", en: "Become a partner", ar: "كن شريكًا", tr: "Partner olun" },
+  "site.section.page-pricing": { de: "Preise", en: "Pricing", ar: "الأسعار", tr: "Fiyatlar" },
+  "site.section.page-reviews": { de: "Kundenstimmen", en: "Reviews", ar: "آراء العملاء", tr: "Müşteri yorumları" },
+  "site.section.page-imprint": { de: "Impressum", en: "Imprint", ar: "بيانات الناشر", tr: "Künye" },
+  "site.section.page-privacy": { de: "Datenschutz", en: "Privacy", ar: "الخصوصية", tr: "Gizlilik" },
+  "site.section.page-terms": { de: "AGB", en: "Terms", ar: "الشروط والأحكام", tr: "Şartlar" },
+  "site.section.page-legal-cookie": { de: "Cookies", en: "Cookies", ar: "ملفات تعريف الارتباط", tr: "Çerezler" },
   "site.published": { de: "Veröffentlicht", en: "Published", ar: "منشور", tr: "Yayında" },
   "site.saved": {
     de: "Gespeichert — auf der Website in bis zu einer Minute sichtbar.",
@@ -915,6 +933,33 @@ export const MESSAGES = {
     en: "Copy is maintained per language.",
     ar: "النصوص تُحرَّر لكل لغة على حدة.",
     tr: "Metinler her dil için ayrı tutulur.",
+  },
+  "site.image.hint": {
+    de: "Ein Pfad unter /images/ oder eine https://-Adresse. Fotos gelten für alle Sprachen.",
+    en: "A path under /images/ or an https:// address. Photos apply to every language.",
+    ar: "مسار ضمن ‎/images/‎ أو عنوان يبدأ بـ ‎https://‎. تسري الصور على جميع اللغات.",
+    tr: "/images/ altında bir yol veya https:// adresi. Fotoğraflar tüm diller için geçerlidir.",
+  },
+  "site.image.invalid": {
+    de: "Nur Pfade unter /images/ oder https://-Adressen sind erlaubt.",
+    en: "Only paths under /images/ or https:// addresses are allowed.",
+    ar: "يُسمح فقط بمسارات ضمن ‎/images/‎ أو بعناوين ‎https://‎.",
+    tr: "Yalnızca /images/ altındaki yollar veya https:// adresleri kabul edilir.",
+  },
+  "site.image.broken": {
+    de: "Das Bild konnte nicht geladen werden.",
+    en: "The image could not be loaded.",
+    ar: "تعذّر تحميل الصورة.",
+    tr: "Görsel yüklenemedi.",
+  },
+  "site.image.reset": {
+    de: "Standardfoto", en: "Default photo", ar: "الصورة الافتراضية", tr: "Varsayılan fotoğraf",
+  },
+  "site.image.wasReset": {
+    de: "Das Standardfoto ist wiederhergestellt.",
+    en: "The default photo has been restored.",
+    ar: "أُعيدت الصورة الافتراضية.",
+    tr: "Varsayılan fotoğraf geri yüklendi.",
   },
   "site.loadFailed": {
     de: "Die Website-Einstellungen konnten nicht geladen werden.",
@@ -2294,6 +2339,25 @@ export const MESSAGES = {
   "nav.faq": {
     de: "FAQ", en: "FAQ", ar: "الأسئلة الشائعة", tr: "SSS",
   },
+  // FAQ topics, one per key in FAQ_CATEGORIES (@mon/core). Interface labels
+  // rather than CMS rows: the set of topics is fixed in code, so a CMS row
+  // could rename a topic but never add one. `all` backs the "all topics" chip
+  // when the homepage's `faq.all` row is missing.
+  "faq.category.all": { de: "Alle", en: "All", ar: "الكل", tr: "Tümü" },
+  "faq.category.insurance": {
+    de: "Versicherung", en: "Insurance", ar: "التأمين", tr: "Sigorta",
+  },
+  "faq.category.billing": {
+    de: "Abrechnung", en: "Billing", ar: "الفوترة", tr: "Faturalandırma",
+  },
+  "faq.category.booking": {
+    de: "Buchung", en: "Booking", ar: "الحجز", tr: "Rezervasyon",
+  },
+  "faq.category.cleaning": {
+    de: "Reinigung", en: "Cleaning", ar: "التنظيف", tr: "Temizlik",
+  },
+  "faq.category.moving": { de: "Umzug", en: "Moving", ar: "النقل", tr: "Taşınma" },
+  "faq.category.general": { de: "Allgemein", en: "General", ar: "عام", tr: "Genel" },
   "nav.contact": {
     de: "Kontakt", en: "Contact", ar: "اتصل بنا", tr: "İletişim",
   },

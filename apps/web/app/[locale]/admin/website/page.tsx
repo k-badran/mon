@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { isSafeImageSrc } from "@mon/core";
+
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import { DashboardShell } from "@/app/components/dashboard/DashboardShell";
@@ -42,6 +44,7 @@ interface ContentBlock {
   slot: string;
   locale: string;
   value: string;
+  /** "text", "textarea" or "image" (a photo's path or https URL). */
   kind: string;
   label: string;
   isPublished: boolean;
@@ -111,6 +114,25 @@ export default function WebsiteControlPage() {
       await sdk.http.patch(`/api/site/blocks/${id}`, patch);
       setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
       setStatus({ kind: "ok", text: t("site.saved") });
+    } catch (caught) {
+      setStatus({
+        kind: "error",
+        text: caught instanceof ApiError ? caught.message : t("error.saveFailed"),
+      });
+    } finally {
+      setSavingKey(null);
+    }
+  }
+
+  /** Puts an image block back to the photo the page shipped with. */
+  async function resetBlock(id: string) {
+    setSavingKey(id);
+    setStatus(null);
+
+    try {
+      const updated = await sdk.http.post<ContentBlock>(`/api/site/blocks/${id}/reset`);
+      setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, value: updated.value } : b)));
+      setStatus({ kind: "ok", text: t("site.image.wasReset") });
     } catch (caught) {
       setStatus({
         kind: "error",
@@ -274,6 +296,7 @@ export default function WebsiteControlPage() {
                     saving={savingKey === block.id}
                     publishedLabel={t("site.published")}
                     onSave={(patch) => void saveBlock(block.id, patch)}
+                    onReset={() => void resetBlock(block.id)}
                   />
                 ))}
               </div>
@@ -374,11 +397,13 @@ function BlockField({
   saving,
   publishedLabel,
   onSave,
+  onReset,
 }: {
   block: ContentBlock;
   saving: boolean;
   publishedLabel: string;
   onSave: (patch: { value?: string; isPublished?: boolean }) => void;
+  onReset: () => void;
 }) {
   const [draft, setDraft] = useState(block.value);
   const dirty = draft !== block.value;
@@ -386,6 +411,21 @@ function BlockField({
   useEffect(() => setDraft(block.value), [block.value]);
 
   const inputId = `block-${block.id}`;
+
+  if (block.kind === "image") {
+    return (
+      <ImageBlockField
+        block={block}
+        draft={draft}
+        setDraft={setDraft}
+        dirty={dirty}
+        saving={saving}
+        publishedLabel={publishedLabel}
+        onSave={onSave}
+        onReset={onReset}
+      />
+    );
+  }
 
   return (
     <div>
@@ -436,6 +476,154 @@ function BlockField({
             </button>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A photo slot: a path or URL field beside a live thumbnail of what it points at.
+ *
+ * There is no upload yet — the site has no file storage — so the field takes
+ * a file already shipped under `/images/` or an https URL. The same rule the
+ * API enforces is checked as the editor types, so a bad value is flagged
+ * before a round trip rather than after. The photo is the same in every
+ * language: saving here changes it on all four locales' pages at once.
+ */
+function ImageBlockField({
+  block,
+  draft,
+  setDraft,
+  dirty,
+  saving,
+  publishedLabel,
+  onSave,
+  onReset,
+}: {
+  block: ContentBlock;
+  draft: string;
+  setDraft: (value: string) => void;
+  dirty: boolean;
+  saving: boolean;
+  publishedLabel: string;
+  onSave: (patch: { value?: string; isPublished?: boolean }) => void;
+  onReset: () => void;
+}) {
+  const { t } = useI18n();
+  const [broken, setBroken] = useState(false);
+
+  const trimmed = draft.trim();
+  const valid = isSafeImageSrc(trimmed);
+
+  // A new value gets a fresh chance to load.
+  useEffect(() => setBroken(false), [trimmed]);
+
+  const inputId = `block-${block.id}`;
+  const hintId = `${inputId}-hint`;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBlockEnd: 4 }}>
+        <label htmlFor={inputId} style={{ fontWeight: 600, color: "var(--text-strong)" }}>
+          {block.label}
+        </label>
+        <code style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>{block.slot}</code>
+
+        <label style={{ marginInlineStart: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+          <input
+            type="checkbox"
+            checked={block.isPublished}
+            onChange={(event) => onSave({ isPublished: event.target.checked })}
+            disabled={saving}
+          />
+          {publishedLabel}
+        </label>
+      </div>
+
+      <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start", flexWrap: "wrap" }}>
+        {/* The thumbnail shows the draft, not the saved value, so the editor
+            sees the photo before committing to it. */}
+        <div
+          style={{
+            inlineSize: 160,
+            blockSize: 100,
+            flexShrink: 0,
+            borderRadius: "var(--radius-md)",
+            border: "1px solid var(--border-default)",
+            background: "var(--surface-sunken)",
+            overflow: "hidden",
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
+          {valid && !broken ? (
+            <img
+              src={trimmed}
+              alt=""
+              onError={() => setBroken(true)}
+              style={{ inlineSize: "100%", blockSize: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)", padding: "var(--space-2)", textAlign: "center" }}>
+              {valid ? t("site.image.broken") : t("site.image.invalid")}
+            </span>
+          )}
+        </div>
+
+        <div style={{ flex: 1, minInlineSize: 240, display: "grid", gap: "var(--space-2)" }}>
+          <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+            {/* Paths and URLs read left to right in every locale. */}
+            <input
+              id={inputId}
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              dir="ltr"
+              spellCheck={false}
+              inputMode="url"
+              aria-describedby={hintId}
+              aria-invalid={!valid}
+              style={{
+                flex: 1,
+                fontFamily: "ui-monospace, monospace",
+                padding: "var(--space-2) var(--space-3)",
+                border: `1px solid ${valid ? "var(--border-default)" : "var(--danger)"}`,
+                borderRadius: "var(--radius-md)",
+              }}
+            />
+
+            {dirty && (
+              <>
+                <button
+                  type="button"
+                  className="btn primary small"
+                  onClick={() => onSave({ value: trimmed })}
+                  disabled={saving || !valid}
+                >
+                  {saving ? "…" : "✓"}
+                </button>
+                <button type="button" className="btn ghost small" onClick={() => setDraft(block.value)} disabled={saving}>
+                  ✕
+                </button>
+              </>
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}>
+            <span id={hintId} style={{ fontSize: "var(--text-sm)", color: valid ? "var(--text-muted)" : "var(--danger)" }}>
+              {valid ? t("site.image.hint") : t("site.image.invalid")}
+            </span>
+
+            <button
+              type="button"
+              className="btn ghost small"
+              onClick={onReset}
+              disabled={saving}
+              style={{ marginInlineStart: "auto" }}
+            >
+              {t("site.image.reset")}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { PageHero, readList, type Copy } from "@/app/components/site/Blocks";
 import { ContactFormSection, HotlineBanner } from "@/app/components/site/Blocks2";
@@ -84,7 +85,7 @@ export default async function ContactPage({ params }: { params: { locale: Locale
           },
         ]}
         submitLabel={copy["form.submit"]}
-        image={`/images/${SECTION}/rectangle.jpg`}
+        image={imageSrc(copy, "form.image", `/images/${SECTION}/rectangle.jpg`)}
         cards={cards}
       />
 

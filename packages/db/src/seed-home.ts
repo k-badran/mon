@@ -29,6 +29,7 @@ import { PAGE_CONTENT } from "./page-content.js";
 import { EXTRA_CONTENT } from "./page-content-extra.js";
 import { LEGAL_CONTENT } from "./legal-content.js";
 import { CLEANING_CONTENT } from "./cleaning-content.js";
+import { IMAGE_CONTENT } from "./image-content.js";
 
 const LOCALES = ["de", "en", "ar", "tr"] as const;
 
@@ -57,6 +58,9 @@ async function main() {
     ...EXTRA_CONTENT,
     ...LEGAL_CONTENT,
     ...CLEANING_CONTENT,
+    // The photographs. A missing row is inserted on every run, so an existing
+    // database gains them without --force and keeps any photo already edited.
+    ...IMAGE_CONTENT,
   ];
   const seeds = scope.length ? all.filter((seed) => scope.includes(seed.section)) : all;
 

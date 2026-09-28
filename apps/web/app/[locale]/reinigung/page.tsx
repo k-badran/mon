@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { DarkHero, path, readList, type Copy } from "@/app/components/site/Blocks";
 import {
@@ -31,9 +32,10 @@ import {
 const SECTION = "service-cleaning";
 
 /**
- * The programme photographs, in card order. They are the frame's own image
- * fills; a programme added in the dashboard beyond these reuses the last one
- * rather than rendering an empty frame.
+ * The programme photographs, in card order: the `programs.N.image` rows fall
+ * back to these, the frame's own image fills. A programme added in the
+ * dashboard beyond these without a photo of its own reuses the last one rather
+ * than rendering an empty frame.
  */
 const PROGRAMME_IMAGES = [
   "/images/service-cleaning/program-end-of-tenancy.jpg",
@@ -66,7 +68,11 @@ export default async function CleaningPage({ params }: { params: { locale: Local
       title: entry.title ?? "",
       body: entry.body ?? "",
       badge: entry.badge,
-      image: PROGRAMME_IMAGES[Math.min(index, PROGRAMME_IMAGES.length - 1)]!,
+      image: imageSrc(
+        copy,
+        `programs.${index + 1}.image`,
+        PROGRAMME_IMAGES[Math.min(index, PROGRAMME_IMAGES.length - 1)]!,
+      ),
     }),
   );
 
@@ -95,7 +101,7 @@ export default async function CleaningPage({ params }: { params: { locale: Local
             ? { label: copy["hero.ctaSecondary"], href: path(locale, "/preise") }
             : undefined
         }
-        image="/images/service-cleaning/page-hero.jpg"
+        image={imageSrc(copy, "hero.image", "/images/service-cleaning/page-hero.jpg")}
       />
 
       <CleaningPrograms
@@ -111,8 +117,8 @@ export default async function CleaningPage({ params }: { params: { locale: Local
         subline={copy["gallery.subline"]}
         beforeLabel={copy["gallery.before"]}
         afterLabel={copy["gallery.after"]}
-        before="/images/service-cleaning/rectangle.jpg"
-        after="/images/service-cleaning/rectangle-2.jpg"
+        before={imageSrc(copy, "gallery.beforeImage", "/images/service-cleaning/rectangle.jpg")}
+        after={imageSrc(copy, "gallery.afterImage", "/images/service-cleaning/rectangle-2.jpg")}
       />
 
       <CleaningGuarantee

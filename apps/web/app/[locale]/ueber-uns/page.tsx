@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { PageHero, readList, type Copy } from "@/app/components/site/Blocks";
 import { SplitDetail, SplitFeature, StatsRow, TeamGrid } from "@/app/components/site/Blocks2";
@@ -53,7 +54,7 @@ export default async function AboutPage({ params }: { params: { locale: Locale }
   const members = readList(copy, "team", ["name", "role"]).map((entry, index) => ({
     name: entry.name ?? "",
     role: entry.role ?? "",
-    photo: portraits[index] ?? "",
+    photo: imageSrc(copy, `team.${index + 1}.image`, portraits[index]) ?? "",
   }));
 
   const fleetPoints = readList(copy, "fleet", ["text"]).map((entry) => entry.text ?? "");
@@ -72,7 +73,7 @@ export default async function AboutPage({ params }: { params: { locale: Locale }
         eyebrow={copy["values.eyebrow"]}
         headline={copy["values.headline"]}
         items={values}
-        image="/images/page-about/rectangle.jpg"
+        image={imageSrc(copy, "values.image", "/images/page-about/rectangle.jpg")}
         flip
       />
 
@@ -88,7 +89,7 @@ export default async function AboutPage({ params }: { params: { locale: Locale }
         headline={copy["fleet.headline"]}
         body={copy["fleet.body"]}
         points={fleetPoints}
-        image="/images/page-about/rectangle-5.jpg"
+        image={imageSrc(copy, "fleet.image", "/images/page-about/rectangle-5.jpg")}
       />
     </>
   );

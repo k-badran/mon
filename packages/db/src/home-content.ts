@@ -24,7 +24,8 @@
 export interface ContentSeed {
   section: string;
   slot: string;
-  kind: "text" | "textarea";
+  /** "image" holds a picture's path or https URL, the same in every locale. */
+  kind: "text" | "textarea" | "image";
   label: string;
   sortOrder: number;
   values: { de: string; en: string; ar: string; tr: string };
@@ -1204,58 +1205,6 @@ export const HOME_CONTENT: ContentSeed[] = [
       en: "All",
       ar: "الكل",
       tr: "Tümü",
-    },
-  },
-  {
-    section: "home",
-    slot: "faq.tag1",
-    kind: "text",
-    label: "FAQ — topic of question 1",
-    sortOrder: 91,
-    values: {
-      de: "Versicherung",
-      en: "Insurance",
-      ar: "التأمين",
-      tr: "Sigorta",
-    },
-  },
-  {
-    section: "home",
-    slot: "faq.tag2",
-    kind: "text",
-    label: "FAQ — topic of question 2",
-    sortOrder: 92,
-    values: {
-      de: "Abrechnung",
-      en: "Billing",
-      ar: "الفوترة",
-      tr: "Faturalandırma",
-    },
-  },
-  {
-    section: "home",
-    slot: "faq.tag3",
-    kind: "text",
-    label: "FAQ — topic of question 3",
-    sortOrder: 93,
-    values: {
-      de: "Buchung",
-      en: "Booking",
-      ar: "الحجز",
-      tr: "Rezervasyon",
-    },
-  },
-  {
-    section: "home",
-    slot: "faq.tag4",
-    kind: "text",
-    label: "FAQ — topic of question 4",
-    sortOrder: 94,
-    values: {
-      de: "Reinigung",
-      en: "Cleaning",
-      ar: "التنظيف",
-      tr: "Temizlik",
     },
   },
   {
