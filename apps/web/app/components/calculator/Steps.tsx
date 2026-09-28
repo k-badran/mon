@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type DragEvent, type Dispatch, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type DragEvent, type Dispatch, type ReactNode } from "react";
 
 import { useI18n } from "@/lib/i18n/provider";
 import { useCatalog } from "@/lib/live/useLiveData";
@@ -13,7 +13,6 @@ import {
 import {
   AvailabilityCalendar,
   CalcIcon,
-  ChoiceCards,
   Chips,
   Field,
   FloorField,
@@ -50,7 +49,7 @@ const set = (dispatch: Dispatch<CalculatorAction>, patch: Partial<CalculatorStat
   dispatch({ type: "set", patch });
 
 const note = "text-body-sm text-text-muted";
-const card = "rounded-xl border border-border-subtle bg-surface-card";
+const card = "rounded-lg border border-border-subtle bg-surface-card";
 const fieldLabel = "text-caption font-semibold text-text-default";
 
 /** The arrival windows the date screen offers, keyed by their start time. */
@@ -130,7 +129,7 @@ function AddressField({
           id={id}
           type="text"
           autoComplete="street-address"
-          className={`${inputClass} ps-10`}
+          className={`${inputClass} ps-9`}
           value={value}
           placeholder={placeholder}
           {...(hint ? { "aria-describedby": `${id}-hint` } : {})}
@@ -224,14 +223,14 @@ function PropertyCard({
       <div className="flex items-center gap-2">
         <span
           aria-hidden="true"
-          className={`grid size-6 shrink-0 place-items-center rounded-full text-caption font-bold text-text-on-brand ${
+          className={`grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold text-text-on-brand ${
             tone === "origin" ? "bg-brand-red" : "bg-success"
           }`}
         >
           {badge}
         </span>
 
-        <p className="text-h6 font-bold text-text-strong">{title}</p>
+        <p className="text-body leading-[19px] font-bold text-text-heading">{title}</p>
       </div>
 
       {children}
@@ -401,10 +400,13 @@ function VolumeStep({ state, dispatch }: StepProps) {
 
           {isLoading ? <p className={note}>{t("common.loading")}</p> : null}
 
-          <div className={`${card} divide-y divide-border-subtle`}>
+          {/* One 52px row per item inside a 20px-padded card (3:1174). */}
+          <div className={`${card} divide-y divide-border-subtle px-5 py-2`}>
             {shown.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-4 px-5 py-3">
-                <span className="text-body font-medium text-text-strong">{item.name}</span>
+              <div key={item.id} className="flex items-center justify-between gap-4 py-3">
+                <span className="text-body-sm leading-[17px] font-medium text-text-heading">
+                  {item.name}
+                </span>
 
                 <Stepper
                   id={`item-${item.id}`}
@@ -447,7 +449,7 @@ function AddonsStep({ state, dispatch }: StepProps) {
   const { t } = useI18n();
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-4">
       <ToggleRow
         id="packing"
         label={t("calc.packing")}
@@ -481,26 +483,37 @@ function AddonsStep({ state, dispatch }: StepProps) {
  * The design offers a free worker count (drawn at four) and three vehicle
  * tiers. `crewSize` is `2 | 3` and the vehicle is a second van or not, in the
  * request schema, the pricing engine and the database alike. A stepper that
- * reaches four would quote three, so the two real choices are asked instead.
+ * reaches four would quote three, so the design's stepper (3:1580) is kept
+ * and bounded to the two real answers.
  */
 function WorkersStep({ state, dispatch }: StepProps) {
   const { t } = useI18n();
 
   return (
-    <div className="grid gap-5">
-      <ChoiceCards
-        name="crewSize"
-        legend={t("calc.crewSize")}
-        columns={2}
-        value={String(state.crewSize) as "2" | "3"}
-        onChange={(value) => set(dispatch, { crewSize: Number(value) as 2 | 3 })}
-        options={[
-          { value: "2", label: t("calc.crewTwo"), hint: t("calc.crewTwoHint") },
-          { value: "3", label: t("calc.crewThree"), hint: t("calc.crewThreeHint") },
-        ]}
-      />
+    <div className="grid gap-8">
+      <div className={`${card} flex flex-wrap items-center justify-between gap-4 p-6`}>
+        <div className="flex max-w-[376px] flex-col gap-1">
+          <label
+            htmlFor="crew-size"
+            className="font-display text-h5 leading-[23px] font-bold text-text-heading"
+          >
+            {t("calc.crewSize")}
+          </label>
+          <p className="text-[13px] leading-[17px] text-text-default">
+            {t("calc.crewRecommendation")}
+          </p>
+        </div>
 
-      <p className={note}>{t("calc.crewRecommendation")}</p>
+        <Stepper
+          id="crew-size"
+          label={t("calc.crewSize")}
+          variant="pill"
+          min={2}
+          max={3}
+          value={state.crewSize}
+          onChange={(crewSize) => set(dispatch, { crewSize: crewSize === 3 ? 3 : 2 })}
+        />
+      </div>
 
       <ToggleRow
         id="second-van"
@@ -531,7 +544,7 @@ function SpecialStep({ state, dispatch }: StepProps) {
   );
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-6">
       <Notice title={t("calc.specialNoticeTitle")}>{t("calc.specialNoticeBody")}</Notice>
 
       <p className={note}>{t("calc.specialHint")}</p>
@@ -542,21 +555,32 @@ function SpecialStep({ state, dispatch }: StepProps) {
         <p className={note}>{t("calc.specialEmpty")}</p>
       ) : null}
 
-      {chosen.map((item) => (
+      {/* Two columns of item cards, ringed in red once anything is counted (3:1729). */}
+      <div className="grid gap-4 md:grid-cols-2 md:gap-x-8">
+      {chosen.map((item) => {
+        const counted =
+          (state.assemblyItems[item.id] ?? 0) + (state.disassemblyItems[item.id] ?? 0) > 0;
+
+        return (
         <div
           key={item.id}
-          className={`${card} flex flex-wrap items-center justify-between gap-4 p-5`}
+          className={`${card} flex flex-col gap-3 p-4 ${
+            counted ? "border-brand-red shadow-[inset_0_0_0_0.5px_var(--color-brand-red)]" : ""
+          }`}
         >
-          <span className="text-body font-medium text-text-strong">{item.name}</span>
+          <span className="font-display text-body-sm leading-[18px] font-bold text-text-heading">
+            {item.name}
+          </span>
 
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
             <div>
-              <span className="mb-1 block text-caption text-text-muted">
+              <span className="mb-1 block text-[11px] leading-[14px] text-text-default">
                 {t("calc.assembly")}
               </span>
               <Stepper
                 id={`assembly-${item.id}`}
                 label={`${t("calc.assembly")}: ${item.name}`}
+                variant="pill"
                 value={state.assemblyItems[item.id] ?? 0}
                 onChange={(quantity) =>
                   dispatch({
@@ -570,12 +594,13 @@ function SpecialStep({ state, dispatch }: StepProps) {
             </div>
 
             <div>
-              <span className="mb-1 block text-caption text-text-muted">
+              <span className="mb-1 block text-[11px] leading-[14px] text-text-default">
                 {t("calc.disassembly")}
               </span>
               <Stepper
                 id={`disassembly-${item.id}`}
                 label={`${t("calc.disassembly")}: ${item.name}`}
+                variant="pill"
                 value={state.disassemblyItems[item.id] ?? 0}
                 onChange={(quantity) =>
                   dispatch({
@@ -589,7 +614,9 @@ function SpecialStep({ state, dispatch }: StepProps) {
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
+      </div>
     </div>
   );
 }
@@ -643,9 +670,10 @@ function PhotosStep({ state, dispatch }: StepProps) {
   }
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-6">
       <p className={note}>{t("calc.photosHint")}</p>
 
+      {/* The drop zone of 3:1930: a dashed 1.5px red outline around a red-tinted medallion. */}
       <label
         htmlFor="photos"
         onDragOver={(event) => {
@@ -654,10 +682,8 @@ function PhotosStep({ state, dispatch }: StepProps) {
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-10 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow ${
-          dragging
-            ? "border-brand-red bg-red-50"
-            : "border-border-default bg-surface-card hover:border-brand-red"
+        className={`flex cursor-pointer flex-col items-center gap-4 rounded-lg border-[1.5px] border-dashed border-brand-red px-6 py-10 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow ${
+          dragging ? "bg-red-50" : "bg-surface-card"
         }`}
       >
         <input
@@ -669,14 +695,23 @@ function PhotosStep({ state, dispatch }: StepProps) {
           onChange={(event) => accept(event.target.files)}
         />
 
-        <span aria-hidden="true" className="text-text-default">
-          <CalcIcon name="upload" size={28} />
+        <span
+          aria-hidden="true"
+          className="grid size-14 place-items-center rounded-full bg-brand-red/6 text-brand-red"
+        >
+          <CalcIcon name="upload" size={24} />
         </span>
 
-        <span className="text-h6 font-bold text-text-strong">{t("calc.photosDropTitle")}</span>
-        <span className="text-body-sm text-text-muted">{t("calc.photosDropHint")}</span>
+        <span className="flex flex-col gap-1">
+          <span className="font-display text-body leading-5 font-bold text-text-heading">
+            {t("calc.photosDropTitle")}
+          </span>
+          <span className="text-[13px] leading-[17px] text-text-default">
+            {t("calc.photosDropHint")}
+          </span>
+        </span>
 
-        <span className="rounded-md bg-brand-red px-4 py-2 text-body-sm font-semibold text-text-on-brand">
+        <span className="rounded-[6px] bg-brand-red px-4 py-2 text-[13px] leading-[17px] font-semibold text-text-on-brand">
           {t("calc.photosChoose")}
         </span>
       </label>
@@ -690,21 +725,33 @@ function PhotosStep({ state, dispatch }: StepProps) {
       </div>
 
       {state.photoNames.length > 0 ? (
-        <div className="grid gap-2">
-          <p className="text-body-sm font-bold text-text-strong">{t("calc.photosListTitle")}</p>
+        <div className="grid gap-3">
+          <p className="font-display text-body leading-5 font-bold text-text-heading">
+            {t("calc.photosListTitle")}
+          </p>
 
-          <ul className={`${card} divide-y divide-border-subtle`}>
+          {/* One card per file with its 50px preview (3:1940). */}
+          <ul className="grid gap-3">
             {state.photoNames.map((name) => {
-              const size = files.find((file) => file.name === name)?.size;
+              const file = files.find((entry) => entry.name === name);
 
               return (
-                <li key={name} className="flex items-center justify-between gap-4 px-5 py-3">
-                  <span className="flex flex-col gap-0.5">
-                    <span className="text-body-sm font-semibold text-text-strong">{name}</span>
-                    <span className="text-caption text-text-muted">
-                      {size === undefined
-                        ? t("calc.photosPending")
-                        : `${megabytes.format(size / 1024 / 1024)} MB · ${t("calc.photosPending")}`}
+                <li
+                  key={name}
+                  className={`${card} flex items-center justify-between gap-4 rounded-md p-3`}
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <PhotoThumb file={file} />
+
+                    <span className="flex min-w-0 flex-col gap-1">
+                      <span className="truncate text-body-sm leading-[18px] font-semibold text-text-heading">
+                        {name}
+                      </span>
+                      <span className="text-caption leading-4 tracking-normal text-text-default">
+                        {file === undefined
+                          ? t("calc.photosPending")
+                          : `${megabytes.format(file.size / 1024 / 1024)} MB • ${t("calc.photosPending")}`}
+                      </span>
                     </span>
                   </span>
 
@@ -712,9 +759,9 @@ function PhotosStep({ state, dispatch }: StepProps) {
                     type="button"
                     onClick={() => remove(name)}
                     aria-label={t("calc.photosRemove", { values: { name } })}
-                    className="grid size-8 place-items-center rounded-md text-text-muted transition-colors hover:text-brand-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
+                    className="grid size-7 shrink-0 place-items-center rounded-full bg-surface-page text-text-default transition-colors hover:text-brand-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow"
                   >
-                    <CalcIcon name="x" size={16} />
+                    <CalcIcon name="trash" size={14} />
                   </button>
                 </li>
               );
@@ -735,15 +782,42 @@ function PhotosStep({ state, dispatch }: StepProps) {
         {t("calc.photosNotUploaded")}
       </p>
 
-      <div className={`${card} grid gap-2 p-5`}>
-        <p className="text-body font-bold text-text-strong">{t("calc.photosTipsTitle")}</p>
-        <ul className="grid gap-1 text-body-sm text-text-default">
+      <div className={`${card} grid gap-3 p-5`}>
+        <p className="font-display text-[15px] leading-[19px] font-bold text-text-heading">
+          <span aria-hidden="true">💡 </span>
+          {t("calc.photosTipsTitle")}
+        </p>
+        <ul className="grid gap-2 text-[13px] leading-[17px] text-text-default">
           <li>{t("calc.photosTip1")}</li>
           <li>{t("calc.photosTip2")}</li>
           <li>{t("calc.photosTip3")}</li>
         </ul>
       </div>
     </div>
+  );
+}
+
+/**
+ * A local preview of a chosen photo. The file never leaves the browser; the
+ * object URL is released when the row goes. After a refresh only the name
+ * survives, so the tile is left blank.
+ */
+function PhotoThumb({ file }: { file: File | undefined }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) return;
+
+    const next = URL.createObjectURL(file);
+    setUrl(next);
+
+    return () => URL.revokeObjectURL(next);
+  }, [file]);
+
+  return (
+    <span className="size-[50px] shrink-0 overflow-hidden rounded-[6px] bg-surface-sunken">
+      {file && url ? <img src={url} alt="" className="size-full object-cover" /> : null}
+    </span>
   );
 }
 
@@ -763,7 +837,7 @@ function DateStep({ state, dispatch }: StepProps) {
     "08:00") as ArrivalWindow;
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8">
       <AvailabilityCalendar
         value={state.scheduledDate}
         onChange={(scheduledDate) => set(dispatch, { scheduledDate })}
@@ -782,7 +856,9 @@ function DateStep({ state, dispatch }: StepProps) {
       />
 
       <div className="grid gap-3">
-        <p className="text-h6 font-bold text-text-strong">{t("calc.arrivalWindow")}</p>
+        <p className="font-display text-h5 leading-[23px] font-bold text-text-heading">
+          {t("calc.arrivalWindow")}
+        </p>
 
         <RadioList
           name="arrivalWindow"
@@ -798,7 +874,7 @@ function DateStep({ state, dispatch }: StepProps) {
       </div>
 
       {/* The date is also typed, so a keyboard user is not made to walk a grid. */}
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <Field id="date" label={t("calc.preferredDate")} hint={t("calc.dateHint")}>
           <input
             id="date"

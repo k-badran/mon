@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { useI18n } from "@/lib/i18n/provider";
 import type { CalculatorState, StepId } from "@/lib/calculator/machine";
 import type { PriceEstimate, QuoteResult } from "@/lib/calculator/usePriceEstimate";
@@ -24,7 +26,7 @@ import type { PriceEstimate, QuoteResult } from "@/lib/calculator/usePriceEstima
  * screens, which are these four here because one screen asks two of the
  * wizard's questions and two screens are one step in its two modes.
  */
-const RAIL_STEPS: ReadonlySet<StepId> = new Set<StepId>([
+export const RAIL_STEPS: ReadonlySet<StepId> = new Set<StepId>([
   "service",
   "route",
   "property",
@@ -35,16 +37,22 @@ interface PanelProps {
   stepId: StepId;
   state: CalculatorState;
   estimate: PriceEstimate;
+  /** The card screens put the wizard's two buttons at the foot of the card. */
+  children?: ReactNode;
 }
 
-export function PricePanel({ stepId, state, estimate }: PanelProps) {
+export function PricePanel({ stepId, state, estimate, children }: PanelProps) {
   return RAIL_STEPS.has(stepId) ? (
     <SummaryRail state={state} estimate={estimate} />
   ) : (
-    <BreakdownCard estimate={estimate} />
+    <BreakdownCard estimate={estimate}>{children}</BreakdownCard>
   );
 }
 
+/**
+ * The flush rail of 3:696. The page draws the column and its border; this is
+ * what sits in it.
+ */
 function SummaryRail({ state, estimate }: { state: CalculatorState; estimate: PriceEstimate }) {
   const { t } = useI18n();
   const rows = specRows(state, estimate.quote, t);
@@ -53,24 +61,26 @@ function SummaryRail({ state, estimate }: { state: CalculatorState; estimate: Pr
     <aside
       aria-label={t("calc.panel.liveEstimate")}
       aria-busy={estimate.refreshing || undefined}
-      className="flex flex-col gap-5 rounded-xl border border-border-subtle bg-neutral-0 p-6 lg:rounded-none lg:border-0 lg:border-l"
+      className="flex flex-col gap-5 p-6"
     >
       <header className="grid gap-1.5">
-        <p className="text-caption font-bold text-text-faint">{t("calc.panel.liveEstimate")}</p>
+        <p className="text-[12px] leading-[15px] font-bold text-text-faint uppercase">
+          {t("calc.panel.liveEstimate")}
+        </p>
         <Total estimate={estimate} size="rail" />
       </header>
 
       <Rule />
 
       <section className="grid gap-2.5">
-        <h3 className="text-body-sm font-bold text-text-strong">
+        <h3 className="font-sans text-[13px] leading-4 font-bold text-text-heading">
           {t("calc.panel.selectedServices")}
         </h3>
 
         {/* One service, because a quote carries one. The design's second
             bullet comes from a multi-select the data model cannot hold yet. */}
-        <ul className="grid gap-2">
-          <li className="flex items-center gap-2 text-body-sm text-text-default">
+        <ul className="grid gap-2.5">
+          <li className="flex items-center gap-2 text-[13px] leading-4 text-text-default">
             <span className="size-1.5 shrink-0 rounded-[3px] bg-brand-yellow" aria-hidden="true" />
             {t(`service.${state.serviceType}`)}
           </li>
@@ -80,19 +90,25 @@ function SummaryRail({ state, estimate }: { state: CalculatorState; estimate: Pr
       <Rule />
 
       <section className="grid gap-3">
-        <h3 className="text-body-sm font-bold text-text-strong">{t("calc.panel.routeSpecs")}</h3>
+        <h3 className="font-sans text-[13px] leading-4 font-bold text-text-heading">
+          {t("calc.panel.routeSpecs")}
+        </h3>
 
         {rows.length > 0 ? (
           <dl className="grid gap-3">
             {rows.map((row) => (
               <div key={row.key} className="flex items-baseline justify-between gap-3">
-                <dt className="text-caption text-text-default">{row.label}</dt>
-                <dd className="text-caption font-semibold text-text-strong">{row.value}</dd>
+                <dt className="text-[12px] leading-[15px] text-text-default">{row.label}</dt>
+                <dd className="text-[12px] leading-[15px] font-semibold text-text-heading">
+                  {row.value}
+                </dd>
               </div>
             ))}
           </dl>
         ) : (
-          <p className="text-caption text-text-faint">{t("calc.panel.awaitingSpecs")}</p>
+          <p className="text-[12px] leading-[15px] text-text-faint">
+            {t("calc.panel.awaitingSpecs")}
+          </p>
         )}
       </section>
 
@@ -103,7 +119,8 @@ function SummaryRail({ state, estimate }: { state: CalculatorState; estimate: Pr
   );
 }
 
-function BreakdownCard({ estimate }: { estimate: PriceEstimate }) {
+/** The floating card of 3:1483, with the wizard's buttons at its foot. */
+function BreakdownCard({ estimate, children }: { estimate: PriceEstimate; children?: ReactNode }) {
   const { t, formatCurrency } = useI18n();
   const lines = estimate.quote?.breakdown.lines ?? [];
 
@@ -111,17 +128,21 @@ function BreakdownCard({ estimate }: { estimate: PriceEstimate }) {
     <aside
       aria-label={t("calc.panel.instantLivePrice")}
       aria-busy={estimate.refreshing || undefined}
-      className="flex flex-col gap-5 rounded-xl bg-neutral-0 p-6 shadow-lg"
+      className="flex flex-col gap-5 rounded-xl border border-border-subtle bg-neutral-0 p-6 shadow-[0_8px_24px_rgba(0,0,0,0.02)]"
     >
       <header className="grid gap-1">
-        <p className="text-h6 font-bold text-brand-red">{t("brand.name")}</p>
-        <p className="text-h5 font-bold text-text-strong">{t("calc.panel.instantLivePrice")}</p>
+        <p className="font-display text-h5 leading-[23px] font-bold text-brand-red">
+          {t("brand.name")}
+        </p>
+        <p className="font-display text-h4 leading-[25px] font-bold text-text-heading">
+          {t("calc.panel.instantLivePrice")}
+        </p>
       </header>
 
       <Rule />
 
       <section className="grid gap-3.5">
-        <h3 className="text-caption font-bold text-text-faint uppercase">
+        <h3 className="font-sans text-[12px] leading-4 font-bold text-text-faint uppercase">
           {t("calc.panel.breakdown")}
         </h3>
 
@@ -130,18 +151,20 @@ function BreakdownCard({ estimate }: { estimate: PriceEstimate }) {
             {lines.map((line, position) => (
               <li key={`${line.key}-${position}`} className="flex items-start justify-between gap-4">
                 <span className="grid gap-0.5">
-                  <span className="text-body-sm font-medium text-text-strong">{t(line.key)}</span>
+                  <span className="text-body-sm leading-[18px] font-medium text-text-heading">
+                    {t(line.key)}
+                  </span>
                   <LineCaption lineKey={line.key} params={line.params} />
                 </span>
 
-                <span className="text-body-sm font-bold tabular-nums whitespace-nowrap text-text-strong">
+                <span className="font-display text-body-sm leading-[18px] font-bold whitespace-nowrap tabular-nums text-text-heading">
                   {formatCurrency(line.amount)}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-caption text-text-faint">{t("calc.panel.awaitingSpecs")}</p>
+          <p className="text-[12px] leading-4 text-text-faint">{t("calc.panel.awaitingSpecs")}</p>
         )}
       </section>
 
@@ -149,32 +172,32 @@ function BreakdownCard({ estimate }: { estimate: PriceEstimate }) {
 
       <div className="flex items-center justify-between gap-4">
         <span className="grid gap-0.5">
-          <span className="text-body-sm font-semibold text-text-default">
+          <span className="font-display text-body-sm leading-[18px] font-semibold text-text-default">
             {t("calc.panel.estimatedTotal")}
           </span>
-          <span className="text-caption text-text-faint">{t("calc.panel.totalNote")}</span>
+          <span className="text-[11px] leading-[14px] text-text-faint">
+            {t("calc.panel.totalNote")}
+          </span>
         </span>
 
         <Total estimate={estimate} size="card" />
       </div>
 
-      <p className="flex items-center gap-2 rounded-md bg-success-soft px-3 py-3 text-caption font-semibold text-success-text">
-        <ShieldCheck />
+      <p className="flex items-center gap-2 rounded-md bg-success/6 p-3 text-[11px] leading-[14px] font-semibold text-success-text">
+        <span className="text-success">
+          <ShieldCheck size={16} />
+        </span>
         {t("calc.panel.bestPrice")}
       </p>
+
+      {children}
     </aside>
   );
 }
 
-/**
- * The headline figure.
- *
- * Rendered through `formatCurrency` rather than the design's split "€" and
- * amount: where the symbol sits, and which side of it the digits fall on, is a
- * locale's decision — and this wizard ships in Arabic.
- */
+/** The headline figure, on the rail or in the card. */
 function Total({ estimate, size }: { estimate: PriceEstimate; size: "rail" | "card" }) {
-  const { t, formatCurrency } = useI18n();
+  const { t, locale, formatCurrency } = useI18n();
   const { quote, refreshing, awaitingAnswers, error } = estimate;
 
   if (!quote) {
@@ -189,30 +212,85 @@ function Total({ estimate, size }: { estimate: PriceEstimate; size: "rail" | "ca
     );
   }
 
-  return (
-    <span className="grid gap-1 text-end">
-      <span
-        aria-live="polite"
-        // Dimmed while a newer price is on its way: what is on screen is the
-        // last figure the server stated, not a guess at the next one.
-        className={[
-          size === "rail" ? "text-h1 font-extrabold" : "text-h2 font-extrabold",
-          "tabular-nums text-brand-red transition-opacity",
-          refreshing ? "opacity-50" : "opacity-100",
-        ].join(" ")}
-      >
-        {formatCurrency(quote.breakdown.totalGross)}
+  // Dimmed while a newer price is on its way: what is on screen is the last
+  // figure the server stated, not a guess at the next one.
+  const fade = `transition-opacity ${refreshing ? "opacity-50" : "opacity-100"}`;
+
+  const failed = error ? (
+    <span className="text-caption text-danger-text">{t("calc.panel.refreshFailed")}</span>
+  ) : null;
+
+  if (size === "card") {
+    return (
+      <span className="grid gap-1 text-end">
+        <span
+          aria-live="polite"
+          className={`font-display text-[1.75rem] leading-[35px] font-extrabold tabular-nums text-brand-red ${fade}`}
+        >
+          {formatCurrency(quote.breakdown.totalGross)}
+        </span>
+        {failed}
       </span>
+    );
+  }
 
-      {size === "rail" ? (
-        <span className="text-caption text-text-default">{t("calc.panel.inclVat")}</span>
-      ) : null}
+  /**
+   * The rail draws a small ink "€", a large red amount and "incl. VAT" on one
+   * baseline (3:699). The split comes from `formatToParts`, so where the
+   * symbol sits — and which side of it the digits fall on — stays the
+   * locale's decision; this wizard ships in Arabic.
+   */
+  return (
+    <span className="grid gap-1">
+      <span aria-live="polite" className={`flex flex-wrap items-baseline gap-1 ${fade}`}>
+        {currencyParts(quote.breakdown.totalGross, locale).map((part, position) =>
+          part.type === "currency" ? (
+            <span key={position} className="text-h5 leading-[22px] font-bold text-text-heading">
+              {part.value}
+            </span>
+          ) : (
+            <span
+              key={position}
+              className="text-[2.25rem] leading-[44px] font-extrabold tabular-nums text-brand-red"
+            >
+              {part.value}
+            </span>
+          ),
+        )}
 
-      {error ? (
-        <span className="text-caption text-danger-text">{t("calc.panel.refreshFailed")}</span>
-      ) : null}
+        <span className="text-[12px] leading-[15px] text-text-default">
+          {t("calc.panel.inclVat")}
+        </span>
+      </span>
+      {failed}
     </span>
   );
+}
+
+/**
+ * The total as the locale writes it, in two kinds of piece: the currency sign,
+ * and the amount with its digits, separators and sign merged. Spacing
+ * literals are dropped because the flex gap does their job.
+ */
+function currencyParts(amount: string, locale: string): Array<{ type: "currency" | "amount"; value: string }> {
+  const value = Number.parseFloat(amount);
+  const parts = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" }).formatToParts(
+    Number.isFinite(value) ? value : 0,
+  );
+
+  const merged: Array<{ type: "currency" | "amount"; value: string }> = [];
+
+  for (const part of parts) {
+    if (part.type === "literal" && part.value.trim() === "") continue;
+
+    const kind = part.type === "currency" ? "currency" : "amount";
+    const last = merged[merged.length - 1];
+
+    if (last && last.type === kind) last.value += part.value;
+    else merged.push({ type: kind, value: part.value });
+  }
+
+  return merged;
 }
 
 /**
@@ -223,7 +301,7 @@ function Total({ estimate, size }: { estimate: PriceEstimate; size: "rail" | "ca
  * copy has not been written yet renders without a caption instead of printing
  * its own key at the customer.
  */
-function LineCaption({
+export function LineCaption({
   lineKey,
   params,
 }: {
@@ -240,23 +318,26 @@ function LineCaption({
 
   if (caption === captionKey) return null;
 
-  return <span className="text-caption text-text-default">{caption}</span>;
+  return <span className="text-caption leading-4 tracking-normal text-text-default">{caption}</span>;
 }
 
+/** The trust badge at the foot of the rail (3:717): a green shield on a sunken chip. */
 function Guarantee() {
   const { t } = useI18n();
 
   return (
-    <div className="flex items-center gap-2.5 rounded-md bg-neutral-50 p-3">
-      <span className="text-brand-red">
-        <ShieldCheck />
+    <div className="flex items-center gap-2.5 rounded-md bg-surface-page p-3">
+      <span className="text-success">
+        <ShieldCheck size={20} />
       </span>
 
       <span className="grid gap-0.5">
-        <span className="text-caption font-bold text-text-strong">
+        <span className="text-[11px] leading-[13px] font-bold text-text-heading">
           {t("calc.panel.guaranteeTitle")}
         </span>
-        <span className="text-caption text-text-default">{t("calc.panel.guaranteeBody")}</span>
+        <span className="text-[10px] leading-3 text-text-default">
+          {t("calc.panel.guaranteeBody")}
+        </span>
       </span>
     </div>
   );
@@ -266,15 +347,15 @@ function Rule() {
   return <hr className="border-0 border-t border-border-subtle" />;
 }
 
-function ShieldCheck() {
+function ShieldCheck({ size = 18 }: { size?: number }) {
   return (
     <svg
-      width="18"
-      height="18"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
