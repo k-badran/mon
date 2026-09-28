@@ -24,6 +24,9 @@ out/
 # turborepo
 .turbo/
 
+# figma-sync.mjs caches whole-file downloads here
+.figma-cache/
+
 # logs
 *.log
 npm-debug.log*

@@ -270,6 +270,28 @@ pnpm dev:api      # API only
 
 ---
 
+## Keeping in sync with Figma
+
+The website is built from the M.io Figma file. `design/figma-sync.json` records
+which saved version of that file the code implements.
+
+```sh
+pnpm figma:check         # frames added, removed, moved or edited since that version
+pnpm figma:mark-synced   # after implementing them: record the current version
+```
+
+`figma:check` needs `FIGMA_TOKEN` (a Figma personal access token) in the root
+`.env`. Tokens expire, so an HTTP 403 means it is time for a new one. Whole-file
+reads are rate-limited per seat; on a View or Collab seat Figma allows only a
+few a month, and the script reports when the block lifts rather than waiting.
+Downloaded versions are cached in `.figma-cache/`.
+
+After changing copy seeds in `packages/db/src/*-content.ts`, apply them to an
+existing database with `pnpm --filter @mon/db seed:home --force` (add
+`--section=<name>` to limit it, `--prune` to drop rows the seed no longer has).
+
+---
+
 ## Connecting the frontend to the API
 
 Everything goes through the typed SDK. There are no Next.js route handlers, and
