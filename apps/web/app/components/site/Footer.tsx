@@ -40,6 +40,21 @@ const LINKS = [
 ] as const;
 
 /**
+ * Pages the header does not carry.
+ *
+ * The quiet footer only repeats the header, which left these four pages —
+ * linked from the old four-column footer's "Company" column — with no way in
+ * from anywhere on the site. They sit on their own quieter row under the main
+ * one, so the frame's main row stays exactly as drawn.
+ */
+const MORE = [
+  { path: "/so-funktioniert", key: "nav.howItWorks" },
+  { path: "/fuer-unternehmen", key: "nav.business" },
+  { path: "/partner", key: "nav.partner" },
+  { path: "/ratgeber", key: "nav.guide" },
+] as const;
+
+/**
  * The frame's three legal links, plus Cookies.
  *
  * The new frame drops the old footer's "Cookie Policy", but /cookies is where
@@ -122,6 +137,19 @@ export function Footer({
             </a>
           </div>
         </div>
+
+        <ul className="flex flex-wrap items-center gap-x-6 gap-y-1">
+          {MORE.map((link) => (
+            <li key={link.path}>
+              <Link
+                href={href(link.path)}
+                className="inline-flex py-1 text-caption font-medium text-white/70 hover:text-brand-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow rounded-md"
+              >
+                {MESSAGES[link.key][locale]}
+              </Link>
+            </li>
+          ))}
+        </ul>
 
         <hr className="border-0 border-t border-white/15" />
 
