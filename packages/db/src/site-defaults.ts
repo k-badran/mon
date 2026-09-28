@@ -144,6 +144,20 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
     label: "Tagline",
     sortOrder: 4,
   },
+  /**
+   * The "GET APP" pill in the nav bar (86:5213) and footer (101:163). No app
+   * listing exists yet, so it ships empty and the site sends the button to
+   * the online calculator until an App Store / Play Store link is entered.
+   */
+  {
+    key: "brand.appUrl",
+    value: "",
+    group: "brand",
+    kind: "text",
+    label: "App download link",
+    description: "App Store / Play Store URL for the GET APP button. Empty: links to the calculator.",
+    sortOrder: 5,
+  },
 
   // ── Contact ───────────────────────────────────────────────────────────
   {

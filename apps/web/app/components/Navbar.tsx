@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { LanguageMenu, ProfileIcon } from "@/app/components/site/ChromeControls";
+import { appLink } from "@/app/components/site/appLink";
 import { useApi } from "@/lib/api";
 import { LOCALE_META, type Locale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/provider";
@@ -11,21 +13,24 @@ import { useI18n } from "@/lib/i18n/provider";
 /**
  * Site navigation.
  *
- * Rebuilt from the M.io "nav-bar" frame, which differs from what was here in
- * every part: the mark is a red badge beside a two-line wordmark, the links are
- * Calculator / Services / Reviews / About Us / FAQ / Contact, the language
- * picker is pipe-separated codes with the active one in red, and the right-hand
- * side is a search control, a rule, a plain "Login" link and a red
- * "Instant Quote" button — not the two buttons that were here.
+ * Rebuilt from the nav-bar of the new homepage (86:5275 in 86:4671) and the new
+ * moving page (125:55 in 106:10195) — the two are the same component, only
+ * placed 20px apart vertically (y 43 vs 23). The logo stands on its own; every
+ * link and control sits in one light-grey pill (r88): About Us, Calculator,
+ * Services, Reviews, FAQ, Contact, then Login with a profile icon, a shopping
+ * cart, a black "GET APP" pill and the language as "العربية" + globe.
+ *
+ * Gone against the previous frame (3:4): the search control, the rule, the
+ * pipe-separated DE | EN | AR | TR list and the red "Instant Quote" button.
+ * The calculator stays one click away: it is the second link, and the cart.
  *
  * Labels come from the catalogue rather than the CMS: they are interface
  * chrome, and a missing one should fail the build rather than leave the header
  * with a gap in it.
  */
 
-/** 80px tall, 1280 content column, 80px inline padding. */
 /**
- * The three services, in the order the homepage and the footer list them.
+ * The three services, in the order the homepage lists them.
  * Figma has pages for moving and cleaning; clearance follows their pattern.
  */
 const SERVICE_LINKS = [
@@ -34,16 +39,19 @@ const SERVICE_LINKS = [
   { path: "/reinigung", labelKey: "service.cleaning" },
 ] as const;
 
+/** The frame's order: About Us first, Contact last. */
 const NAV_LINKS = [
+  { path: "/ueber-uns", labelKey: "nav.about" },
   { path: "/rechner", labelKey: "nav.calculator" },
   { path: "__services__", labelKey: "nav.services" },
   { path: "/kundenstimmen", labelKey: "nav.reviews" },
-  { path: "/ueber-uns", labelKey: "nav.about" },
   { path: "/faq", labelKey: "nav.faq" },
   { path: "/kontakt", labelKey: "nav.contact" },
 ] as const;
 
-export default function Navbar() {
+const LINK = "text-body-sm font-semibold whitespace-nowrap text-text-strong hover:text-brand-red";
+
+export default function Navbar({ appUrl }: { appUrl?: string | undefined }) {
   const { user, loading, isStaff, signOut } = useApi();
   const { t, locale, setLocale } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,6 +61,9 @@ export default function Navbar() {
 
   const href = (path: string) =>
     path.startsWith("/#") ? `/${locale}${path.slice(1)}` : `/${locale}${path === "/" ? "" : path}`;
+
+  const app = appLink(appUrl, locale);
+  const appTarget = app.external ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
   // Navigating is the drawer's purpose, so arriving somewhere closes it.
   useEffect(() => {
@@ -82,15 +93,19 @@ export default function Navbar() {
   // A menu that only closes by clicking its own trigger is a trap: every
   // other way out of it — Escape, clicking elsewhere — has to work too.
   useEffect(() => {
-    if (!servicesOpen) return;
+    if (!servicesOpen && !menuOpen) return;
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setServicesOpen(false);
+      if (event.key === "Escape") {
+        setServicesOpen(false);
+        setMenuOpen(false);
+      }
     }
 
     function onPointerDown(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
       if (!target?.closest("[data-services-menu]")) setServicesOpen(false);
+      if (!target?.closest("[data-account-menu]")) setMenuOpen(false);
     }
 
     document.addEventListener("keydown", onKeyDown);
@@ -100,213 +115,175 @@ export default function Navbar() {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown);
     };
-  }, [servicesOpen]);
+  }, [servicesOpen, menuOpen]);
 
   const locales = Object.keys(LOCALE_META) as Locale[];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border-subtle bg-neutral-0">
-      <div className="mx-auto flex h-20 w-full max-w-[1440px] items-center justify-between gap-4 px-5 md:px-10 2xl:px-20">
+    <header className="sticky top-0 z-30 bg-neutral-0">
+      {/* 1440 frame: 46px inline, the 65px pill 23px from the top (106:10195). */}
+      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-4 px-5 py-4 md:px-10 md:py-6 2xl:px-[46px]">
         {/* ── Mark ───────────────────────────────────────────────────── */}
-        {/**
-         * The brand mark.
-         *
-         * Twelve of the fourteen page frames place this 86x47 image here; only
-         * the homepage and the standalone nav-bar component draw a lettered
-         * badge beside a wordmark instead. The image is the actual brand asset,
-         * so it is what ships — building from those two frames is what put a
-         * placeholder in the header.
-         */}
         <Link href={href("/")} className="flex shrink-0 items-center">
           <img
             src="/images/brand/logo.png"
             alt={t("brand.name")}
             width={86}
             height={47}
-            className="h-10 w-auto md:h-12"
+            className="h-10 w-auto md:h-[47px]"
           />
         </Link>
 
-        {/* ── Links ──────────────────────────────────────────────────── */}
-        <nav className="hidden items-center gap-6 xl:flex" aria-label={t("nav.services")}>
-          {NAV_LINKS.map((link) =>
-            link.path === "__services__" ? (
-              <div key={link.path} className="relative" data-services-menu>
+        {/* ── The pill: links + controls ─────────────────────────────── */}
+        <div className="flex min-w-0 items-center gap-12 rounded-full border border-neutral-100 bg-neutral-100 px-4 py-2 md:px-6 md:py-3">
+          <nav className="hidden items-center gap-6 xl:flex" aria-label={t("nav.services")}>
+            {NAV_LINKS.map((link) =>
+              link.path === "__services__" ? (
+                <div key={link.path} className="relative" data-services-menu>
+                  <button
+                    type="button"
+                    aria-expanded={servicesOpen}
+                    aria-haspopup="menu"
+                    onClick={() => setServicesOpen((open) => !open)}
+                    className={`flex items-center gap-1 ${LINK}`}
+                  >
+                    {t(link.labelKey)}
+                    <Caret open={servicesOpen} />
+                  </button>
+
+                  {servicesOpen ? (
+                    <div
+                      role="menu"
+                      className="absolute start-0 z-40 mt-5 grid w-56 gap-1 rounded-xl border border-border-subtle bg-neutral-0 p-2 shadow-lg"
+                    >
+                      {SERVICE_LINKS.map((service) => (
+                        <Link
+                          key={service.path}
+                          href={href(service.path)}
+                          role="menuitem"
+                          className="rounded-md px-3 py-2 text-body-sm font-semibold text-text-default hover:bg-neutral-50 hover:text-brand-red"
+                          onClick={() => setServicesOpen(false)}
+                        >
+                          {t(service.labelKey)}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <Link key={link.path} href={href(link.path)} className={LINK}>
+                  {t(link.labelKey)}
+                </Link>
+              ),
+            )}
+          </nav>
+
+          <div className="flex min-w-0 items-center gap-3 md:gap-4">
+            {loading ? (
+              <span aria-hidden="true" className="hidden h-[18px] w-[57px] rounded bg-neutral-200 lg:block" />
+            ) : user ? (
+              <div className="relative" data-account-menu>
                 <button
                   type="button"
-                  aria-expanded={servicesOpen}
+                  className="grid size-8 place-items-center rounded-full bg-brand-red text-body-sm font-bold text-white"
+                  aria-expanded={menuOpen}
                   aria-haspopup="menu"
-                  onClick={() => setServicesOpen((open) => !open)}
-                  className="flex items-center gap-1 text-body-sm font-semibold text-text-strong hover:text-brand-red"
+                  aria-label={t("nav.profile")}
+                  onClick={() => setMenuOpen((open) => !open)}
                 >
-                  {t(link.labelKey)}
-                  <Caret open={servicesOpen} />
+                  {(user.email || "?").charAt(0).toUpperCase()}
                 </button>
 
-                {servicesOpen ? (
+                {menuOpen ? (
                   <div
                     role="menu"
-                    className="absolute start-0 z-40 mt-3 grid w-56 gap-1 rounded-xl border border-border-subtle bg-neutral-0 p-2 shadow-lg"
+                    className="absolute end-0 z-40 mt-3 grid w-56 gap-1 rounded-xl border border-border-subtle bg-neutral-0 p-2 shadow-lg"
                   >
-                    {SERVICE_LINKS.map((service) => (
-                      <Link
-                        key={service.path}
-                        href={href(service.path)}
-                        role="menuitem"
-                        className="rounded-md px-3 py-2 text-body-sm font-semibold text-text-default hover:bg-neutral-50 hover:text-brand-red"
-                        onClick={() => setServicesOpen(false)}
-                      >
-                        {t(service.labelKey)}
-                      </Link>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            ) : (
-              <Link
-                key={link.path}
-                href={href(link.path)}
-                className="text-body-sm font-semibold text-text-strong hover:text-brand-red"
-              >
-                {t(link.labelKey)}
-              </Link>
-            ),
-          )}
-        </nav>
-
-        {/* ── Right-hand controls ────────────────────────────────────── */}
-        <div className="flex min-w-0 shrink items-center gap-4">
-          {/**
-           * Pipe-separated language codes, the active one in red — the
-           * design's own treatment rather than a segmented control.
-           */}
-          <div
-            className="hidden items-center gap-1 lg:flex"
-            role="group"
-            aria-label={t("nav.language")}
-          >
-            {locales.map((code, index) => (
-              <span key={code} className="flex items-center gap-1">
-                {index > 0 ? (
-                  <span aria-hidden="true" className="text-body-sm text-text-muted">
-                    |
-                  </span>
-                ) : null}
-
-                <button
-                  type="button"
-                  lang={code}
-                  aria-current={code === locale ? "true" : undefined}
-                  aria-label={LOCALE_META[code].label}
-                  onClick={() => setLocale(code)}
-                  className={`text-body-sm ${
-                    code === locale
-                      ? "font-bold text-brand-red"
-                      : "font-medium text-text-muted hover:text-text-strong"
-                  }`}
-                >
-                  {code.toUpperCase()}
-                </button>
-              </span>
-            ))}
-          </div>
-
-          <Link
-            href={href("/faq")}
-            aria-label={t("nav.search")}
-            className="hidden text-text-strong hover:text-brand-red lg:block"
-          >
-            <Search />
-          </Link>
-
-          <span aria-hidden="true" className="hidden h-6 w-px bg-border-subtle lg:block" />
-
-          {loading ? (
-            <span aria-hidden="true" className="hidden h-5 w-16 rounded bg-neutral-100 lg:block" />
-          ) : user ? (
-            <div className="relative">
-              <button
-                type="button"
-                className="grid size-9 place-items-center rounded-full bg-brand-red text-body-sm font-bold text-white"
-                aria-expanded={menuOpen}
-                aria-haspopup="menu"
-                onClick={() => setMenuOpen((open) => !open)}
-              >
-                {(user.email || "?").charAt(0).toUpperCase()}
-              </button>
-
-              {menuOpen ? (
-                <div
-                  role="menu"
-                  className="absolute end-0 z-40 mt-2 grid w-56 gap-1 rounded-xl border border-border-subtle bg-neutral-0 p-2 shadow-lg"
-                >
-                  <Link
-                    href={href("/dashboard")}
-                    role="menuitem"
-                    className="rounded-md px-3 py-2 text-body-sm text-text-default hover:bg-neutral-50"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {t("nav.profile")}
-                  </Link>
-                  <Link
-                    href={href("/dashboard/auftraege")}
-                    role="menuitem"
-                    className="rounded-md px-3 py-2 text-body-sm text-text-default hover:bg-neutral-50"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {t("nav.orders")}
-                  </Link>
-
-                  {isStaff ? (
                     <Link
-                      href={href("/admin")}
+                      href={href("/dashboard")}
                       role="menuitem"
                       className="rounded-md px-3 py-2 text-body-sm text-text-default hover:bg-neutral-50"
                       onClick={() => setMenuOpen(false)}
                     >
-                      {t("nav.admin")}
+                      {t("nav.profile")}
                     </Link>
-                  ) : null}
+                    <Link
+                      href={href("/dashboard/auftraege")}
+                      role="menuitem"
+                      className="rounded-md px-3 py-2 text-body-sm text-text-default hover:bg-neutral-50"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {t("nav.orders")}
+                    </Link>
 
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="rounded-md px-3 py-2 text-start text-body-sm text-text-default hover:bg-neutral-50"
-                    onClick={() => void signOut()}
-                  >
-                    {t("nav.logout")}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ) : (
+                    {isStaff ? (
+                      <Link
+                        href={href("/admin")}
+                        role="menuitem"
+                        className="rounded-md px-3 py-2 text-body-sm text-text-default hover:bg-neutral-50"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        {t("nav.admin")}
+                      </Link>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="rounded-md px-3 py-2 text-start text-body-sm text-text-default hover:bg-neutral-50"
+                      onClick={() => void signOut()}
+                    >
+                      {t("nav.logout")}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <Link href={href("/login")} className={`hidden items-center gap-[3px] lg:flex ${LINK}`}>
+                <ProfileIcon />
+                {t("nav.login")}
+              </Link>
+            )}
+
+            {/**
+             * The frame's shopping cart. There is no basket in this product —
+             * a quote is built in the calculator — so the cart opens that, and
+             * says so to assistive technology.
+             */}
             <Link
-              href={href("/login")}
-              className="hidden text-body-sm font-semibold text-text-strong hover:text-brand-red lg:block"
+              href={href("/rechner")}
+              aria-label={t("nav.cart")}
+              title={t("nav.cart")}
+              className="hidden text-text-strong hover:text-brand-red sm:block"
             >
-              {t("nav.login")}
+              <Cart />
             </Link>
-          )}
 
-          <Link
-            href={href("/rechner")}
-            className="hidden items-center gap-2 rounded-md bg-brand-red px-5 py-3 text-body-sm font-bold whitespace-nowrap text-white transition-colors hover:bg-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow md:inline-flex"
-          >
-            {t("nav.instantQuote")}
-            <CalculatorIcon />
-          </Link>
+            <a
+              href={app.href}
+              {...appTarget}
+              className="hidden items-center rounded-full bg-neutral-900 px-6 py-2.5 text-body leading-[21px] whitespace-nowrap text-white uppercase transition-colors hover:bg-brand-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow sm:inline-flex"
+            >
+              {t("nav.getApp")}
+            </a>
 
-          {/* Below the link row's breakpoint the drawer carries everything. */}
-          <button
-            type="button"
-            className="grid size-10 place-items-center rounded-md border border-border-subtle text-text-strong xl:hidden"
-            aria-expanded={drawerOpen}
-            aria-controls="site-nav-drawer"
-            aria-label={t(drawerOpen ? "nav.closeMenu" : "nav.openMenu")}
-            onClick={() => setDrawerOpen((open) => !open)}
-          >
-            <Bars />
-          </button>
+            {/* Below lg the drawer carries the full language list. */}
+            <div className="hidden lg:block">
+              <LanguageMenu />
+            </div>
+
+            {/* Below the link row's breakpoint the drawer carries everything. */}
+            <button
+              type="button"
+              className="grid size-9 place-items-center rounded-full text-text-strong hover:bg-neutral-200 xl:hidden"
+              aria-expanded={drawerOpen}
+              aria-controls="site-nav-drawer"
+              aria-label={t(drawerOpen ? "nav.closeMenu" : "nav.openMenu")}
+              onClick={() => setDrawerOpen((open) => !open)}
+            >
+              <Bars />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -355,20 +332,22 @@ export default function Navbar() {
             {!user ? (
               <Link
                 href={href("/login")}
-                className="mt-4 rounded-md border border-border-default px-4 py-3 text-center text-body-lg font-semibold text-text-default"
+                className="mt-4 flex items-center justify-center gap-2 rounded-full border border-border-default px-4 py-3 text-body-lg font-semibold text-text-default"
               >
+                <ProfileIcon />
                 {t("nav.login")}
               </Link>
             ) : null}
 
-            <Link
-              href={href("/rechner")}
-              className="mt-2 rounded-md bg-brand-red px-4 py-3 text-center text-body font-bold text-white"
+            <a
+              href={app.href}
+              {...appTarget}
+              className="mt-2 rounded-full bg-neutral-900 px-4 py-3 text-center text-body text-white uppercase"
             >
-              {t("nav.instantQuote")}
-            </Link>
+              {t("nav.getApp")}
+            </a>
 
-            {/* The header hides the picker below its own breakpoint. */}
+            {/* The header hides the language menu below its own breakpoint. */}
             <div
               className="mt-6 grid grid-cols-2 gap-2 border-t border-border-subtle pt-6 lg:hidden"
               role="group"
@@ -417,7 +396,8 @@ function Caret({ open }: { open: boolean }) {
   );
 }
 
-function Search() {
+/** vuesax/linear/shopping-cart, 18px, 1.4px stroke. */
+function Cart() {
   return (
     <svg
       width="18"
@@ -425,32 +405,13 @@ function Search() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.75"
+      strokeWidth="1.4"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
-}
-
-function CalculatorIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h4" />
+      <path d="M2 2h1.74c1.08 0 1.93.93 1.84 2l-.83 9.96a2.8 2.8 0 0 0 2.79 3.03h10.65c1.44 0 2.7-1.18 2.81-2.61l.54-7.5c.12-1.66-1.14-3.01-2.81-3.01H5.82" />
+      <path d="M16.25 22a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5ZM8.25 22a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5ZM9 8h12" />
     </svg>
   );
 }

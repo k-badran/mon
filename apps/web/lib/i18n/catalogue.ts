@@ -136,7 +136,7 @@ export const MESSAGES = {
   "calc.step.scope": { de: "Umfang", en: "Scope", ar: "النطاق", tr: "Kapsam" },
   "calc.step.schedule": { de: "Termin", en: "Date", ar: "الموعد", tr: "Tarih" },
   "calc.step.contact": { de: "Kontakt", en: "Contact", ar: "التواصل", tr: "İletişim" },
-  "calc.progress": { de: "Fortschritt", en: "Progress", ar: "التقدّم", tr: "İlerleme" },
+  "calc.progress": { de: "Fortschritt", en: "Wizard progress", ar: "التقدّم", tr: "İlerleme" },
   "calc.whichService": {
     de: "Welche Leistung brauchst du?",
     en: "Which service do you need?",
@@ -1947,6 +1947,123 @@ export const MESSAGES = {
     ar: "اكتمل {percent}٪", tr: "%{percent} tamamlandı",
   },
 
+  // The wizard's buttons, worded per screen as the frames word them (3:622 … 3:2018).
+  "calc.nextStep": { de: "Nächster Schritt", en: "Next Step", ar: "الخطوة التالية", tr: "Sonraki adım" },
+  /** The fourth node of the five-node rail (3:653); the ten-segment rail keeps the short name. */
+  "calc.node.volume": {
+    de: "Volumenschätzung", en: "Volume Estimate", ar: "تقدير الحجم", tr: "Hacim tahmini",
+  },
+  "calc.cta.continue": {
+    de: "Speichern & weiter", en: "Save & Continue", ar: "حفظ ومتابعة", tr: "Kaydet ve devam et",
+  },
+  "calc.cta.toSpecial": {
+    de: "Weiter zu Sondergegenständen", en: "Continue to Special Items",
+    ar: "المتابعة إلى القطع الخاصة", tr: "Özel eşyalara geç",
+  },
+  "calc.cta.toPhotos": {
+    de: "Weiter zu den Fotos", en: "Continue to Photos",
+    ar: "المتابعة إلى الصور", tr: "Fotoğraflara geç",
+  },
+  "calc.cta.toDates": {
+    de: "Weiter zum Termin", en: "Continue to Dates",
+    ar: "المتابعة إلى المواعيد", tr: "Tarihlere geç",
+  },
+  "calc.cta.toReview": {
+    de: "Endgültiges Angebot prüfen", en: "Review Final Offer",
+    ar: "مراجعة العرض النهائي", tr: "Son teklifi incele",
+  },
+  "calc.cta.back": {
+    de: "Zurück zum vorherigen Schritt", en: "Back to Previous Step",
+    ar: "العودة إلى الخطوة السابقة", tr: "Önceki adıma dön",
+  },
+
+  // The two result screens (3:2348 instant quote, 3:2496 pending review).
+  "calc.tab.pending": {
+    de: "Vorläufige Schätzung", en: "Pending Estimate", ar: "تقدير قيد المراجعة", tr: "Bekleyen tahmin",
+  },
+  "calc.quote.badge": {
+    de: "Sofortpreis — jetzt buchen", en: "Instant Price — Book Now",
+    ar: "سعر فوري — احجز الآن", tr: "Anında fiyat — Hemen rezervasyon yap",
+  },
+  "calc.quote.title": {
+    de: "Wir haben Ihren besten Preis berechnet!", en: "We calculated your best rate!",
+    ar: "لقد حسبنا لك أفضل سعر!", tr: "Sizin için en iyi fiyatı hesapladık!",
+  },
+  "calc.quote.body": {
+    de: "Garantierter Preis auf Basis Ihrer aktuellen Angaben. Keine versteckten Gebühren oder Überraschungen. Der Preis gilt bis {date}.",
+    en: "Guaranteed price based on your current entries. No hidden fees or surprise charges. Price held until {date}.",
+    ar: "سعر مضمون بناءً على بياناتك الحالية. لا رسوم خفية ولا مفاجآت. السعر ثابت حتى {date}.",
+    tr: "Mevcut bilgilerinize dayalı garantili fiyat. Gizli ücret veya sürpriz masraf yok. Fiyat {date} tarihine kadar geçerlidir.",
+  },
+  "calc.quote.accept": {
+    de: "Annehmen & jetzt buchen", en: "Accept & Book Now", ar: "قبول والحجز الآن", tr: "Kabul et ve rezervasyon yap",
+  },
+  "calc.quote.save": { de: "Angebot speichern", en: "Save Quote", ar: "حفظ العرض", tr: "Teklifi kaydet" },
+  /** There is no PDF endpoint; the button opens the print dialog, which saves one. */
+  "calc.quote.pdf": {
+    de: "Als PDF speichern", en: "Download as PDF", ar: "تنزيل بصيغة PDF", tr: "PDF olarak indir",
+  },
+  "calc.quote.breakdown": {
+    de: "Detaillierte Preisaufstellung", en: "Itemized Price Breakdown",
+    ar: "تفصيل السعر", tr: "Ayrıntılı fiyat dökümü",
+  },
+  "calc.quote.total": {
+    de: "Garantierter Gesamtbetrag", en: "Total Guaranteed Amount",
+    ar: "المبلغ الإجمالي المضمون", tr: "Garantili toplam tutar",
+  },
+  "calc.pending.badge": {
+    de: "Schätzung — Prüfung ausstehend", en: "Estimate — Pending Review",
+    ar: "تقدير — بانتظار المراجعة", tr: "Tahmin — İnceleme bekliyor",
+  },
+  "calc.pending.title": {
+    de: "Wir erstellen Ihr individuelles Angebot", en: "We are preparing your custom quote",
+    ar: "نحن نُعدّ عرضك المخصّص", tr: "Size özel teklifinizi hazırlıyoruz",
+  },
+  "calc.pending.estimate": { de: "(Schätzung)", en: "(estimate)", ar: "(تقديري)", tr: "(tahmini)" },
+  "calc.pending.body": {
+    de: "Einige Ihrer Angaben muss unser Dispositionsteam kurz von Hand prüfen, bevor wir einen Preis garantieren. Der Betrag oben ist unsere aktuelle Schätzung.",
+    en: "Some of your answers need a manual check by our dispatch team before we can guarantee a price. The figure above is our current estimate.",
+    ar: "تحتاج بعض إجاباتك إلى تحقّق يدوي من فريق التنسيق لدينا قبل أن نضمن السعر. المبلغ أعلاه هو تقديرنا الحالي.",
+    tr: "Bir fiyatı garanti edebilmemiz için bazı yanıtlarınızın sevk ekibimiz tarafından elle kontrol edilmesi gerekiyor. Yukarıdaki tutar güncel tahminimizdir.",
+  },
+  "calc.pending.whyTitle": {
+    de: "Warum wird das geprüft?", en: "Why is this pending review?",
+    ar: "لماذا يخضع هذا للمراجعة؟", tr: "Bu neden inceleniyor?",
+  },
+  "calc.pending.whyBody": {
+    de: "Unsere Umzugsexperten prüfen die folgenden Punkte, damit es am Umzugstag keine Überraschungen gibt. Den endgültigen Preis bestätigen wir innerhalb eines Werktags.",
+    en: "Our moving experts check the points below so there are no surprise complications on your moving day. We confirm the final price within one working day.",
+    ar: "يتحقّق خبراء النقل لدينا من النقاط أدناه حتى لا تحدث مفاجآت يوم النقل. نؤكّد السعر النهائي خلال يوم عمل واحد.",
+    tr: "Taşınma gününde sürpriz yaşanmaması için taşıma uzmanlarımız aşağıdaki noktaları kontrol eder. Nihai fiyatı bir iş günü içinde onaylarız.",
+  },
+  "calc.pending.timeline": {
+    de: "Nächste Schritte", en: "Next Steps Timeline", ar: "الخطوات التالية", tr: "Sonraki adımlar",
+  },
+  "calc.pending.step1": {
+    de: "Schätzung berechnet", en: "Estimate Calculated", ar: "تم حساب التقدير", tr: "Tahmin hesaplandı",
+  },
+  "calc.pending.step1Sub": { de: "Gerade erledigt", en: "Done just now", ar: "تمّ للتو", tr: "Az önce tamamlandı" },
+  "calc.pending.step2": {
+    de: "Prüfung durch Experten", en: "Expert Assessment", ar: "تقييم الخبراء", tr: "Uzman değerlendirmesi",
+  },
+  "calc.pending.step2Sub": {
+    de: "In Bearbeitung (innerhalb 24 h)", en: "In progress (within 24h)",
+    ar: "قيد التنفيذ (خلال 24 ساعة)", tr: "Devam ediyor (24 saat içinde)",
+  },
+  "calc.pending.step3": {
+    de: "Endgültiges Angebot", en: "Final Quote Sent", ar: "إرسال العرض النهائي", tr: "Nihai teklif gönderildi",
+  },
+  "calc.pending.step3Sub": { de: "Per E-Mail", en: "By email", ar: "عبر البريد الإلكتروني", tr: "E-posta ile" },
+  "calc.pending.step4": { de: "Sicher buchen", en: "Safe Booking", ar: "حجز آمن", tr: "Güvenli rezervasyon" },
+  "calc.pending.step4Sub": {
+    de: "Termin sofort sichern", en: "Secure your date instantly", ar: "احجز موعدك فورًا", tr: "Tarihinizi hemen ayırtın",
+  },
+  /** Signing up with the quote id adopts the quote, which gives dispatch a way to reply. */
+  "calc.pending.save": {
+    de: "Schätzung speichern & Konto erstellen", en: "Save Estimate & Create Account",
+    ar: "حفظ التقدير وإنشاء حساب", tr: "Tahmini kaydet ve hesap oluştur",
+  },
+
   "common.skip": { de: "Überspringen", en: "Skip", ar: "تخطَّ", tr: "Atla" },
   "common.yes": { de: "Ja", en: "Yes", ar: "نعم", tr: "Evet" },
   "common.no": { de: "Nein", en: "No", ar: "لا", tr: "Hayır" },
@@ -2197,6 +2314,21 @@ export const MESSAGES = {
   },
   "nav.partner": {
     de: "Partner werden", en: "Become a Partner", ar: "كن شريكاً", tr: "Ortak Ol",
+  },
+  /**
+   * The black pill of the new nav-bar (86:5213) and the white one of the
+   * footer (101:163). Rendered uppercase, as drawn; Arabic has no case.
+   */
+  "nav.getApp": {
+    de: "App holen", en: "Get app", ar: "حمّل التطبيق", tr: "Uygulamayı indir",
+  },
+  /** The nav-bar's shopping cart (86:5339), which opens the calculator. */
+  "nav.cart": {
+    de: "Ihr Angebot", en: "Your quote", ar: "عرض السعر الخاص بك", tr: "Teklifiniz",
+  },
+  /** Names the footer's link row for screen readers, apart from the header's. */
+  "footer.navLabel": {
+    de: "Fußzeilen-Navigation", en: "Footer navigation", ar: "روابط التذييل", tr: "Alt bilgi gezinmesi",
   },
 
   // ── Errors ──────────────────────────────────────────────────────────
