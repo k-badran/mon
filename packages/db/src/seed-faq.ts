@@ -6,8 +6,11 @@
  * English, Arabic and Turkish homepages — the endpoint returned an empty
  * list and the section hid itself.
  *
- * Idempotent on (locale, sortOrder), which is the table's unique key.
+ * Idempotent on (locale, sortOrder), which is the table's unique key. A
+ * re-run rewrites the category too, so rows seeded before the column existed
+ * pick up their topic from here.
  */
+import type { FaqCategory } from "@mon/core";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "./client.js";
@@ -15,6 +18,8 @@ import { faqEntries } from "./schema/catalog.js";
 
 interface FaqSeed {
   sortOrder: number;
+  /** One topic per question, the same in every locale — a key, not a label. */
+  category: FaqCategory;
   de: { q: string; a: string };
   en: { q: string; a: string };
   ar: { q: string; a: string };
@@ -24,6 +29,7 @@ interface FaqSeed {
 const FAQ: FaqSeed[] = [
   {
     sortOrder: 1,
+    category: "insurance",
     de: {
       q: "Sind meine Möbel während des Transports versichert?",
       a: "Ja, vollständig. Jedes transportierte Stück ist durch unsere Allianz-Haftpflicht- und Transportversicherung abgesichert. Bei wertvollen Kunstobjekten passen wir die Versicherungssumme auf Wunsch individuell an.",
@@ -43,6 +49,7 @@ const FAQ: FaqSeed[] = [
   },
   {
     sortOrder: 2,
+    category: "billing",
     de: {
       q: "Wie funktioniert die Abrechnung nach m² genau?",
       a: "Sie geben die Wohnfläche und die ungefähre Zimmerzahl in unseren Rechner ein. Unser System vergleicht das mit Durchschnittswerten und berechnet daraus ein exaktes Festpreisangebot. Alternativ können Sie einzelne Sperrgutstücke manuell ergänzen.",
@@ -62,6 +69,7 @@ const FAQ: FaqSeed[] = [
   },
   {
     sortOrder: 3,
+    category: "booking",
     de: {
       q: "Kann ich meinen Umzugstermin später verschieben?",
       a: "Eine Terminverschiebung ist bis 5 Werktage vor dem vereinbarten Termin vollständig kostenfrei. Wenden Sie sich dafür einfach direkt an Ihren persönlichen Projektleiter.",
@@ -81,6 +89,7 @@ const FAQ: FaqSeed[] = [
   },
   {
     sortOrder: 4,
+    category: "cleaning",
     de: {
       q: "Was beinhaltet die Übergabegarantie bei der Reinigung?",
       a: "Das bedeutet: Meldet der Vermieter bei der offiziellen Übergabe Reinigungsmängel, beheben wir diese sofort und für Sie vollständig kostenfrei. Auf Wunsch begleiten wir Sie auch bei der Schlüsselübergabe.",
@@ -119,7 +128,13 @@ async function main() {
       if (existing) {
         await db
           .update(faqEntries)
-          .set({ question: text.q, answer: text.a, isPublished: true, updatedAt: new Date() })
+          .set({
+            question: text.q,
+            answer: text.a,
+            category: entry.category,
+            isPublished: true,
+            updatedAt: new Date(),
+          })
           .where(eq(faqEntries.id, existing.id));
         updated += 1;
         continue;
@@ -129,6 +144,7 @@ async function main() {
         locale,
         question: text.q,
         answer: text.a,
+        category: entry.category,
         sortOrder: entry.sortOrder,
         isPublished: true,
       });

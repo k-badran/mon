@@ -1,5 +1,5 @@
 import { env } from "@mon/config";
-import { publicHolidaysForRange } from "@mon/core";
+import { publicHolidaysForRange, type FaqCategory } from "@mon/core";
 
 import { KNOWLEDGE } from "./knowledge-seed.js";
 import { CONTENT_DEFAULTS, SETTING_DEFAULTS } from "./site-defaults.js";
@@ -115,9 +115,15 @@ const CATALOG: ReadonlyArray<{
   c("Reinigung", "Keller / Dachboden", "70.00", "0.00"),
 ];
 
-const FAQ: ReadonlyArray<{ locale: string; question: string; answer: string }> = [
+const FAQ: ReadonlyArray<{
+  locale: string;
+  category: FaqCategory;
+  question: string;
+  answer: string;
+}> = [
   {
     locale: "de",
+    category: "billing",
     question: "Wie berechnet sich der Preis?",
     answer:
       "Der Preis setzt sich aus einem Grundpreis, dem Umfang (Fläche oder einzelne Positionen), " +
@@ -126,6 +132,7 @@ const FAQ: ReadonlyArray<{ locale: string; question: string; answer: string }> =
   },
   {
     locale: "de",
+    category: "booking",
     question: "Brauche ich ein Konto?",
     answer:
       "Der Rechner ist ohne Konto nutzbar. Für eine verbindliche Anfrage ist ein kostenloses " +
@@ -133,6 +140,7 @@ const FAQ: ReadonlyArray<{ locale: string; question: string; answer: string }> =
   },
   {
     locale: "de",
+    category: "booking",
     question: "Bis wann kann ich kostenlos stornieren?",
     answer:
       "Bis 12 Stunden vor dem Termin ist die Stornierung kostenlos. Danach werden der " +
@@ -140,6 +148,7 @@ const FAQ: ReadonlyArray<{ locale: string; question: string; answer: string }> =
   },
   {
     locale: "de",
+    category: "general",
     question: "In welchem Gebiet seid ihr tätig?",
     answer:
       "Der Startpunkt muss in Nordrhein-Westfalen liegen. Das Ziel eines Umzugs kann " +

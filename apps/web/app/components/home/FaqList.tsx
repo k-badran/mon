@@ -1,6 +1,9 @@
 "use client";
 
+import { FAQ_CATEGORIES, toFaqCategory, type FaqCategory } from "@mon/core";
 import { useState } from "react";
+
+import { useTranslate } from "@/lib/i18n/provider";
 
 /**
  * The homepage FAQ: topic chips over an accordion.
@@ -16,31 +19,43 @@ import { useState } from "react";
  * and the first one open. The frame also carries a designer's note under the
  * chips ("filters appear once listing exceeds 8 items") — an annotation, not
  * copy, so it is not rendered.
+ *
+ * The chips are the topics the entries actually carry (`faq_entries.category`),
+ * in FAQ_CATEGORIES order rather than the order the questions happen to come
+ * in, so the row reads the same whatever the sort order of the list. Their
+ * labels, and each card's badge, are interface messages keyed by topic.
  */
 
 export interface HomeFaq {
   id: string;
   question: string;
   answer: string;
+  /** Always set by the API; anything unrecognised reads as "general". */
+  category?: string | null;
 }
 
 export function FaqList({
   entries,
   allLabel,
 }: {
-  entries: (HomeFaq & { tag?: string | undefined })[];
+  entries: HomeFaq[];
   allLabel?: string | undefined;
 }) {
-  const [topic, setTopic] = useState<string | null>(null);
+  const t = useTranslate();
+  const [topic, setTopic] = useState<FaqCategory | null>(null);
 
-  // Topics in the order their questions appear, once each. No tags at all —
-  // an FAQ nobody categorised — means no chips rather than a lone "All".
-  const topics = [...new Set(entries.map((entry) => entry.tag).filter(Boolean))] as string[];
-  const visible = topic ? entries.filter((entry) => entry.tag === topic) : entries;
+  const filed = entries.map((entry) => ({ ...entry, topic: toFaqCategory(entry.category) }));
+  const present = new Set(filed.map((entry) => entry.topic));
+  const topics = FAQ_CATEGORIES.filter((key) => present.has(key));
+  const visible = topic ? filed.filter((entry) => entry.topic === topic) : filed;
+
+  const label = (key: FaqCategory) => t(`faq.category.${key}`);
 
   return (
     <div className="grid gap-6">
-      {topics.length > 0 ? (
+      {/* One topic only — say an FAQ nobody categorised, all "general" —
+          means no chips: "All" and that topic would show the same list. */}
+      {topics.length > 1 ? (
         // Toggle buttons rather than a tablist: they filter one list in place
         // instead of switching between panels.
         <div className="flex flex-wrap gap-2">
@@ -58,7 +73,7 @@ export function FaqList({
                     : "bg-neutral-100 font-medium text-neutral-700 hover:bg-neutral-200"
                 }`}
               >
-                {value ?? allLabel ?? "All"}
+                {value ? label(value) : allLabel || t("faq.category.all")}
               </button>
             );
           })}
@@ -77,11 +92,9 @@ export function FaqList({
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm marker:content-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-yellow [&::-webkit-details-marker]:hidden">
               <span className="grid justify-items-start gap-2">
-                {entry.tag ? (
-                  <span className="rounded-[6px] border border-brand-yellow bg-yellow-tint px-3 py-1.5 text-caption font-bold tracking-[0.5px] text-brand-red uppercase">
-                    {entry.tag}
-                  </span>
-                ) : null}
+                <span className="rounded-[6px] border border-brand-yellow bg-yellow-tint px-3 py-1.5 text-caption font-bold tracking-[0.5px] text-brand-red uppercase">
+                  {label(entry.topic)}
+                </span>
                 <span className="font-display text-lg leading-6 font-bold text-text-strong">
                   {entry.question}
                 </span>
