@@ -186,6 +186,44 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "textarea",
   ),
 
+  // The trust chips under the included cards (frame 106:10195, `trust-row`).
+  row(S, "trust.1.value", "Trust chip 1 — figure", 21, {
+    de: "4.500+",
+    en: "4,500+",
+    ar: "4,500+",
+    tr: "4.500+",
+  }),
+  row(S, "trust.1.label", "Trust chip 1 — label", 22, {
+    de: "Fünf-Sterne-Bewertungen",
+    en: "Five-Star Reviews",
+    ar: "تقييم بخمس نجوم",
+    tr: "Beş Yıldızlı Yorum",
+  }),
+  row(S, "trust.2.value", "Trust chip 2 — figure", 23, {
+    de: "100 %",
+    en: "100%",
+    ar: "100%",
+    tr: "%100",
+  }),
+  row(S, "trust.2.label", "Trust chip 2 — label", 24, {
+    de: "Zertifizierte Teams",
+    en: "Certified Crews",
+    ar: "فرق معتمدة",
+    tr: "Sertifikalı Ekipler",
+  }),
+  row(S, "trust.3.value", "Trust chip 3 — figure", 25, {
+    de: "99,9 %",
+    en: "99.9%",
+    ar: "99.9%",
+    tr: "%99,9",
+  }),
+  row(S, "trust.3.label", "Trust chip 3 — label", 26, {
+    de: "Pünktliche Lieferung",
+    en: "On-Time Delivery",
+    ar: "تسليم في الموعد",
+    tr: "Zamanında Teslimat",
+  }),
+
   row(S, "factors.eyebrow", "Pricing factors — eyebrow", 30, {
     de: "Dynamischer Rechner",
     en: "Dynamic Calculator",
@@ -333,75 +371,25 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "textarea",
   ),
 
-  row(S, "faq.eyebrow", "FAQ — eyebrow", 60, {
-    de: "Hilfe",
-    en: "Help Desk",
-    ar: "مكتب المساعدة",
-    tr: "Yardım Masası",
+  // The masonry gallery's caption pills, in the frame's order (tall photo first).
+  row(S, "gallery.1.caption", "Gallery photo 1 — caption", 53, {
+    de: "Privatumzug",
+    en: "Residential Move",
+    ar: "نقل سكني",
+    tr: "Konut Taşıma",
   }),
-  row(S, "faq.headline", "FAQ — headline", 61, {
-    de: "Häufig gestellte Fragen",
-    en: "Frequently Asked Questions",
-    ar: "الأسئلة الشائعة",
-    tr: "Sık Sorulan Sorular",
+  row(S, "gallery.2.caption", "Gallery photo 2 — caption", 54, {
+    de: "Antiquitäten-Transport",
+    en: "Antique Handling",
+    ar: "نقل التحف",
+    tr: "Antika Taşıma",
   }),
-  row(S, "faq.1.question", "FAQ 1 — question", 62, {
-    de: "Wie lange im Voraus sollte ich meinen Umzug buchen?",
-    en: "How far in advance should I reserve my relocation?",
-    ar: "قبل كم من الوقت ينبغي أن أحجز موعد النقل؟",
-    tr: "Taşınmamı ne kadar önceden ayırtmalıyım?",
+  row(S, "gallery.3.caption", "Gallery photo 3 — caption", 55, {
+    de: "Lagerung & Logistik",
+    en: "Storage & Logistics",
+    ar: "التخزين والخدمات اللوجستية",
+    tr: "Depolama ve Lojistik",
   }),
-  row(
-    S,
-    "faq.1.answer",
-    "FAQ 1 — answer",
-    63,
-    {
-      de: "Wir empfehlen mindestens 2–3 Wochen Vorlauf. Dank unserer großen regionalen Flotte können wir jedoch oft auch dringende Last-Minute-Umzüge übernehmen.",
-      en: "We recommend booking at least 2-3 weeks in advance. However, with our extensive regional fleet, we are often able to accommodate emergency last-minute moves.",
-      ar: "نوصي بالحجز قبل 2–3 أسابيع على الأقل. لكن بفضل أسطولنا الإقليمي الواسع، غالباً ما نستطيع تلبية عمليات النقل الطارئة في اللحظة الأخيرة.",
-      tr: "En az 2-3 hafta önceden rezervasyon öneririz. Ancak geniş bölgesel filomuz sayesinde çoğu zaman acil, son dakika taşımalarını da karşılayabiliyoruz.",
-    },
-    "textarea",
-  ),
-  row(S, "faq.2.question", "FAQ 2 — question", 64, {
-    de: "Sind meine wertvollen Elektrogeräte versichert?",
-    en: "Are my valuable electronics covered by the damage insurance?",
-    ar: "هل أجهزتي الإلكترونية الثمينة مشمولة بالتأمين؟",
-    tr: "Değerli elektronik eşyalarım hasar sigortası kapsamında mı?",
-  }),
-  row(
-    S,
-    "faq.2.answer",
-    "FAQ 2 — answer",
-    65,
-    {
-      de: "Ja. Alle über unser Inventarverzeichnis erfassten Güter sind vollständig durch unsere umfassende Transportversicherung bis 500.000 € gedeckt.",
-      en: "Yes, all goods checked in via our structural inventory catalog are fully covered under our comprehensive transport insurance policy up to €500,000.",
-      ar: "نعم، كل الأغراض المسجَّلة في قائمة الجرد مشمولة بالكامل بوثيقة تأمين النقل الشاملة حتى 500,000 €.",
-      tr: "Evet, envanter kataloğumuza kaydedilen tüm eşyalar kapsamlı nakliye sigorta poliçemizle 500.000 €'ya kadar tamamen korunur.",
-    },
-    "textarea",
-  ),
-  row(S, "faq.3.question", "FAQ 3 — question", 66, {
-    de: "Muss ich meine Kartons selbst packen?",
-    en: "Do I need to pack my own cardboard boxes?",
-    ar: "هل عليّ تعبئة صناديقي بنفسي؟",
-    tr: "Kutularımı kendim mi paketlemeliyim?",
-  }),
-  row(
-    S,
-    "faq.3.answer",
-    "FAQ 3 — answer",
-    67,
-    {
-      de: "Sie können selbst packen oder unseren Full-Service-Packservice unten dazubuchen. Wenn Sie das Upgrade wählen, kommen wir mit Kartons, Etiketten und Luftpolsterfolie und verpacken alles sicher.",
-      en: "You can pack them yourself, or add our full-service packing upgrade below. If you choose the upgrade, we arrive with boxes, labels, bubble wrap, and pack everything safely.",
-      ar: "يمكنك التعبئة بنفسك أو إضافة خدمة التغليف الكاملة أدناه. وإذا اخترت الترقية، نصل ومعنا الصناديق والملصقات وورق الفقاعات، ونغلّف كل شيء بأمان.",
-      tr: "Kendiniz paketleyebilir ya da aşağıdaki tam hizmet paketleme eklentimizi alabilirsiniz. Eklentiyi seçerseniz kutular, etiketler ve balonlu naylonla gelir, her şeyi güvenle paketleriz.",
-    },
-    "textarea",
-  ),
 
   row(S, "addons.eyebrow", "Add-ons — eyebrow", 70, {
     de: "Zusatzmodule",
@@ -510,31 +498,6 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "Rezervasyona Ekle",
   }),
 
-  row(S, "cta.headline", "Closing CTA — headline", 90, {
-    de: "Bereit, Ihren garantierten Preis zu berechnen?",
-    en: "Ready to Calculate Your Guaranteed Price?",
-    ar: "جاهز لحساب سعرك المضمون؟",
-    tr: "Garantili Fiyatınızı Hesaplamaya Hazır mısınız?",
-  }),
-  row(
-    S,
-    "cta.body",
-    "Closing CTA — body",
-    91,
-    {
-      de: "Geben Sie Ihre Adressen und Ihr Inventar in unseren digitalen Rechner ein und erhalten Sie in weniger als 3 Minuten sofort einen vertraglich verbindlichen Preis. Kein Telefonat nötig.",
-      en: "Enter your locations and inventory in our digital calculator to receive an instant contract binding price in less than 3 minutes. No calls required.",
-      ar: "أدخل عناوينك وقائمة أغراضك في حاسبتنا الرقمية لتحصل على سعر فوري ومُلزم تعاقدياً في أقل من 3 دقائق. دون الحاجة إلى أي مكالمة.",
-      tr: "Adreslerinizi ve eşya envanterinizi dijital hesaplayıcımıza girin, 3 dakikadan kısa sürede anında ve sözleşmeye bağlayıcı bir fiyat alın. Telefon görüşmesi gerekmez.",
-    },
-    "textarea",
-  ),
-  row(S, "cta.button", "Closing CTA — button", 92, {
-    de: "Rechner starten",
-    en: "Start Calculator",
-    ar: "ابدأ الحاسبة",
-    tr: "Hesaplayıcıyı Başlat",
-  }),
   // ══ How it works ═══════════════════════════════════════════════════
   row(H, "hero.eyebrow", "Hero — eyebrow", 1, {
     de: "Klarer Fahrplan",
