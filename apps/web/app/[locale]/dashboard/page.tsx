@@ -7,6 +7,7 @@ import { useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import { telHref, useSiteSettings } from "@/lib/site/useSiteSettings";
 import { useLiveOrders } from "@/lib/live/useLiveData";
+import { useMyThreads } from "@/lib/live/useMessages";
 import { DashboardShell } from "@/app/components/dashboard/DashboardShell";
 import {
   IconCheck,
@@ -31,6 +32,8 @@ export default function DashboardOverviewPage() {
   const site = useSiteSettings();
 
   const { data, isLoading } = useLiveOrders({ limit: 50 });
+  // The same entry the sidebar badge reads, so the tile and the badge agree.
+  const messages = useMyThreads();
   const orders = data?.items ?? [];
 
   const active = orders.filter((o) => o.status === "confirmed" || o.status === "quoted");
@@ -97,7 +100,7 @@ export default function DashboardOverviewPage() {
           tone="info"
           icon={<IconMessages />}
           label={t("dash.unreadMessages")}
-          value={isLoading ? null : 0}
+          value={messages.isLoading ? null : (messages.data?.unread ?? 0)}
           sub={t("dash.fromSupport")}
         />
       </section>

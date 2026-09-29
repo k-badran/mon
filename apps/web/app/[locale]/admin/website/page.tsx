@@ -7,6 +7,7 @@ import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_BYTES, isSafeImageSrc } from "@mo
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 import { DashboardShell } from "@/app/components/dashboard/DashboardShell";
+import { FaqEditor } from "./FaqEditor";
 
 /**
  * Website control.
@@ -50,7 +51,7 @@ interface ContentBlock {
   isPublished: boolean;
 }
 
-type Tab = "theme" | "brand" | "contact" | "seo" | "content";
+type Tab = "theme" | "brand" | "contact" | "seo" | "content" | "faq";
 
 export default function WebsiteControlPage() {
   const { sdk } = useApi();
@@ -201,6 +202,7 @@ export default function WebsiteControlPage() {
     { id: "contact", label: t("site.tab.contact") },
     { id: "seo", label: t("site.tab.seo") },
     { id: "content", label: t("site.tab.content") },
+    { id: "faq", label: t("site.tab.faq") },
   ];
 
   return (
@@ -250,7 +252,7 @@ export default function WebsiteControlPage() {
       )}
 
       {/* ── Settings tabs ───────────────────────────────────────────── */}
-      {!loading && tab !== "content" && (
+      {!loading && tab !== "content" && tab !== "faq" && (
         <section className="card">
           <div className="card-head">
             <h2>{TABS.find((item) => item.id === tab)?.label}</h2>
@@ -332,6 +334,9 @@ export default function WebsiteControlPage() {
           ))}
         </>
       )}
+
+      {/* ── FAQ tab ─────────────────────────────────────────────────── */}
+      {!loading && tab === "faq" && <FaqEditor onStatus={setStatus} />}
     </DashboardShell>
   );
 }

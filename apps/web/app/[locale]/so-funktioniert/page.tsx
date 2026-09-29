@@ -20,7 +20,7 @@ import { HowItWorksComparison, HowItWorksSteps } from "@/app/components/site/How
 const SECTION = "page-how-it-works";
 
 export const metadata: Metadata = {
-  title: "So funktioniert's — m.on",
+  title: "So funktioniert's",
 };
 
 export default async function HowItWorksPage({ params }: { params: { locale: Locale } }) {

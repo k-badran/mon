@@ -8,6 +8,8 @@ import { permissionFor, type StaffRoutePath } from "@/lib/access/staff-routes";
 import { useApi } from "@/lib/api";
 import { LOCALE_META, type Locale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/provider";
+import { useMyThreads } from "@/lib/live/useMessages";
+import { useStaffWaitingCount } from "@/lib/live/useStaffInbox";
 import { telHref, useSiteSettings } from "@/lib/site/useSiteSettings";
 import {
   IconAnalytics,
@@ -110,6 +112,7 @@ const STAFF_NAV: StaffNavItem[] = [
   { href: "/admin/nutzer", labelKey: "admin.nav.users", Icon: IconUsers },
   { href: "/admin/leads", labelKey: "admin.nav.leads", Icon: IconLeads, planned: true },
   { href: "/admin/auftraege", labelKey: "admin.nav.orders", Icon: IconOrders },
+  { href: "/admin/nachrichten", labelKey: "admin.nav.messages", Icon: IconMessages },
   { href: "/admin/dispatch", labelKey: "admin.nav.dispatch", Icon: IconDispatch, planned: true },
   { href: "/admin/preise", labelKey: "admin.nav.pricing", Icon: IconPricing, planned: true },
   // Points at the billing screen that exists. The entry used to name
@@ -142,6 +145,18 @@ export function DashboardShell({
   const site = useSiteSettings();
   const pathname = usePathname();
   const router = useRouter();
+
+  // The Messages badge is the customer's own unread support replies, read by
+  // the frame itself so it is right on every page rather than only on the ones
+  // that remember to pass it. The Messages screen shares the same cache entry,
+  // so opening a conversation clears the badge in the same render.
+  const threads = useMyThreads({ enabled: variant === "customer" && unreadCount === undefined });
+  const unread = unreadCount ?? (variant === "customer" ? threads.data?.unread : undefined);
+
+  // The staff counterpart: conversations waiting on a person. The hook asks for
+  // nothing without `messages.read`, so a role that cannot open the inbox never
+  // requests its count either.
+  const waiting = useStaffWaitingCount({ enabled: variant === "staff" }).data?.waiting;
 
   // Not the guard — see the note at the top of this file. This catches the
   // session ending or being demoted in a tab that is already open, which the
@@ -204,8 +219,13 @@ export function DashboardShell({
               <Link key={path} href={target} aria-current={isCurrent ? "page" : undefined}>
                 <Icon className="nav-icon" />
                 <span className="nav-label">{t(labelKey)}</span>
-                {labelKey === "dash.messages" && unreadCount ? (
-                  <span className="nav-badge">{unreadCount}</span>
+                {labelKey === "dash.messages" && unread ? (
+                  <span className="nav-badge">{unread}</span>
+                ) : null}
+                {path === "/admin/nachrichten" && waiting ? (
+                  <span className="nav-badge" title={t("inbox.waitingCount", { count: waiting, values: { count: waiting } })}>
+                    {waiting}
+                  </span>
                 ) : null}
               </Link>
             );
@@ -286,7 +306,7 @@ export function DashboardShell({
 
           <button type="button" className="dash-bell" aria-label={t("dash.notifications")}>
             <IconBell />
-            {unreadCount ? <span className="count">{unreadCount}</span> : null}
+            {unread ? <span className="count">{unread}</span> : null}
           </button>
         </header>
 

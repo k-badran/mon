@@ -23,4 +23,7 @@ export const listOrdersSchema = z.object({
   // entire orders table on every page load.
   limit: z.coerce.number().int().min(1).max(100).default(25),
   cursor: z.string().datetime().optional(),
+  // By creation time either way, because that is the column the cursor walks.
+  // Staff working through a backlog read it oldest first.
+  sort: z.enum(["newest", "oldest"]).default("newest"),
 });

@@ -7,7 +7,8 @@ import { asyncHandler } from "../../middleware/error-handler.js";
 import { chatRateLimit } from "../../middleware/rate-limit.js";
 import { optionalAuth, requireAuth } from "../../middleware/require-auth.js";
 import { requirePermission } from "../../middleware/require-permission.js";
-import { validate, validatedParams } from "../../middleware/validate.js";
+import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
+import { recordAudit } from "../audit/audit.service.js";
 import * as chatService from "./chat.service.js";
 
 export const chatRouter: Router = Router();
@@ -79,6 +80,42 @@ chatRouter.post(
   }),
 );
 
+// ── The signed-in owner ─────────────────────────────────────────────────
+//
+// Declared before `/:threadId` so "mine" is not read as a malformed thread id.
+// No capability is asked for: these return and change only the caller's own
+// conversations, which ownership alone authorises — a customer holds no
+// capabilities at all. Marking read is not audited, for the same reason a
+// customer's own chat message is not: it is the owner's bookkeeping on their
+// own data, not an act on anyone else's.
+
+/** The caller's conversations, for the dashboard's Messages screen and badge. */
+chatRouter.get(
+  "/mine",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const threads = await chatService.listUserThreads(req.user!.id);
+
+    res.json({
+      threads,
+      // Summed here so the badge on every dashboard page needs one number,
+      // not the list.
+      unread: threads.reduce((total, thread) => total + thread.unread, 0),
+    });
+  }),
+);
+
+chatRouter.post(
+  "/:threadId/read",
+  requireAuth,
+  validate({ params: z.object({ threadId: z.string().uuid() }) }),
+  asyncHandler(async (req, res) => {
+    const threadId = validatedParams<{ threadId: string }>(req).threadId;
+    await chatService.markRead(req.user!.id, threadId);
+    res.status(204).send();
+  }),
+);
+
 chatRouter.get(
   "/:threadId",
   optionalAuth,
@@ -106,17 +143,55 @@ chatRouter.get(
 
 // ── Staff ───────────────────────────────────────────────────────────────
 //
-// These four endpoints are the authorisation boundary for the support inbox.
+// These endpoints are the authorisation boundary for the support inbox.
 // The admin UI hides them from customers, but that is presentation; what makes
 // them safe is the capability check here, re-read from the database per request.
 
-/** The staff inbox: conversations waiting on a person. */
+const staffThreadsQuery = z.object({
+  status: z.enum(["all", "waiting", "assistant", "human"]).default("all"),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+/**
+ * The staff inbox: every conversation, the ones waiting on a person first.
+ *
+ * The customer's name and email are part of it. Answering someone without
+ * knowing who they are is not answering them, and `messages.read` is held
+ * only by roles that also hold `customers.read`.
+ */
 chatRouter.get(
   "/staff/threads",
   requireAuth,
   requirePermission("messages.read"),
+  validate({ query: staffThreadsQuery }),
+  asyncHandler(async (req, res) => {
+    const { status, limit } = validatedQuery<z.infer<typeof staffThreadsQuery>>(req);
+    res.json({ threads: await chatService.listStaffThreads(status, limit) });
+  }),
+);
+
+/**
+ * The number behind the inbox's nav badge. Its own route so the badge on every
+ * staff page costs one count, not the list.
+ */
+chatRouter.get(
+  "/staff/waiting",
+  requireAuth,
+  requirePermission("messages.read"),
   asyncHandler(async (_req, res) => {
-    res.json({ threads: await chatService.listActiveThreads() });
+    res.json({ waiting: await chatService.countWaitingThreads() });
+  }),
+);
+
+/** One conversation's full history, whoever owns it. */
+chatRouter.get(
+  "/staff/threads/:threadId",
+  requireAuth,
+  requirePermission("messages.read"),
+  validate({ params: z.object({ threadId: z.string().uuid() }) }),
+  asyncHandler(async (req, res) => {
+    const threadId = validatedParams<{ threadId: string }>(req).threadId;
+    res.json(await chatService.getStaffThread(threadId));
   }),
 );
 
@@ -148,6 +223,15 @@ chatRouter.post(
   asyncHandler(async (req, res) => {
     const threadId = validatedParams<{ threadId: string }>(req).threadId;
     await chatService.takeOver(threadId, req.user!.id);
+
+    await recordAudit({
+      actor: { id: req.user!.id, email: req.user!.email },
+      action: "chat.taken_over",
+      entityType: "chat_thread",
+      entityId: threadId,
+      requestId: req.requestId,
+    });
+
     res.status(204).send();
   }),
 );
@@ -163,6 +247,19 @@ chatRouter.post(
   asyncHandler(async (req, res) => {
     const threadId = validatedParams<{ threadId: string }>(req).threadId;
     await chatService.postStaffMessage(threadId, req.user!.id, req.body.body);
+
+    // The message row records that staff wrote it, not which of them. The
+    // audit entry is where that is kept; the text itself is not copied, since
+    // it is already in the conversation.
+    await recordAudit({
+      actor: { id: req.user!.id, email: req.user!.email },
+      action: "chat.replied",
+      entityType: "chat_thread",
+      entityId: threadId,
+      changes: { length: req.body.body.length },
+      requestId: req.requestId,
+    });
+
     res.status(201).json({ threadId });
   }),
 );

@@ -56,6 +56,9 @@ export const STAFF_ROUTES = [
   // Read, not moderate: complaints handling is customer service's job, and
   // they need to see what was said before they can answer it.
   { path: "/admin/qualitaet", permission: "reviews.read" },
+  // The support inbox opens on reading; answering and taking over need
+  // `messages.write`, which the screen checks per control and the API per call.
+  { path: "/admin/nachrichten", permission: "messages.read" },
   { path: "/admin/logs", permission: "audit.read" },
   { path: "/admin/website", permission: "content.write" },
   { path: "/admin/einstellungen", permission: "settings.write" },

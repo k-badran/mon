@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
-import { fetchSiteContent } from "@/lib/site/theme";
+import { fetchSiteContent, fetchSiteTheme } from "@/lib/site/theme";
 import { path, readList, type Copy } from "@/app/components/site/Blocks";
-import { CenteredHero, SoftCtaBand } from "@/app/components/site/Blocks2";
+import { CenteredHero, SoftCtaBand, telHref } from "@/app/components/site/Blocks2";
 import { FaqDirectory, type FaqCategory } from "@/app/components/site/FaqDirectory";
 
 /**
@@ -31,7 +31,9 @@ export async function generateMetadata({
   const sections = await fetchSiteContent(params.locale, SECTION);
   const name = sections[SECTION]?.["meta.title"];
 
-  return { title: name ? `${name} — m.on` : "m.on" };
+  // The layout's template appends the brand; without a name the page
+  // inherits the default title rather than a bare brand.
+  return name ? { title: name } : {};
 }
 
 export default async function FaqPage({ params }: { params: { locale: Locale } }) {
@@ -58,7 +60,10 @@ export default async function FaqPage({ params }: { params: { locale: Locale } }
     }))
     .filter((category) => category.label && category.entries.length > 0);
 
-  const phone = copy["cta.phone"];
+  // The number dialled is the contact setting, so it cannot drift from the one
+  // the contact page and the calculator show. The button label stays copy.
+  const { contact } = await fetchSiteTheme();
+  const phone = contact["contact.phone"]?.trim();
 
   return (
     <>
@@ -85,7 +90,7 @@ export default async function FaqPage({ params }: { params: { locale: Locale } }
         }
         secondary={
           copy["cta.secondary"] && phone
-            ? { label: copy["cta.secondary"], href: `tel:${phone.replace(/\s+/g, "")}` }
+            ? { label: copy["cta.secondary"], href: `tel:${telHref(phone)}` }
             : undefined
         }
       />

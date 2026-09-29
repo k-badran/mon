@@ -417,7 +417,7 @@ export function ContactPanel({
  * code — an editor writing `+49 (30) 901820` in the CMS would get a dial
  * string three digits short, and nothing would say so.
  */
-function telHref(phone: string) {
+export function telHref(phone: string) {
   return phone.replace(/\(0\)/g, "").replace(/[^\d+]/g, "");
 }
 
@@ -1781,11 +1781,18 @@ export function ReviewFeed({
   more,
 }: {
   reviews: Array<{
+    /** A stable key. Real reviews can share a display name; testimonials do not. */
+    id?: string | undefined;
     name: string;
     meta?: string | undefined;
     body?: string | undefined;
     response?: string | undefined;
     avatar?: string | undefined;
+    /**
+     * Drawn in the avatar's circle when there is no photo — a customer review
+     * carries none — so the card keeps the frame's shape either way.
+     */
+    monogram?: string | undefined;
     /** Stars lit, out of five. The frame draws these per review. */
     rating: number;
   }>;
@@ -1801,7 +1808,7 @@ export function ReviewFeed({
         <ul className="grid gap-8">
           {reviews.map((review) => (
             <li
-              key={review.name}
+              key={review.id ?? review.name}
               className="grid gap-5 rounded-lg border border-border-subtle bg-neutral-50 p-6 md:p-8"
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1815,6 +1822,13 @@ export function ReviewFeed({
                       loading="lazy"
                       className="size-12 shrink-0 rounded-full object-cover"
                     />
+                  ) : review.monogram ? (
+                    <span
+                      aria-hidden="true"
+                      className="grid size-12 shrink-0 place-items-center rounded-full bg-neutral-100 font-display text-body font-bold text-brand-red"
+                    >
+                      {review.monogram}
+                    </span>
                   ) : null}
 
                   <div className="grid gap-1">
@@ -2125,7 +2139,16 @@ export function ContactFormSection({
   submitLabel?: string | undefined;
   action?: string | undefined;
   image?: string | undefined;
-  cards: Array<{ title: string; body: string }>;
+  /**
+   * `links` are the reachable details — a `tel:` or `mailto:` — set under the
+   * body as anchors, because a number a visitor cannot tap is not the same
+   * affordance on the phone most of them read this on.
+   */
+  cards: Array<{
+    title: string;
+    body: string;
+    links?: Array<{ label: string; href: string }> | undefined;
+  }>;
 }) {
   /**
    * Figma leaves the controls borderless — a #f9fafb fill on a white card,
@@ -2281,14 +2304,26 @@ export function ContactFormSection({
               {cards.map((card) => (
                 <li
                   key={card.title}
-                  className="grid gap-3 rounded-lg bg-neutral-0 p-6"
+                  className="grid content-start gap-3 rounded-lg bg-neutral-0 p-6"
                 >
                   <h3 className="font-display text-body font-bold text-text-heading">
                     {card.title}
                   </h3>
-                  <p className="text-body-sm leading-[1.4] whitespace-pre-line text-text-default">
-                    {card.body}
-                  </p>
+                  {card.body ? (
+                    <p className="text-body-sm leading-[1.4] whitespace-pre-line text-text-default">
+                      {card.body}
+                    </p>
+                  ) : null}
+                  {card.links?.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="justify-self-start text-body-sm font-bold [overflow-wrap:anywhere] text-text-heading underline decoration-brand-red underline-offset-4 hover:text-brand-red focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red"
+                    >
+                      {/* Numbers and addresses read left to right in Arabic too. */}
+                      <bdi dir="ltr">{link.label}</bdi>
+                    </a>
+                  ))}
                 </li>
               ))}
             </ul>

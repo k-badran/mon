@@ -7,7 +7,7 @@ import {
   type CalendarDate,
 } from "@mon/core";
 import { db, schema } from "@mon/db";
-import { and, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";
 import { recordAudit, type AuditActor } from "../audit/audit.service.js";
@@ -229,6 +229,7 @@ export interface ListOrdersOptions {
   userId?: string | undefined;
   limit: number;
   cursor?: string | undefined;
+  sort?: "newest" | "oldest" | undefined;
 }
 
 /**
@@ -254,9 +255,25 @@ export async function listOrders(options: ListOrdersOptions) {
     );
   }
 
+  const oldestFirst = options.sort === "oldest";
+
   // Keyset pagination: stable under inserts, unlike OFFSET.
   if (options.cursor) {
-    conditions.push(sql`${orders.createdAt} < ${new Date(options.cursor)}`);
+    // Bound as a string with an explicit cast. A raw sql`` template has no
+    // column to take an encoder from, and the driver refuses a Date there —
+    // which made every request for a second page answer 500.
+    const cursor = sql`${new Date(options.cursor).toISOString()}::timestamptz`;
+
+    // The cursor is an ISO string, so it carries milliseconds while the column
+    // carries microseconds. Walking forwards, the last row served is a few
+    // microseconds *after* its own cursor and would come back as the first row
+    // of the next page; truncating the column to the cursor's precision keeps
+    // it out.
+    conditions.push(
+      oldestFirst
+        ? sql`date_trunc('milliseconds', ${orders.createdAt}) > ${cursor}`
+        : sql`${orders.createdAt} < ${cursor}`,
+    );
   }
 
   const rows = await db
@@ -274,7 +291,7 @@ export async function listOrders(options: ListOrdersOptions) {
     })
     .from(orders)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(orders.createdAt))
+    .orderBy(oldestFirst ? asc(orders.createdAt) : desc(orders.createdAt))
     // One extra row tells us whether another page exists.
     .limit(options.limit + 1);
 

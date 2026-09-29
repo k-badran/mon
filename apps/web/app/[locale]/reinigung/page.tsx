@@ -50,7 +50,7 @@ const CROSS_SELL_TARGETS: Array<{ route: string; icon: CrossSellIcon }> = [
 ];
 
 export const metadata: Metadata = {
-  title: "Reinigung — m.on",
+  title: "Reinigung",
 };
 
 export default async function CleaningPage({ params }: { params: { locale: Locale } }) {

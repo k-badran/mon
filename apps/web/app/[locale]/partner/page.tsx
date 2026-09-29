@@ -30,7 +30,9 @@ export async function generateMetadata({
   const sections = await fetchSiteContent(params.locale, SECTION);
   const name = sections[SECTION]?.["meta.title"];
 
-  return { title: name ? `${name} — m.on` : "m.on" };
+  // The layout's template appends the brand; without a name the page
+  // inherits the default title rather than a bare brand.
+  return name ? { title: name } : {};
 }
 
 export default async function PartnerPage({ params }: { params: { locale: Locale } }) {

@@ -37,7 +37,7 @@ const CROSS_SELL_TARGETS: Array<{ route: string; icon: CrossSellIcon }> = [
 ];
 
 export const metadata: Metadata = {
-  title: "Entsorgung — m.on",
+  title: "Entsorgung",
 };
 
 export default async function DisposalPage({ params }: { params: { locale: Locale } }) {
