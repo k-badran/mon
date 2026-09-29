@@ -59,7 +59,10 @@ mailRouter.get(
        * the `log` driver is "working" in the sense that it never fails, and
        * delivers nothing.
        */
-      sendsRealEmail: mailer.driver === "smtp",
+      // Anything but `log` delivers. Written as "is not log" rather than a list
+      // of the drivers that send, so adding a provider cannot leave this
+      // reporting that a working configuration sends nothing.
+      sendsRealEmail: mailer.driver !== "log",
       ...(error ? { error } : {}),
     });
   }),
