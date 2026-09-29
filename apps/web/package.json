@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3200",
-    "build": "node scripts/build-messages.mjs && next build",
+    "dev": "node scripts/build-image-manifest.mjs && next dev -p 3200",
+    "build": "node scripts/build-messages.mjs && node scripts/build-image-manifest.mjs && next build",
     "start": "next start -p 3200",
     "lint": "next lint",
     "check-types": "tsc --noEmit",
     "build:messages": "node scripts/build-messages.mjs",
-    "build:check": "NEXT_DIST_DIR=.next-build next build"
+    "build:check": "NEXT_DIST_DIR=.next-build next build",
+    "build:images": "node scripts/build-image-manifest.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",

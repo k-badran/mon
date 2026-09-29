@@ -1,5 +1,7 @@
 import { isSafeImageSrc } from "@mon/core";
 
+import shippedImages from "./public-images.json";
+
 /**
  * The shape of the site's theme, and the values it falls back to.
  *
@@ -47,9 +49,12 @@ export const DEFAULT_LOGO = "/images/brand/logo.png";
  * The brand logo to render.
  *
  * The API only stores an `/images/...` path or an https URL; the value is
- * checked again because it goes straight into an `<img src>`.
+ * checked again because it goes straight into an `<img src>`, and a local
+ * path whose file no longer ships falls back rather than showing a broken logo.
  */
 export function logoSrc(value: string | undefined): string {
   const trimmed = value?.trim();
-  return trimmed && isSafeImageSrc(trimmed) ? trimmed : DEFAULT_LOGO;
+  if (!trimmed || !isSafeImageSrc(trimmed)) return DEFAULT_LOGO;
+  if (trimmed.startsWith("/images/") && !(shippedImages as string[]).includes(trimmed)) return DEFAULT_LOGO;
+  return trimmed;
 }
