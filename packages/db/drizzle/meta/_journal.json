@@ -50,6 +50,13 @@
       "when": 1790602002979,
       "tag": "0006_logo_setting_default",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790695310390,
+      "tag": "0007_drop_wrong_homepage_images",
+      "breakpoints": true
     }
   ]
 }
