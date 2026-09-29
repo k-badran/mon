@@ -961,36 +961,6 @@ export const MESSAGES = {
     ar: "أُعيدت الصورة الافتراضية.",
     tr: "Varsayılan fotoğraf geri yüklendi.",
   },
-  "site.image.upload": {
-    de: "Foto hochladen", en: "Upload photo", ar: "رفع صورة", tr: "Fotoğraf yükle",
-  },
-  "site.image.uploading": {
-    de: "Wird hochgeladen …", en: "Uploading…", ar: "جارٍ الرفع…", tr: "Yükleniyor…",
-  },
-  "site.image.uploaded": {
-    de: "Hochgeladen. Mit ✓ übernehmen Sie das Foto auf die Seite.",
-    en: "Uploaded. Press ✓ to put the photo on the page.",
-    ar: "تم الرفع. اضغط ✓ لوضع الصورة على الصفحة.",
-    tr: "Yüklendi. Fotoğrafı sayfaya koymak için ✓ tuşuna basın.",
-  },
-  "site.image.uploadTooLarge": {
-    de: "Das Foto ist größer als 8 MB.",
-    en: "The photo is larger than 8 MB.",
-    ar: "الصورة أكبر من 8 ميغابايت.",
-    tr: "Fotoğraf 8 MB'tan büyük.",
-  },
-  "site.image.uploadType": {
-    de: "Nur JPEG-, PNG-, WebP- oder AVIF-Fotos sind möglich.",
-    en: "Only JPEG, PNG, WebP or AVIF photos can be uploaded.",
-    ar: "يمكن رفع صور JPEG أو PNG أو WebP أو AVIF فقط.",
-    tr: "Yalnızca JPEG, PNG, WebP veya AVIF fotoğraflar yüklenebilir.",
-  },
-  "site.image.uploadFailed": {
-    de: "Das Hochladen ist fehlgeschlagen.",
-    en: "The upload failed.",
-    ar: "فشل الرفع.",
-    tr: "Yükleme başarısız oldu.",
-  },
   "site.loadFailed": {
     de: "Die Website-Einstellungen konnten nicht geladen werden.",
     en: "The website settings could not be loaded.",
@@ -2371,10 +2341,8 @@ export const MESSAGES = {
   },
   // FAQ topics, one per key in FAQ_CATEGORIES (@mon/core). Interface labels
   // rather than CMS rows: the set of topics is fixed in code, so a CMS row
-  // could rename a topic but never add one. `all` labels an "all topics"
-  // filter. The homepage (3:4) draws a plain accordion and shows none of
-  // these; they name the `category` that /api/faq returns wherever a page
-  // filters by it.
+  // could rename a topic but never add one. `all` backs the "all topics" chip
+  // when the homepage's `faq.all` row is missing.
   "faq.category.all": { de: "Alle", en: "All", ar: "الكل", tr: "Tümü" },
   "faq.category.insurance": {
     de: "Versicherung", en: "Insurance", ar: "التأمين", tr: "Sigorta",
@@ -2410,6 +2378,21 @@ export const MESSAGES = {
   },
   "nav.partner": {
     de: "Partner werden", en: "Become a Partner", ar: "كن شريكاً", tr: "Ortak Ol",
+  },
+  /**
+   * The black pill of the new nav-bar (86:5213) and the white one of the
+   * footer (101:163). Rendered uppercase, as drawn; Arabic has no case.
+   */
+  "nav.getApp": {
+    de: "App holen", en: "Get app", ar: "حمّل التطبيق", tr: "Uygulamayı indir",
+  },
+  /** The nav-bar's shopping cart (86:5339), which opens the calculator. */
+  "nav.cart": {
+    de: "Ihr Angebot", en: "Your quote", ar: "عرض السعر الخاص بك", tr: "Teklifiniz",
+  },
+  /** Names the footer's link row for screen readers, apart from the header's. */
+  "footer.navLabel": {
+    de: "Fußzeilen-Navigation", en: "Footer navigation", ar: "روابط التذييل", tr: "Alt bilgi gezinmesi",
   },
 
   // ── Errors ──────────────────────────────────────────────────────────

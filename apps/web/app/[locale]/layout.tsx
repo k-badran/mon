@@ -8,7 +8,7 @@ import { I18nProvider } from "@/lib/i18n/provider";
 import { QueryProvider } from "@/lib/live/query-provider";
 import { logoSrc } from "@/lib/site/defaults";
 import { fetchSiteContent, fetchSiteTheme, fontHref, themeToCss } from "@/lib/site/theme";
-import { Footer as SiteFooter } from "@/app/components/home/Sections";
+import { Footer as SiteFooter } from "@/app/components/site/Footer";
 import { ContentLoadBanner } from "@/app/components/site/ContentLoadBanner";
 import { SiteChrome } from "@/app/components/SiteChrome";
 import "../theme.css";
@@ -133,7 +133,18 @@ export default async function LocaleLayout({
         <ApiProvider>
           <QueryProvider>
             <I18nProvider locale={locale} messages={MESSAGES[locale]} fallback={MESSAGES.de}>
-              <SiteChrome footer={<SiteFooter copy={footerCopy} locale={locale} logo={logoSrc(site.brand["brand.logo"])} />}>
+              <SiteChrome
+                appUrl={site.brand["brand.appUrl"]}
+                footer={
+                  <SiteFooter
+                    copy={footerCopy}
+                    locale={locale}
+                    brandName={site.brand["brand.name"]}
+                    appUrl={site.brand["brand.appUrl"]}
+                    logo={logoSrc(site.brand["brand.logo"])}
+                  />
+                }
+              >
                 {children}
               </SiteChrome>
             </I18nProvider>

@@ -4,7 +4,7 @@ import { isSafeImageSrc } from "../image-src.js";
 
 describe("isSafeImageSrc", () => {
   it("accepts shipped image paths and https URLs", () => {
-    expect(isSafeImageSrc("/images/home/hero-right.jpg")).toBe(true);
+    expect(isSafeImageSrc("/images/home/hero-truck.jpg")).toBe(true);
     expect(isSafeImageSrc("  /images/logo.svg ")).toBe(true);
     expect(isSafeImageSrc("https://cdn.example.com/a/b.jpg?w=800")).toBe(true);
   });

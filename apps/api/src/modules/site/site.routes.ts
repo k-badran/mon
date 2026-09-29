@@ -161,7 +161,7 @@ const settingBody = z.object({ value: z.string().trim().max(2000) });
  * image over plain http, is refused here and again when the site renders.
  */
 const IMAGE_RULE =
-  "Expected an image path under /images/ (e.g. /images/home/hero-right.jpg) or an https:// URL.";
+  "Expected an image path under /images/ (e.g. /images/home/hero-truck.jpg) or an https:// URL.";
 
 siteRouter.patch(
   "/settings/:key",
