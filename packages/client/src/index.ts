@@ -1,7 +1,7 @@
 export { ApiClient, ApiError } from "./http.js";
 export type { ApiClientOptions, ApiErrorCode, TokenPair, TokenStore } from "./http.js";
 export { createBrowserTokenStore, createMemoryTokenStore } from "./token-store.js";
-export { UmzugPlusSdk, createSdk } from "./sdk.js";
+export { MonSdk, createSdk } from "./sdk.js";
 export type {
   AuthResult,
   AuthUser,

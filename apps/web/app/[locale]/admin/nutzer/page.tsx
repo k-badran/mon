@@ -5,8 +5,8 @@ import type {
   ManagedUser,
   UserRole,
   UserStatus,
-} from "@umzugplus/client";
-import { ROLES, ROLE_RANK, canAssignRole } from "@umzugplus/core";
+} from "@mon/client";
+import { ROLES, ROLE_RANK, canAssignRole } from "@mon/core";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import { ApiError, useApi } from "@/lib/api";

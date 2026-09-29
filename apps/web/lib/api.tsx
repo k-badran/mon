@@ -5,14 +5,14 @@ import {
   isStaffRole,
   ROLE_RANK,
   type Permission,
-} from "@umzugplus/core";
+} from "@mon/core";
 import {
   ApiError,
   createBrowserTokenStore,
   createSdk,
   type AuthUser,
-  type UmzugPlusSdk,
-} from "@umzugplus/client";
+  type MonSdk,
+} from "@mon/client";
 import {
   createContext,
   useCallback,
@@ -45,7 +45,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
  * pressed "sign out" and came back signed in. The intent is remembered here
  * and carried out before any session is restored.
  */
-const PENDING_SIGN_OUT_KEY = "umzugplus.signout-pending";
+const PENDING_SIGN_OUT_KEY = "mon.signout-pending";
 
 function rememberPendingSignOut(pending: boolean): void {
   try {
@@ -72,7 +72,7 @@ function hasPendingSignOut(): boolean {
  * rather than a refusal — the endpoint accepts an unauthenticated call and
  * clears the cookies regardless of what it finds.
  */
-async function endServerSession(sdk: UmzugPlusSdk): Promise<boolean> {
+async function endServerSession(sdk: MonSdk): Promise<boolean> {
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
       await sdk.auth.logout();
@@ -124,8 +124,18 @@ const SIGNED_OUT: AuthState = {
 };
 
 interface ApiContextValue extends AuthState {
-  sdk: UmzugPlusSdk;
+  sdk: MonSdk;
   signIn: (email: string, password: string) => Promise<AuthUser>;
+  /**
+   * Signs in with a one-time code emailed to the address.
+   *
+   * Separate from `signIn` because the credential is different, but it must
+   * store the token pair exactly as `signIn` does — a page that called
+   * `sdk.auth.verifyOtp` itself would get a valid session from the API and then
+   * fail on the next request, because nothing put the access token where the
+   * client reads it.
+   */
+  signInWithCode: (email: string, code: string) => Promise<AuthUser>;
   signUp: (input: {
     email: string;
     password: string;
@@ -237,6 +247,21 @@ export function ApiProvider({ children }: { children: ReactNode }) {
     [sdk, applyUser],
   );
 
+  const signInWithCode = useCallback(
+    async (email: string, code: string) => {
+      const result = await sdk.auth.verifyOtp({ email, code });
+
+      tokensRef.current.set({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
+      applyUser(result.user);
+
+      return result.user;
+    },
+    [sdk, applyUser],
+  );
+
   const signUp = useCallback<ApiContextValue["signUp"]>(
     async (input) => {
       const result = await sdk.auth.register(input);
@@ -285,8 +310,8 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<ApiContextValue>(
-    () => ({ ...state, sdk, signIn, signUp, signOut, refreshUser, can }),
-    [state, sdk, signIn, signUp, signOut, refreshUser, can],
+    () => ({ ...state, sdk, signIn, signInWithCode, signUp, signOut, refreshUser, can }),
+    [state, sdk, signIn, signInWithCode, signUp, signOut, refreshUser, can],
   );
 
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;
@@ -312,7 +337,7 @@ export function useCan(permission: Permission): boolean {
 }
 
 /** Convenience: the SDK on its own, for components that do not need auth state. */
-export function useSdk(): UmzugPlusSdk {
+export function useSdk(): MonSdk {
   return useApi().sdk;
 }
 

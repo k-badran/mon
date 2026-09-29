@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/client",
+  "name": "@mon/client",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -11,10 +11,10 @@
     "dev": "tsc --watch",
     "check-types": "tsc --noEmit"
   },
-  "dependencies": { "@umzugplus/core": "workspace:*" },
+  "dependencies": { "@mon/core": "workspace:*" },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@umzugplus/typescript-config": "workspace:*",
+    "@mon/typescript-config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }

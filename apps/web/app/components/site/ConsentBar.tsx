@@ -29,7 +29,7 @@ import { useEffect, useState } from "react";
  */
 
 /** Read before anything non-essential runs. `"all"` | `"essential"`. */
-export const CONSENT_KEY = "umzugplus.cookie-consent";
+export const CONSENT_KEY = "mon.cookie-consent";
 
 /** Reject and Manage are the same 1px-white outline in the frame. */
 const OUTLINE =

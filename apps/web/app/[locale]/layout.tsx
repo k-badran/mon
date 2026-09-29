@@ -6,8 +6,9 @@ import { ApiProvider } from "@/lib/api";
 import { LOCALES, LOCALE_META, isLocale, type Locale } from "@/lib/i18n/config";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { QueryProvider } from "@/lib/live/query-provider";
+import { logoSrc } from "@/lib/site/defaults";
 import { fetchSiteContent, fetchSiteTheme, fontHref, themeToCss } from "@/lib/site/theme";
-import { Footer as SiteFooter } from "@/app/components/home/Sections";
+import { Footer as SiteFooter } from "@/app/components/site/Footer";
 import { ContentLoadBanner } from "@/app/components/site/ContentLoadBanner";
 import { SiteChrome } from "@/app/components/SiteChrome";
 import "../theme.css";
@@ -31,21 +32,21 @@ export function generateStaticParams() {
 
 const TITLES: Record<Locale, { title: string; description: string }> = {
   de: {
-    title: "UmzugPlus — Ihr Umzug. Einfach organisiert.",
+    title: "m.on — Ihr Umzug. Einfach organisiert.",
     description:
       "Umzug, Entsorgung und Reinigung zum transparenten Festpreis — online berechnen, online anfragen.",
   },
   en: {
-    title: "UmzugPlus — Moving, simply organised.",
+    title: "m.on — Moving, simply organised.",
     description:
       "Moving, disposal and cleaning at a transparent fixed price — calculate online, request online.",
   },
   ar: {
-    title: "UmzugPlus — نقل منظّم ببساطة",
+    title: "m.on — نقل منظّم ببساطة",
     description: "نقل وتخلّص من الأثاث وتنظيف بسعر ثابت وشفاف — احسب واطلب أونلاين.",
   },
   tr: {
-    title: "UmzugPlus — Taşınma, kolayca organize.",
+    title: "m.on — Taşınma, kolayca organize.",
     description:
       "Şeffaf sabit fiyatla nakliye, tasfiye ve temizlik — online hesapla, online talep et.",
   },
@@ -132,7 +133,18 @@ export default async function LocaleLayout({
         <ApiProvider>
           <QueryProvider>
             <I18nProvider locale={locale} messages={MESSAGES[locale]} fallback={MESSAGES.de}>
-              <SiteChrome footer={<SiteFooter copy={footerCopy} locale={locale} />}>
+              <SiteChrome
+                appUrl={site.brand["brand.appUrl"]}
+                footer={
+                  <SiteFooter
+                    copy={footerCopy}
+                    locale={locale}
+                    brandName={site.brand["brand.name"]}
+                    appUrl={site.brand["brand.appUrl"]}
+                    logo={logoSrc(site.brand["brand.logo"])}
+                  />
+                }
+              >
                 {children}
               </SiteChrome>
             </I18nProvider>

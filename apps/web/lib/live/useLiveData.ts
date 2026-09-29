@@ -1,7 +1,7 @@
 "use client";
 
-import type { DayAvailability } from "@umzugplus/core";
-import type { ListOrdersQuery, OrderStatus, OrderSummary, Paginated } from "@umzugplus/client";
+import type { DayAvailability } from "@mon/core";
+import type { ListOrdersQuery, OrderStatus, OrderSummary, Paginated } from "@mon/client";
 import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { useEffect } from "react";
 

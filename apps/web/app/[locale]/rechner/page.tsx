@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -13,9 +13,12 @@ import {
   isPriceable,
   toQuoteInput,
   type CalculatorState,
+  type StepId,
 } from "@/lib/calculator/machine";
 import { STEP_COMPONENTS } from "@/app/components/calculator/Steps";
-import { PricePanel } from "@/app/components/calculator/PricePanel";
+import { PricePanel, RAIL_STEPS } from "@/app/components/calculator/PricePanel";
+import { CalcHeader, IconCheck, primaryButton, quietButton } from "@/app/components/calculator/CalcChrome";
+import { QuoteResultView } from "@/app/components/calculator/QuoteResult";
 import { usePriceEstimate, type QuoteResult } from "@/lib/calculator/usePriceEstimate";
 
 /**
@@ -33,13 +36,25 @@ import { usePriceEstimate, type QuoteResult } from "@/lib/calculator/usePriceEst
  *      away and comes back has not lost twenty answers.
  */
 
-const STORAGE_KEY = "umzugplus.calculator.v1";
+const STORAGE_KEY = "mon.calculator.v1";
+
+/**
+ * The primary button's label on the card-layout screens, which the design
+ * words per screen ("Continue to Special Items" on 3:1526 …). Steps missing
+ * here say "Save & Continue", as the add-ons screen does.
+ */
+const CONTINUE_KEY: Partial<Record<StepId, string>> = {
+  workers: "calc.cta.toSpecial",
+  special: "calc.cta.toPhotos",
+  photos: "calc.cta.toDates",
+  date: "calc.cta.toReview",
+};
 
 export default function CalculatorPage() {
   return (
     // useSearchParams needs a boundary, and the frame is worth showing while
     // the URL resolves.
-    <Suspense fallback={<div className="mx-auto min-h-[60vh] w-full max-w-3xl px-4 py-10" aria-busy="true" />}>
+    <Suspense fallback={<div className="min-h-screen bg-surface-page" aria-busy="true" />}>
       <Calculator />
     </Suspense>
   );
@@ -135,6 +150,7 @@ function Calculator() {
     return (
       <QuoteResultView
         quote={quote}
+        state={state}
         onEdit={() => {
           setQuote(null);
           goTo(steps.length - 1);
@@ -143,137 +159,362 @@ function Calculator() {
     );
   }
 
-  return (
-    // The price panel is its own column from lg up, where the design puts it,
-    // and stacks under the step below that — still live either way.
-    <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 md:py-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-      <header className="mb-8 grid gap-6 lg:col-start-1">
-        {/**
-         * The design's progress rail: one filled segment per step, the count,
-         * and how far along the customer is. "of 10" is `steps.length`, not the
-         * literal ten in the mock — a cleaning job has no crew or handling step
-         * and so runs to eight.
-         */}
-        <div className="grid gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="text-body-sm font-bold tracking-[1px] text-brand-red uppercase">
-              {t("calc.progress")}
-            </p>
+  const heading = t(step.labelKey);
+  const lead = t(step.leadKey);
 
-            <p className="rounded-full bg-red-50 px-3 py-1 text-caption font-semibold text-brand-red">
-              {t("calc.stepOf", { values: { current: index + 1, total: steps.length } })}
-            </p>
+  const body = (
+    <>
+      <section aria-labelledby="step-title">
+        <h2 id="step-title" className="sr-only">
+          {heading}
+        </h2>
 
-            <p className="ms-auto text-body-sm text-text-default">
-              {t("calc.percentComplete", {
-                values: { percent: Math.round(((index + 1) / steps.length) * 100) },
-              })}
-            </p>
+        <StepBody id={step.id} state={state} dispatch={dispatch} />
+      </section>
+
+      <div aria-live="polite">
+        {error ? (
+          <p className="rounded-md border border-danger bg-danger-soft px-4 py-3 text-body-sm text-danger-text">
+            {error}
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
+
+  const advance = isLast ? (
+    <button
+      type="button"
+      className={`${primaryButton} min-h-12 w-full rounded-md px-6 py-3.5 text-[15px] leading-5`}
+      onClick={() => void requestQuote()}
+      disabled={!canAdvance || pricing}
+      data-loading={pricing ? "true" : undefined}
+    >
+      {pricing ? t("calc.pricing") : t("calc.getPrice")}
+    </button>
+  ) : null;
+
+  /**
+   * The design has two layouts for the wizard.
+   *
+   * The first five screens (3:618 … 3:1107) sit under a five-node rail, split
+   * the page 1080/360 with a flush price rail on the end side, and put Back
+   * and Next Step under the questions. The later ones (3:1381 … 3:2018) sit in
+   * a 64px-padded page under the ten-segment rail, with the price as a
+   * floating card that also carries the two buttons.
+   */
+  if (RAIL_STEPS.has(step.id)) {
+    return (
+      <div className="flex min-h-screen flex-col bg-surface-page">
+        <CalcHeader homeHref={`/${locale}`} />
+
+        <NodeRail
+          index={index}
+          limit={limit}
+          reviewIndex={steps.length - 1}
+          onSelect={goTo}
+        />
+
+        <div className="flex flex-1 flex-col lg:flex-row">
+          <main className="flex min-w-0 flex-1 flex-col gap-8 px-4 py-8 sm:p-10">
+            <StepHeading size="rail" heading={heading} lead={lead} />
+
+            {body}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+              {index > 0 ? (
+                <button
+                  type="button"
+                  className={`${quietButton} min-h-[41px] rounded-[6px] px-6 py-2.5 text-body-sm font-bold text-text-default`}
+                  onClick={() => goTo(index - 1)}
+                >
+                  {t("common.back")}
+                </button>
+              ) : (
+                <span />
+              )}
+
+              <button
+                type="button"
+                className={`${primaryButton} min-h-[41px] rounded-[6px] px-6 py-2.5 text-body-sm`}
+                onClick={() => goTo(index + 1)}
+                disabled={!canAdvance}
+              >
+                {t("calc.nextStep")}
+              </button>
+            </div>
+          </main>
+
+          <div className="shrink-0 border-t border-border-subtle bg-surface-card lg:w-[360px] lg:border-s lg:border-t-0">
+            <div className="lg:sticky lg:top-0">
+              <PricePanel stepId={step.id} state={state} estimate={estimate} />
+            </div>
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          <ol className="grid grid-flow-col auto-cols-fr gap-2" aria-label={t("calc.progress")}>
-            {steps.map((entry, position) => {
-              const done = position < index;
-              const current = position === index;
+  return (
+    <div className="min-h-screen bg-surface-page">
+      <CalcHeader homeHref={`/${locale}`} />
 
-              return (
-                <li key={entry.id}>
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-8 lg:p-16">
+        <SegmentRail
+          steps={steps.map((entry) => ({ id: entry.id, label: t(entry.railKey) }))}
+          index={index}
+          limit={limit}
+          onSelect={goTo}
+        />
+
+        <StepHeading size="card" heading={heading} lead={lead} />
+
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+          <main className="flex min-w-0 flex-1 flex-col gap-6">{body}</main>
+
+          <div className="lg:sticky lg:top-6 lg:w-[360px] lg:shrink-0">
+            <PricePanel stepId={step.id} state={state} estimate={estimate}>
+              <div className="flex flex-col gap-2.5">
+                {advance ?? (
                   <button
                     type="button"
-                    onClick={() => goTo(position)}
-                    disabled={position > limit}
-                    aria-current={current ? "step" : undefined}
-                    className={[
-                      "grid w-full gap-2 text-start",
-                      "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-yellow",
-                      position > limit ? "cursor-not-allowed" : "cursor-pointer",
-                    ].join(" ")}
+                    className={`${primaryButton} min-h-12 w-full rounded-md px-6 py-3.5 text-[15px] leading-5`}
+                    onClick={() => goTo(index + 1)}
+                    disabled={!canAdvance}
                   >
-                    <span
-                      aria-hidden="true"
-                      className={`block h-1.5 rounded-full transition-colors ${
-                        current ? "bg-brand-red" : done ? "bg-text-strong" : "bg-surface-sunken"
-                      }`}
-                    />
-
-                    <span
-                      className={`truncate text-caption ${
-                        current
-                          ? "font-bold text-brand-red"
-                          : done
-                            ? "font-medium text-text-strong"
-                            : "font-medium text-text-faint"
-                      }`}
-                    >
-                      {t(entry.railKey)}
-                    </span>
+                    {step.optional && !canAdvance
+                      ? t("common.skip")
+                      : t(CONTINUE_KEY[step.id] ?? "calc.cta.continue")}
+                    <ArrowIcon />
                   </button>
-                </li>
-              );
-            })}
-          </ol>
+                )}
+
+                <button
+                  type="button"
+                  className={`${quietButton} min-h-[42px] w-full rounded-md px-6 py-3 text-body-sm font-semibold text-text-default`}
+                  onClick={() => goTo(index - 1)}
+                >
+                  {t("calc.cta.back")}
+                </button>
+              </div>
+            </PricePanel>
+          </div>
         </div>
-
-        <div className="grid gap-3">
-          <h1 className="text-h1 text-text-strong">{t(step.labelKey)}</h1>
-          <p className="text-body-lg text-text-default">{t(step.leadKey)}</p>
-        </div>
-      </header>
-
-      <div className="grid gap-6 lg:col-start-1">
-        <section aria-labelledby="step-title">
-          <h2 id="step-title" className="sr-only">
-            {t(step.labelKey)}
-          </h2>
-
-          <StepBody id={step.id} state={state} dispatch={dispatch} />
-        </section>
-
-        <div aria-live="polite">
-          {error ? (
-            <p className="rounded-md border border-danger bg-danger-soft px-4 py-3 text-body-sm text-danger-text">
-              {error}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="btn-row border-t border-border-subtle pt-6">
-          <button
-            type="button"
-            className="btn secondary"
-            onClick={() => goTo(index - 1)}
-            disabled={index === 0}
-          >
-            {t("common.back")}
-          </button>
-
-          {isLast ? (
-            <button
-              type="button"
-              className="btn primary large"
-              onClick={() => void requestQuote()}
-              disabled={!canAdvance || pricing}
-              data-loading={pricing ? "true" : undefined}
-            >
-              {pricing ? t("calc.pricing") : t("calc.getPrice")}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn primary large"
-              onClick={() => goTo(index + 1)}
-              disabled={!canAdvance}
-            >
-              {step.optional && !canAdvance ? t("common.skip") : t("common.next")}
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-6">
-        <PricePanel stepId={step.id} state={state} estimate={estimate} />
       </div>
     </div>
+  );
+}
+
+function StepHeading({
+  size,
+  heading,
+  lead,
+}: {
+  size: "rail" | "card";
+  heading: string;
+  lead: string;
+}) {
+  // 24/29 on the rail screens, 32/40 in the display face on the card screens.
+  return (
+    <header className="flex flex-col gap-2">
+      <h1
+        className={
+          size === "rail"
+            ? "font-sans text-[1.5rem] leading-[1.8rem] font-extrabold tracking-normal text-text-heading"
+            : "font-display text-[1.75rem] leading-9 font-extrabold tracking-normal text-text-heading sm:text-[2rem] sm:leading-10"
+        }
+      >
+        {heading}
+      </h1>
+      <p className={size === "rail" ? "text-body-sm text-text-default" : "text-body text-text-default"}>
+        {lead}
+      </p>
+    </header>
+  );
+}
+
+/**
+ * The five-node rail of the first screens (3:634).
+ *
+ * Four nodes are the four rail steps; the fifth, "Final Review", is the
+ * wizard's last step, reachable once everything before it is answered.
+ */
+function NodeRail({
+  index,
+  limit,
+  reviewIndex,
+  onSelect,
+}: {
+  index: number;
+  limit: number;
+  reviewIndex: number;
+  onSelect: (position: number) => void;
+}) {
+  const { t } = useI18n();
+
+  const nodes: Array<{ key: string; target: number }> = [
+    { key: "calc.rail.service", target: 0 },
+    { key: "calc.rail.route", target: 1 },
+    { key: "calc.rail.property", target: 2 },
+    { key: "calc.node.volume", target: 3 },
+    { key: "calc.step.review", target: reviewIndex },
+  ];
+
+  return (
+    <nav aria-label={t("calc.progress")} className="px-4 pt-6 pb-2 sm:px-10">
+      <ol className="flex items-center justify-between gap-3 overflow-x-auto">
+        {nodes.map((node, position) => {
+          const current = node.target === index;
+          const done = node.target < index;
+          const last = position === nodes.length - 1;
+
+          return (
+            <li key={node.key} className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onSelect(node.target)}
+                disabled={node.target > limit}
+                aria-current={current ? "step" : undefined}
+                className="flex items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-yellow disabled:cursor-not-allowed"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`grid size-7 shrink-0 place-items-center rounded-full text-caption font-bold ${
+                    current
+                      ? "bg-brand-red text-text-on-brand"
+                      : done
+                        ? "bg-success text-text-on-brand"
+                        : "border border-border-subtle bg-surface-card text-text-default"
+                  }`}
+                >
+                  {done ? <IconCheck /> : position + 1}
+                </span>
+
+                <span
+                  className={`text-[13px] leading-4 ${current ? "" : "hidden md:inline"} ${
+                    current
+                      ? "font-bold text-text-heading"
+                      : done
+                        ? "font-medium text-text-default"
+                        : "font-medium text-text-faint"
+                  }`}
+                >
+                  {t(node.key)}
+                </span>
+              </button>
+
+              {last ? null : (
+                <span aria-hidden="true" className="hidden h-0.5 w-10 bg-border-subtle md:block" />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+/**
+ * The ten-segment rail of the later screens (3:1392).
+ *
+ * "of 10" is `steps.length`, not the literal ten in the mock — a cleaning job
+ * has no crew or handling step and so runs to eight. Every segment up to the
+ * current one is red, as drawn; only the current label is.
+ */
+function SegmentRail({
+  steps,
+  index,
+  limit,
+  onSelect,
+}: {
+  steps: Array<{ id: string; label: string }>;
+  index: number;
+  limit: number;
+  onSelect: (position: number) => void;
+}) {
+  const { t } = useI18n();
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <p className="font-display text-body-sm leading-[18px] font-bold text-brand-red uppercase">
+            {t("calc.progress")}
+          </p>
+
+          <p className="rounded-sm bg-brand-red/6 px-2 py-0.5 text-caption font-semibold text-brand-red">
+            {t("calc.stepOf", { values: { current: index + 1, total: steps.length } })}
+          </p>
+        </div>
+
+        <p className="text-[13px] leading-[17px] font-medium text-text-default">
+          {t("calc.percentComplete", {
+            values: { percent: Math.round(((index + 1) / steps.length) * 100) },
+          })}
+        </p>
+      </div>
+
+      <ol className="grid grid-flow-col auto-cols-fr gap-2" aria-label={t("calc.progress")}>
+        {steps.map((entry, position) => {
+          const reached = position <= index;
+          const current = position === index;
+
+          return (
+            <li key={entry.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(position)}
+                disabled={position > limit}
+                aria-current={current ? "step" : undefined}
+                aria-label={entry.label}
+                className="grid w-full gap-1.5 text-start focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-yellow disabled:cursor-not-allowed"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`block h-1.5 rounded-[3px] transition-colors ${
+                    reached ? "bg-brand-red" : "bg-border-subtle"
+                  }`}
+                />
+
+                <span
+                  aria-hidden="true"
+                  className={`hidden truncate text-[10px] leading-[13px] sm:block ${
+                    current
+                      ? "font-bold text-brand-red"
+                      : reached
+                        ? "font-medium text-text-heading"
+                        : "font-medium text-text-faint"
+                  }`}
+                >
+                  {entry.label}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function ArrowIcon(): ReactNode {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      // Points the way the reader is going, in either direction of text.
+      className="rtl:-scale-x-100"
+    >
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </svg>
   );
 }
 
@@ -288,98 +529,4 @@ function StepBody({
 }) {
   const Component = STEP_COMPONENTS[id];
   return <Component state={state} dispatch={dispatch} />;
-}
-
-/**
- * The quote.
- *
- * Two outcomes: a price the customer can book, or a job that needs a human to
- * look at it. The design draws these as separate screens because they ask for
- * different things — one offers a booking, the other promises a callback.
- */
-function QuoteResultView({ quote, onEdit }: { quote: QuoteResult; onEdit: () => void }) {
-  const { t, locale, formatCurrency } = useI18n();
-  const breakdown = quote.breakdown;
-
-  if (quote.requiresReview) {
-    return (
-      <div className="mx-auto w-full max-w-3xl px-4 py-10 md:py-16">
-        <section className="grid gap-4 rounded-2xl border border-border-subtle bg-surface-card p-8 text-center">
-          <p className="text-overline text-brand-red">{t("calc.title")}</p>
-          <h1 className="text-h1 text-text-strong">{t("calc.reviewTitle")}</h1>
-          <p className="text-body-lg text-text-muted">{t("calc.reviewBody")}</p>
-
-          {quote.reviewReasons.length > 0 ? (
-            <ul className="mx-auto grid max-w-md gap-1 text-body-sm text-text-muted">
-              {quote.reviewReasons.map((reason) => (
-                <li key={reason}>{t(`calc.review.${reason}`)}</li>
-              ))}
-            </ul>
-          ) : null}
-
-          <div className="btn-row">
-            <button type="button" className="btn secondary" onClick={onEdit}>
-              {t("calc.editAnswers")}
-            </button>
-            <a className="btn primary large" href={`/${locale}/kontakt`}>
-              {t("nav.contact")}
-            </a>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10 md:py-16">
-      <section className="grid gap-4 rounded-2xl border border-border-subtle bg-surface-card p-8">
-        <p className="text-overline text-brand-red">{t("calc.title")}</p>
-        <h1 className="text-h1 text-text-strong">{t("calc.quoteTitle")}</h1>
-
-        <p className="text-display text-brand-red">{formatCurrency(breakdown.totalGross)}</p>
-        <p className="text-body-sm text-text-muted">{t("calc.vatIncluded")}</p>
-
-        <div className="mt-2 grid gap-2 border-t border-border-subtle pt-4">
-          {breakdown.lines.map((line, position) => (
-            <div
-              key={`${line.key}-${position}`}
-              className="flex items-baseline justify-between gap-4 text-body-sm"
-            >
-              <span className="text-text-muted">
-                {t(`line.${line.key.replace("line.", "")}`)}
-              </span>
-              <span className="tabular-nums text-text-default">
-                {formatCurrency(line.amount)}
-              </span>
-            </div>
-          ))}
-
-          <div className="flex items-baseline justify-between gap-4 text-body-sm">
-            <span className="text-text-muted">
-              {t("calc.vat", { values: { rate: breakdown.vatRate } })}
-            </span>
-            <span className="tabular-nums text-text-default">
-              {formatCurrency(breakdown.vatAmount)}
-            </span>
-          </div>
-
-          <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-border-subtle pt-3">
-            <span className="text-h6 text-text-strong">{t("orders.grandTotal")}</span>
-            <span className="text-h4 font-bold tabular-nums text-brand-red">
-              {formatCurrency(breakdown.totalGross)}
-            </span>
-          </div>
-        </div>
-
-        <div className="btn-row">
-          <button type="button" className="btn secondary" onClick={onEdit}>
-            {t("calc.editAnswers")}
-          </button>
-          <a className="btn primary large" href={`/${locale}/buchen?quote=${quote.id}`}>
-            {t("calc.bookNow")}
-          </a>
-        </div>
-      </section>
-    </div>
-  );
 }

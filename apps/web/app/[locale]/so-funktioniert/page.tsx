@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { PageHero, readList, type Copy } from "@/app/components/site/Blocks";
-import { ComparisonTable, StepsTimeline } from "@/app/components/site/Blocks2";
+import { HowItWorksComparison, HowItWorksSteps } from "@/app/components/site/HowItWorksBlocks";
 
 /**
  * The "how it works" page.
@@ -19,7 +20,7 @@ import { ComparisonTable, StepsTimeline } from "@/app/components/site/Blocks2";
 const SECTION = "page-how-it-works";
 
 export const metadata: Metadata = {
-  title: "So funktioniert's — UmzugPlus",
+  title: "So funktioniert's — m.on",
 };
 
 export default async function HowItWorksPage({ params }: { params: { locale: Locale } }) {
@@ -43,19 +44,18 @@ export default async function HowItWorksPage({ params }: { params: { locale: Loc
       />
 
       {/* The frame keeps every photograph to the right of its copy. */}
-      <StepsTimeline
+      <HowItWorksSteps
         steps={steps}
         stepLabel={copy["steps.label"]}
-        alternate={false}
         images={[
           "/images/page-how-it-works/rectangle.jpg",
           "/images/page-how-it-works/rectangle-2.jpg",
           "/images/page-how-it-works/rectangle-3.jpg",
           "/images/page-how-it-works/rectangle-4.jpg",
-        ]}
+        ].map((fallback, index) => imageSrc(copy, `steps.${index + 1}.image`, fallback))}
       />
 
-      <ComparisonTable
+      <HowItWorksComparison
         eyebrow={copy["compare.eyebrow"]}
         headline={copy["compare.headline"]}
         columns={{
@@ -64,7 +64,6 @@ export default async function HowItWorksPage({ params }: { params: { locale: Loc
           theirs: copy["compare.col.theirs"] ?? "",
         }}
         rows={comparison}
-        markOurs
       />
     </>
   );

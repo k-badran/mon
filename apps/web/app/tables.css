@@ -15,14 +15,18 @@
   background: var(--surface-card);
 }
 
-table {
+/* Scoped to .table-wrap, which every dashboard table sits in. Bare `table`,
+   `thead th` and `tbody td:last-child { display: flex }` rules are unlayered,
+   so they beat Tailwind on public pages too, and restyled the marketing
+   tables (the how-it-works comparison, the rate table) as admin grids. */
+.table-wrap table {
   inline-size: 100%;
   border-collapse: collapse;
   font-size: var(--text-base);
   min-inline-size: 640px;
 }
 
-thead th {
+.table-wrap thead th {
   text-align: start;
   font-size: var(--text-xs);
   font-weight: 600;
@@ -35,23 +39,23 @@ thead th {
   white-space: nowrap;
 }
 
-tbody td {
+.table-wrap tbody td {
   padding: var(--space-4);
   border-block-end: 1px solid var(--border-subtle);
   vertical-align: middle;
   color: var(--text-default);
 }
-tbody tr:last-child td { border-block-end: none; }
-tbody tr:hover { background: var(--surface-page); }
+.table-wrap tbody tr:last-child td { border-block-end: none; }
+.table-wrap tbody tr:hover { background: var(--surface-page); }
 
-tbody td a { color: var(--brand-red); font-weight: 600; text-decoration: none; }
-tbody td a:hover { text-decoration: underline; }
+.table-wrap tbody td a { color: var(--brand-red); font-weight: 600; text-decoration: none; }
+.table-wrap tbody td a:hover { text-decoration: underline; }
 
 /* Digits line up when they are in a column together. */
-td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; }
+.table-wrap td.num, .table-wrap th.num { text-align: end; font-variant-numeric: tabular-nums; }
 
 /* Action cells hold several buttons; they wrap rather than stretch the row. */
-tbody td:last-child { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
+.table-wrap tbody td:last-child { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
 
 /* ── Filters above a table ───────────────────────────────────────────── */
 

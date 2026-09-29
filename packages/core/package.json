@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/core",
+  "name": "@mon/core",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@umzugplus/typescript-config": "workspace:*",
+    "@mon/typescript-config": "workspace:*",
     "typescript": "^5.9.2",
     "vitest": "^2.1.8"
   }

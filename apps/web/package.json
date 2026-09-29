@@ -1,20 +1,21 @@
 {
-  "name": "@umzugplus/web",
+  "name": "@mon/web",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3200",
-    "build": "node scripts/build-messages.mjs && next build",
+    "dev": "node scripts/build-image-manifest.mjs && next dev -p 3200",
+    "build": "node scripts/build-messages.mjs && node scripts/build-image-manifest.mjs && next build",
     "start": "next start -p 3200",
     "lint": "next lint",
     "check-types": "tsc --noEmit",
     "build:messages": "node scripts/build-messages.mjs",
-    "build:check": "NEXT_DIST_DIR=.next-build next build"
+    "build:check": "NEXT_DIST_DIR=.next-build next build",
+    "build:images": "node scripts/build-image-manifest.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",
-    "@umzugplus/client": "workspace:*",
-    "@umzugplus/core": "workspace:*",
+    "@mon/client": "workspace:*",
+    "@mon/core": "workspace:*",
     "jose": "^5.9.6",
     "next": "14.2.35",
     "react": "^18.3.1",
@@ -26,7 +27,7 @@
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@umzugplus/typescript-config": "workspace:*",
+    "@mon/typescript-config": "workspace:*",
     "playwright-core": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5.9.2"

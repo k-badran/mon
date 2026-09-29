@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -83,7 +84,7 @@ export const refreshTokens = pgTable(
 );
 
 /**
- * Single-use tokens for password reset and email confirmation.
+ * Single-use tokens for password reset, email confirmation and login codes.
  * Stored hashed for the same reason as refresh tokens: a database leak must
  * not hand an attacker a working reset link.
  */
@@ -96,9 +97,25 @@ export const verificationTokens = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
 
     tokenHash: text("token_hash").notNull(),
-    purpose: text("purpose").notNull(), // "password_reset" | "email_verification"
+    purpose: text("purpose").notNull(), // see VerificationPurpose in ./enums.ts
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     consumedAt: timestamp("consumed_at", { withTimezone: true }),
+
+    /**
+     * Failed verification attempts against this token.
+     *
+     * Only login codes need it, and they need it badly: a six-digit code is one
+     * in a million, which unlimited guessing turns into a certainty. The
+     * per-IP rate limit does not cover this on its own — it throttles a single
+     * caller, while the value being protected is a specific user's code, and an
+     * attacker spreading guesses across addresses stays under every per-IP
+     * budget. Counting on the row caps the guesses the code itself will ever
+     * accept, wherever they come from.
+     *
+     * Nullable would have meant every read handling "no count yet"; the default
+     * keeps the counter a plain number from the moment the row exists.
+     */
+    attempts: integer("attempts").notNull().default(0),
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

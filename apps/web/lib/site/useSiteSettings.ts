@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useApi } from "@/lib/api";
-import { DEFAULT_THEME, type SiteTheme } from "./defaults";
+import { DEFAULT_THEME, logoSrc, type SiteTheme } from "./defaults";
 import { REFERENCE_POLL_MS } from "@/lib/live/config";
 
 /**
@@ -30,9 +30,9 @@ export function useSiteSettings() {
   const settings = data ?? DEFAULT_THEME;
 
   return {
-    brandName: settings.brand["brand.name"] ?? "UmzugPlus",
-    legalName: settings.brand["brand.legalName"] ?? "UmzugPlus GmbH",
-    logo: settings.brand["brand.logo"] ?? "/images/logo.svg",
+    brandName: settings.brand["brand.name"] ?? "m.on",
+    legalName: settings.brand["brand.legalName"] ?? "m.on GmbH",
+    logo: logoSrc(settings.brand["brand.logo"]),
     tagline: settings.brand["brand.tagline"] ?? "",
     phone: settings.contact["contact.phone"] ?? "",
     email: settings.contact["contact.email"] ?? "",

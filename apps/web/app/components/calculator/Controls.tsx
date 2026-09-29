@@ -56,7 +56,7 @@ export function ChoiceCards<T extends string>({
       {options.map((option) => (
         <label
           key={option.value}
-          className="relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border-subtle bg-surface-card p-5 transition-colors hover:border-border-strong has-[:checked]:border-brand-red has-[:checked]:bg-red-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
+          className="relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border-subtle bg-surface-card p-5 transition-colors hover:border-border-strong has-[:checked]:border-brand-red has-[:checked]:shadow-[inset_0_0_0_0.5px_var(--color-brand-red)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
         >
           <input
             type="radio"
@@ -73,10 +73,12 @@ export function ChoiceCards<T extends string>({
             </span>
           )}
 
-          <span className="text-h6 font-semibold text-text-strong">{option.label}</span>
+          <span className="font-display text-body leading-5 font-bold text-text-heading">
+            {option.label}
+          </span>
 
           {option.hint && (
-            <span className="text-body-sm text-text-muted">{option.hint}</span>
+            <span className="text-[13px] leading-[17px] text-text-default">{option.hint}</span>
           )}
         </label>
       ))}
@@ -129,15 +131,18 @@ export function Field({
 
 /** The shared input styling, applied to whatever control a step renders. */
 export const inputClass =
-  "w-full rounded-md border border-border-default bg-surface-card px-4 py-2.5 text-body " +
+  "w-full rounded-[6px] border border-border-subtle bg-surface-card px-3 py-2.5 text-body-sm leading-[17px] " +
   "text-text-strong placeholder:text-text-faint " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow";
 
 /**
- * An on/off option with a description.
+ * An on/off option with a description, drawn as the add-on card of 3:1435:
+ * the copy on one side, an optional price and a switch on the other, and a
+ * 1.5px red ring once it is on.
  *
- * A checkbox rather than a switch: these are answers submitted with the rest
- * of the form, not settings that take effect the moment they are flipped.
+ * A checkbox underneath rather than `role="switch"`: these are answers
+ * submitted with the rest of the form, not settings that take effect the
+ * moment they are flipped. Only the drawing is a switch.
  */
 export function ToggleRow({
   id,
@@ -157,28 +162,42 @@ export function ToggleRow({
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-4 rounded-lg border border-border-subtle bg-surface-card p-5 transition-colors hover:border-border-strong has-[:checked]:border-brand-red has-[:checked]:bg-red-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
+      className="flex cursor-pointer items-center justify-between gap-6 rounded-lg border border-border-subtle bg-surface-card p-5 transition-colors hover:border-border-strong has-[:checked]:border-brand-red has-[:checked]:shadow-[inset_0_0_0_0.5px_var(--color-brand-red)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
     >
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 size-5 shrink-0 accent-brand-red"
-      />
-
-      <span className="flex flex-1 flex-col gap-1">
-        <span className="text-h6 font-semibold text-text-strong">{label}</span>
+      <span className="flex max-w-[500px] flex-1 flex-col gap-1">
+        <span className="font-display text-body leading-5 font-bold text-text-heading">{label}</span>
         {description && (
-          <span className="text-body-sm text-text-muted">{description}</span>
+          <span className="text-[13px] leading-[17px] text-text-default">{description}</span>
         )}
       </span>
 
-      {price && (
-        <span className="text-body-sm font-semibold whitespace-nowrap text-text-strong">
-          {price}
+      <span className="flex shrink-0 items-center gap-5">
+        {price && (
+          <span
+            className={`font-display text-body leading-5 font-bold whitespace-nowrap ${
+              checked ? "text-brand-red" : "text-text-default"
+            }`}
+          >
+            {price}
+          </span>
+        )}
+
+        <input
+          id={id}
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          className="peer sr-only"
+        />
+
+        {/* 46×24, a 20px knob on a 2px inset; red and to the end once on. */}
+        <span
+          aria-hidden="true"
+          className="flex h-6 w-[46px] shrink-0 items-center rounded-full bg-border-subtle p-0.5 transition-colors peer-checked:justify-end peer-checked:bg-brand-red"
+        >
+          <span className="size-5 rounded-full bg-neutral-0 shadow-sm" />
         </span>
-      )}
+      </span>
     </label>
   );
 }
@@ -196,6 +215,7 @@ export function Stepper({
   onChange,
   min = 0,
   max = 99,
+  variant = "round",
 }: {
   id: string;
   label: string;
@@ -203,24 +223,42 @@ export function Stepper({
   onChange: (value: number) => void;
   min?: number;
   max?: number;
+  /**
+   * The design draws two: round sunken buttons, the plus ringed in red, in the
+   * item list (3:1178); and a bordered capsule with the plus on a red tint on
+   * the later screens (3:1585).
+   */
+  variant?: "round" | "pill";
 }) {
   const clamp = (next: number) => Math.min(max, Math.max(min, next));
 
-  const button =
-    "grid size-9 shrink-0 place-items-center rounded-md border border-border-default " +
-    "bg-surface-card text-h5 leading-none text-text-strong transition-colors " +
-    "hover:border-brand-red hover:text-brand-red " +
-    "disabled:cursor-not-allowed disabled:border-border-subtle disabled:text-text-faint " +
+  const base =
+    "grid size-7 shrink-0 place-items-center text-body leading-none font-bold transition-colors " +
+    "disabled:cursor-not-allowed disabled:opacity-40 " +
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow";
 
+  const minus =
+    variant === "round"
+      ? `${base} rounded-full border border-border-subtle bg-surface-page text-text-default hover:border-border-strong`
+      : `${base} rounded-[6px] bg-surface-page text-text-default hover:bg-surface-sunken`;
+
+  const plus =
+    variant === "round"
+      ? `${base} rounded-full border border-brand-red bg-surface-page text-brand-red hover:bg-red-50`
+      : `${base} rounded-[6px] bg-brand-red/6 text-brand-red hover:bg-red-100`;
+
   return (
-    <div className="inline-flex items-center gap-2">
+    <div
+      className={`inline-flex items-center gap-3 ${
+        variant === "pill" ? "rounded-md border border-border-subtle px-2 py-1.5" : ""
+      }`}
+    >
       <button
         type="button"
         onClick={() => onChange(clamp(value - 1))}
         disabled={value <= min}
         aria-label={`${label} −1`}
-        className={button}
+        className={minus}
       >
         −
       </button>
@@ -234,7 +272,10 @@ export function Stepper({
         max={max}
         aria-label={label}
         onChange={(event) => onChange(clamp(Number.parseInt(event.target.value, 10) || 0))}
-        className="w-14 rounded-md border border-border-default bg-surface-card py-2 text-center text-body font-semibold text-text-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        // A bare number between the buttons, as drawn — still typeable.
+        className={`${
+          variant === "pill" ? "w-6 font-display text-body" : "w-5 text-body-sm"
+        } rounded-sm bg-transparent text-center font-bold text-text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
       />
 
       <button
@@ -242,7 +283,7 @@ export function Stepper({
         onClick={() => onChange(clamp(value + 1))}
         disabled={value >= max}
         aria-label={`${label} +1`}
-        className={button}
+        className={plus}
       >
         +
       </button>
@@ -317,7 +358,7 @@ export function FloorField({
           {/* The design fills the box green and inks the label once it is on. */}
           <span
             aria-hidden="true"
-            className="grid size-5 place-items-center rounded-[4px] border border-border-default bg-surface-card text-text-on-brand transition-colors [&>svg]:opacity-0 peer-checked:border-success peer-checked:bg-success peer-checked:[&>svg]:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-yellow"
+            className="grid size-5 place-items-center rounded-[4px] border-2 border-border-strong bg-surface-card text-text-on-brand transition-colors [&>svg]:opacity-0 peer-checked:border-success peer-checked:bg-success peer-checked:[&>svg]:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-yellow"
           >
             <CalcIcon name="check" size={14} />
           </span>
@@ -335,7 +376,7 @@ const CHEVRON =
   "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E";
 
 /** Select styling: the shared input, plus room for the chevron the design draws. */
-export const selectClass = `${inputClass} appearance-none bg-[length:16px_16px] bg-[right_0.75rem_center] bg-no-repeat pe-10 bg-[image:var(--calc-chevron)]`;
+export const selectClass = `${inputClass} appearance-none bg-[length:16px_16px] bg-[right_0.75rem_center] rtl:bg-[left_0.75rem_center] bg-no-repeat pe-10 bg-[image:var(--calc-chevron)]`;
 
 /** Handed to a select as an inline style so the data URI stays out of a class. */
 export const selectChevron = { "--calc-chevron": `url("${CHEVRON}")` } as CSSProperties;
@@ -431,7 +472,8 @@ export function ServiceCards<T extends string>({
       {options.map((option) => (
         <label
           key={option.value}
-          className="flex cursor-pointer items-center gap-5 rounded-xl border-2 border-transparent bg-surface-card p-6 transition-colors hover:border-border-default has-[:checked]:border-brand-yellow has-[:checked]:bg-yellow-tint has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
+          // 2px hairline at rest, brand yellow over a 12% yellow wash once chosen (3:665, 3:685).
+          className="flex cursor-pointer items-center gap-5 rounded-lg border-2 border-border-subtle bg-surface-card p-6 transition-colors hover:border-border-default has-[:checked]:border-brand-yellow has-[:checked]:bg-brand-yellow/12 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
         >
           <input
             type="radio"
@@ -444,7 +486,7 @@ export function ServiceCards<T extends string>({
 
           <span
             aria-hidden="true"
-            className="grid size-6 shrink-0 place-items-center rounded-[4px] border border-border-default bg-surface-card text-text-on-brand [&>svg]:opacity-0 peer-checked:border-brand-red peer-checked:bg-brand-red peer-checked:[&>svg]:opacity-100"
+            className="grid size-6 shrink-0 place-items-center rounded-[4px] border-2 border-border-strong bg-surface-card text-text-on-brand [&>svg]:opacity-0 peer-checked:border-brand-red peer-checked:bg-brand-red peer-checked:[&>svg]:opacity-100"
           >
             <CalcIcon name="check" size={16} />
           </span>
@@ -457,8 +499,8 @@ export function ServiceCards<T extends string>({
           </span>
 
           <span className="flex flex-1 flex-col gap-1">
-            <span className="text-h6 font-bold text-text-strong">{option.label}</span>
-            <span className="text-body-sm text-text-default">{option.description}</span>
+            <span className="text-body leading-[19px] font-bold text-text-heading">{option.label}</span>
+            <span className="text-[13px] leading-4 text-text-default">{option.description}</span>
           </span>
         </label>
       ))}
@@ -466,7 +508,10 @@ export function ServiceCards<T extends string>({
   );
 }
 
-/** A row of radios with a visible dot, as the route screen draws customer type. */
+/**
+ * A row of radios as the route screen draws customer type (3:770): an 18px
+ * circle, grey-ringed at rest and filled solid red once chosen.
+ */
 export function InlineRadios<T extends string>({
   name,
   legend,
@@ -497,12 +542,10 @@ export function InlineRadios<T extends string>({
 
           <span
             aria-hidden="true"
-            className="grid size-[18px] shrink-0 place-items-center rounded-full border border-border-default bg-surface-card transition-colors [&>span]:opacity-0 peer-checked:border-brand-red peer-checked:bg-brand-red peer-checked:[&>span]:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-yellow"
-          >
-            <span className="size-1.5 rounded-full bg-neutral-0" />
-          </span>
+            className="size-[18px] shrink-0 rounded-full border border-border-strong bg-surface-card transition-colors peer-checked:border-brand-red peer-checked:bg-brand-red peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-yellow"
+          />
 
-          <span className="text-body text-text-default peer-checked:font-semibold peer-checked:text-text-strong">
+          <span className="text-body-sm leading-[17px] text-text-default peer-checked:font-semibold peer-checked:text-text-heading">
             {option.label}
           </span>
         </label>
@@ -511,7 +554,11 @@ export function InlineRadios<T extends string>({
   );
 }
 
-/** Stacked radio cards with a title and a sub-line — the arrival windows. */
+/**
+ * Stacked radio cards with a title and a sub-line — the arrival windows
+ * (3:2202). The radio sits at the end, and a chosen card keeps its white
+ * fill and takes the 1.5px red ring.
+ */
 export function RadioList<T extends string>({
   name,
   legend,
@@ -526,14 +573,23 @@ export function RadioList<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <fieldset className="grid gap-3 border-0 p-0">
+    <fieldset className="grid gap-2.5 border-0 p-0">
       <legend className="sr-only">{legend}</legend>
 
       {options.map((option) => (
         <label
           key={option.value}
-          className="flex cursor-pointer items-center gap-4 rounded-xl border border-border-subtle bg-surface-card p-4 transition-colors hover:border-border-strong has-[:checked]:border-brand-red has-[:checked]:bg-red-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
+          className="flex cursor-pointer items-center justify-between gap-4 rounded-[10px] border border-border-subtle bg-surface-card p-4 transition-colors hover:border-border-strong has-[:checked]:border-brand-red has-[:checked]:shadow-[inset_0_0_0_0.5px_var(--color-brand-red)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
         >
+          <span className="flex flex-col gap-0.5">
+            <span className="font-display text-[15px] leading-[19px] font-bold text-text-heading">
+              {option.label}
+            </span>
+            <span className="text-caption leading-4 tracking-normal text-text-default">
+              {option.hint}
+            </span>
+          </span>
+
           <input
             type="radio"
             name={name}
@@ -545,14 +601,9 @@ export function RadioList<T extends string>({
 
           <span
             aria-hidden="true"
-            className="grid size-5 shrink-0 place-items-center rounded-full border border-border-default bg-surface-card transition-colors [&>span]:opacity-0 peer-checked:border-brand-red peer-checked:bg-brand-red peer-checked:[&>span]:opacity-100"
+            className="grid size-5 shrink-0 place-items-center rounded-full border-2 border-border-subtle bg-surface-card transition-colors [&>span]:opacity-0 peer-checked:border-brand-red peer-checked:[&>span]:opacity-100"
           >
-            <span className="size-1.5 rounded-full bg-neutral-0" />
-          </span>
-
-          <span className="flex flex-col gap-0.5">
-            <span className="text-body font-bold text-text-strong">{option.label}</span>
-            <span className="text-caption text-text-default">{option.hint}</span>
+            <span className="size-2.5 rounded-full bg-brand-red" />
           </span>
         </label>
       ))}
@@ -576,7 +627,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={legend}
-      className="inline-flex rounded-md bg-surface-card p-1"
+      className="inline-flex w-fit rounded-md border border-border-subtle bg-surface-card p-1"
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -589,7 +640,8 @@ export function Segmented<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={[
-              "rounded-[6px] px-8 py-1.5 text-body-sm transition-colors",
+              // Two 156px halves of a 320px switch (3:1036).
+              "h-8 min-w-[132px] rounded-[6px] px-4 text-[13px] leading-4 transition-colors sm:min-w-[156px]",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow",
               active
                 ? "bg-brand-red font-bold text-text-on-brand"
@@ -640,7 +692,7 @@ export function RangeSlider({
         className="h-2 w-full cursor-pointer rounded-full accent-brand-red focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-yellow"
       />
 
-      <div className="flex justify-between text-caption text-text-faint">
+      <div className="flex justify-between text-[11px] leading-[13px] text-text-faint">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
@@ -673,11 +725,12 @@ export function Chips<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={[
-              "rounded-full px-4 py-2 text-body-sm transition-colors",
+              // A 12% yellow wash with a yellow ring when on, a hairline when off (3:1162).
+              "rounded-[20px] border px-4 py-2 text-[13px] leading-4 text-text-heading transition-colors",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow",
               active
-                ? "bg-brand-yellow font-bold text-text-strong"
-                : "bg-surface-card font-medium text-text-default hover:text-text-strong",
+                ? "border-brand-yellow bg-brand-yellow/12 font-bold"
+                : "border-border-subtle bg-surface-card font-medium hover:border-border-strong",
             ].join(" ")}
           >
             {option.label}
@@ -698,23 +751,25 @@ export function Notice({
   title: string;
   children: ReactNode;
 }) {
+  // The handling notice of 3:1723: an 8% yellow wash, a yellow hairline and a
+  // yellow "!" medallion.
   const skin =
     tone === "warning"
       ? "border-warning bg-warning-soft"
-      : "border-brand-yellow bg-yellow-tint";
+      : "border-brand-yellow bg-brand-yellow/8";
 
   return (
-    <div className={`flex items-start gap-4 rounded-xl border p-5 ${skin}`}>
+    <div className={`flex items-start gap-3 rounded-md border p-4 ${skin}`}>
       <span
         aria-hidden="true"
-        className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-yellow text-text-strong"
+        className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-yellow font-display text-body-sm font-extrabold text-text-heading"
       >
-        <CalcIcon name="alert" size={14} />
+        !
       </span>
 
-      <div className="flex flex-col gap-1">
-        <p className="text-body-sm font-bold text-text-strong">{title}</p>
-        <div className="text-body-sm text-text-default">{children}</div>
+      <div className="flex flex-col gap-0.5">
+        <p className="font-display text-body-sm leading-[18px] font-bold text-text-heading">{title}</p>
+        <div className="text-[13px] leading-[17px] text-text-default">{children}</div>
       </div>
     </div>
   );
@@ -793,15 +848,17 @@ export function AvailabilityCalendar({
     });
 
   const navButton =
-    "grid size-8 place-items-center rounded-md text-text-strong transition-colors " +
+    "grid size-8 place-items-center rounded-[6px] border border-border-subtle text-text-strong transition-colors " +
     "hover:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow";
 
+  // Drawn as 3:2072: a 24px-padded card, 50px day tiles on a sunken fill with
+  // a hairline, the availability dot under the number, and a plain legend.
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border-subtle bg-surface-card p-6">
+    <div className="flex flex-col gap-5 rounded-lg border border-border-subtle bg-surface-card p-4 sm:p-6">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-h6 font-bold text-text-strong">{monthLabel}</p>
+        <p className="font-display text-h5 leading-[23px] font-bold text-text-heading">{monthLabel}</p>
 
-        <div className="flex gap-1">
+        <div className="flex gap-3">
           <button
             type="button"
             className={navButton}
@@ -821,9 +878,9 @@ export function AvailabilityCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1" aria-busy={isLoading}>
+      <div className="grid grid-cols-7 gap-1 sm:gap-2" aria-busy={isLoading}>
         {weekdays.map((day) => (
-          <span key={day} className="py-1 text-center text-caption font-bold text-text-faint">
+          <span key={day} className="text-center text-caption leading-4 font-bold tracking-normal text-text-faint">
             {day}
           </span>
         ))}
@@ -848,13 +905,13 @@ export function AvailabilityCalendar({
               aria-pressed={chosen}
               onClick={() => onChange(iso)}
               className={[
-                "relative grid aspect-square place-items-center rounded-md text-body-sm transition-colors",
+                "flex h-[50px] flex-col items-center justify-center gap-1 rounded-md border font-display text-body-sm leading-[18px] transition-colors",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow",
                 chosen
-                  ? "bg-brand-red font-bold text-text-on-brand"
+                  ? "border-brand-red bg-brand-red font-extrabold text-text-on-brand"
                   : bookable
-                    ? "text-text-strong hover:bg-surface-sunken"
-                    : "cursor-not-allowed text-text-faint",
+                    ? "border-border-subtle bg-surface-page font-semibold text-text-heading hover:border-border-strong"
+                    : "cursor-not-allowed border-border-subtle bg-surface-page text-text-faint",
               ].join(" ")}
             >
               {day}
@@ -862,9 +919,7 @@ export function AvailabilityCalendar({
               {bookable && !chosen && (
                 <span
                   aria-hidden="true"
-                  className={`absolute bottom-1 size-1 rounded-full ${
-                    scarce ? "bg-brand-yellow" : "bg-success"
-                  }`}
+                  className={`size-1.5 rounded-full ${scarce ? "bg-brand-yellow" : "bg-success"}`}
                 />
               )}
             </button>
@@ -872,15 +927,16 @@ export function AvailabilityCalendar({
         })}
       </div>
 
-      <ul className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border-subtle pt-4 text-caption text-text-default">
+      <ul className="flex flex-wrap gap-x-4 gap-y-2 text-caption leading-4 tracking-normal text-text-default">
         {[
-          { key: "free", dot: "bg-success", text: labels.free },
-          { key: "limited", dot: "bg-brand-yellow", text: labels.limited },
-          { key: "full", dot: "bg-border-strong", text: labels.full },
-          { key: "selected", dot: "bg-brand-red", text: labels.selected },
+          { key: "free", dot: "size-2 rounded-full bg-success", text: labels.free },
+          { key: "limited", dot: "size-2 rounded-full bg-brand-yellow", text: labels.limited },
+          { key: "full", dot: "size-2 rounded-full bg-border-strong", text: labels.full },
+          // The chosen day is a filled tile, so its key is a small square.
+          { key: "selected", dot: "size-3 rounded-[3px] bg-brand-red", text: labels.selected },
         ].map((item) => (
-          <li key={item.key} className="flex items-center gap-2">
-            <span aria-hidden="true" className={`size-2 rounded-full ${item.dot}`} />
+          <li key={item.key} className="flex items-center gap-1.5">
+            <span aria-hidden="true" className={item.dot} />
             {item.text}
           </li>
         ))}

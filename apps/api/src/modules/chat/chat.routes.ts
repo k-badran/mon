@@ -12,7 +12,7 @@ import * as chatService from "./chat.service.js";
 
 export const chatRouter: Router = Router();
 
-const VISITOR_COOKIE = "umzugplus_visitor";
+const VISITOR_COOKIE = "mon_visitor";
 const VISITOR_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 const sendBody = z.object({

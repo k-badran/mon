@@ -3,7 +3,7 @@ import {
   verifyAccessToken,
   type AccessTokenClaims,
   type UserRole,
-} from "@umzugplus/auth";
+} from "@mon/auth";
 import type { NextFunction, Request, Response } from "express";
 
 import { effectiveRole } from "../lib/account-state.js";

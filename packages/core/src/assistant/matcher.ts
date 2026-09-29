@@ -206,25 +206,25 @@ const FALLBACK: Record<string, { clarify: string; handoff: string }> = {
     clarify: "Meintest du vielleicht eine dieser Fragen?",
     handoff:
       "Das kann ich leider nicht sicher beantworten. Möchtest du mit jemandem aus " +
-      "unserem Team sprechen? Du kannst uns auch unter info@umzugplus.de erreichen.",
+      "unserem Team sprechen? Du kannst uns auch unter info@moveongo.de erreichen.",
   },
   en: {
     clarify: "Did you mean one of these?",
     handoff:
       "I am not able to answer that reliably. Would you like to talk to someone from " +
-      "our team? You can also reach us at info@umzugplus.de.",
+      "our team? You can also reach us at info@moveongo.de.",
   },
   ar: {
     clarify: "هل تقصد أحد هذه الأسئلة؟",
     handoff:
       "لا أستطيع الإجابة على هذا بثقة. هل تودّ التحدّث مع أحد من فريقنا؟ " +
-      "يمكنك أيضًا مراسلتنا على info@umzugplus.de.",
+      "يمكنك أيضًا مراسلتنا على info@moveongo.de.",
   },
   tr: {
     clarify: "Bunlardan birini mi kastettiniz?",
     handoff:
       "Bunu güvenle yanıtlayamıyorum. Ekibimizden biriyle görüşmek ister misiniz? " +
-      "Bize info@umzugplus.de adresinden de ulaşabilirsiniz.",
+      "Bize info@moveongo.de adresinden de ulaşabilirsiniz.",
   },
 };
 

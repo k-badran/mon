@@ -30,6 +30,9 @@ export type ErrorCode =
   | "INVALID_STATE_TRANSITION"
   | "QUOTE_EXPIRED"
   | "QUOTE_ALREADY_USED"
+  // 413, 415 — an upload that is too big, or not a file type the site serves
+  | "PAYLOAD_TOO_LARGE"
+  | "UNSUPPORTED_MEDIA_TYPE"
   // 422
   | "UNPROCESSABLE"
   | "PRICING_FAILED"

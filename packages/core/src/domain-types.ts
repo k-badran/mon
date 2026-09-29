@@ -2,7 +2,7 @@
  * Types for the `jsonb` columns.
  *
  * Drizzle's `.$type<T>()` only asserts a shape at compile time, so these are
- * mirrored by Zod schemas in `@umzugplus/core` and validated at every
+ * mirrored by Zod schemas in `@mon/core` and validated at every
  * boundary where the data enters the system.
  */
 

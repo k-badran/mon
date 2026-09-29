@@ -1,13 +1,17 @@
-import { db, schema } from "@umzugplus/db";
+import { IMAGE_UPLOAD_MAX_BYTES, checkImageUpload, isSafeImageSrc } from "@mon/core";
+import { db, schema } from "@mon/db";
 import { and, asc, eq } from "drizzle-orm";
-import { Router } from "express";
+import { Router, type RequestHandler } from "express";
+import multer from "multer";
 import { z } from "zod";
 
 import { AppError } from "../../lib/errors.js";
 import { redis } from "../../lib/redis.js";
+import { storeImage, uploadsEnabled, uploadsUnavailable } from "../../lib/upload-storage.js";
 import { asyncHandler } from "../../middleware/error-handler.js";
+import { uploadRateLimit } from "../../middleware/rate-limit.js";
 import { requireAuth } from "../../middleware/require-auth.js";
-import { requirePermission } from "../../middleware/require-permission.js";
+import { requireAnyPermission, requirePermission } from "../../middleware/require-permission.js";
 import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
 import { recordAudit } from "../audit/audit.service.js";
 
@@ -127,6 +131,8 @@ siteRouter.get(
 // page copy is not thereby allowed to repaint the site, and vice versa.
 const themeEditor = [requireAuth, requirePermission("theme.write")] as const;
 const contentEditor = [requireAuth, requirePermission("content.write")] as const;
+/** Page photos are content, the logo is theme; either editor may upload. */
+const photoUploader = [requireAuth, requireAnyPermission("content.write", "theme.write")] as const;
 
 /** Every setting with its editor metadata, so the UI builds itself. */
 siteRouter.get(
@@ -147,6 +153,16 @@ const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 const settingBody = z.object({ value: z.string().trim().max(2000) });
 
+/**
+ * What an image field accepts, stated in the error the editor shows.
+ *
+ * The value is rendered into an <img src> on public pages, so only files the
+ * site ships and https URLs get through — a javascript: or data: value, or an
+ * image over plain http, is refused here and again when the site renders.
+ */
+const IMAGE_RULE =
+  "Expected an image path under /images/ (e.g. /images/home/hero-truck.jpg) or an https:// URL.";
+
 siteRouter.patch(
   "/settings/:key",
   ...themeEditor,
@@ -165,7 +181,7 @@ siteRouter.patch(
     // The kind recorded with the setting is what it is validated against —
     // a colour field must not be able to hold prose.
     if (before.kind === "color" && !HEX.test(value)) {
-      throw AppError.unprocessable("Expected a hex colour such as #D71635.");
+      throw AppError.unprocessable("Expected a hex colour such as #E62039.");
     }
 
     if (before.kind === "email" && !z.string().email().safeParse(value).success) {
@@ -178,6 +194,10 @@ siteRouter.patch(
 
     if (before.kind === "number" && Number.isNaN(Number(value))) {
       throw AppError.unprocessable("Expected a number.");
+    }
+
+    if (before.kind === "image" && !isSafeImageSrc(value)) {
+      throw AppError.unprocessable(IMAGE_RULE);
     }
 
     const [updated] = await db
@@ -248,11 +268,19 @@ siteRouter.patch(
       throw AppError.notFound("Content block");
     }
 
-    const [updated] = await db
-      .update(contentBlocks)
-      .set({ ...req.body, updatedAt: new Date(), updatedBy: req.user!.id })
-      .where(eq(contentBlocks.id, id))
-      .returning();
+    // An image block's value lands in an <img src> on a public page, so it is
+    // held to the image rule rather than accepted as free text. Empty is
+    // allowed: it means "no photo set", and the page shows its own or none.
+    if (
+      before.kind === "image" &&
+      req.body.value !== undefined &&
+      req.body.value !== "" &&
+      !isSafeImageSrc(req.body.value)
+    ) {
+      throw AppError.unprocessable(IMAGE_RULE);
+    }
+
+    const updated = await writeBlock(before, req.body, req.user!.id);
 
     await invalidateSiteCache();
 
@@ -263,7 +291,7 @@ siteRouter.patch(
       entityId: id,
       changes: {
         slot: `${before.section}.${before.slot}`,
-        locale: before.locale,
+        locale: before.kind === "image" ? "all" : before.locale,
         ...(req.body.value !== undefined ? { value: { from: before.value, to: req.body.value } } : {}),
         ...(req.body.isPublished !== undefined ? { isPublished: req.body.isPublished } : {}),
       },
@@ -276,6 +304,188 @@ siteRouter.patch(
 );
 
 /**
+ * Puts an image block back to the photo the page shipped with.
+ *
+ * The escape hatch for a pasted URL that later breaks or turns out wrong: the
+ * editor need not remember which file the design used.
+ */
+siteRouter.post(
+  "/blocks/:id/reset",
+  ...contentEditor,
+  validate({ params: z.object({ id: z.string().uuid() }) }),
+  asyncHandler(async (req, res) => {
+    const id = validatedParams<{ id: string }>(req).id;
+
+    const [before] = await db.select().from(contentBlocks).where(eq(contentBlocks.id, id)).limit(1);
+
+    if (!before) {
+      throw AppError.notFound("Content block");
+    }
+
+    const { imageDefault } = await import("@mon/db/image-content");
+    const value = before.kind === "image" ? imageDefault(before.section, before.slot) : undefined;
+
+    if (value === undefined) {
+      throw AppError.unprocessable("Only a seeded image block has a default to reset to.");
+    }
+
+    const updated = await writeBlock(before, { value }, req.user!.id);
+
+    await invalidateSiteCache();
+
+    await recordAudit({
+      actor: { id: req.user!.id, email: req.user!.email },
+      action: "site.content_updated",
+      entityType: "content_block",
+      entityId: id,
+      changes: {
+        slot: `${before.section}.${before.slot}`,
+        locale: "all",
+        value: { from: before.value, to: value },
+        reset: true,
+      },
+      ipAddress: req.ip,
+      requestId: req.requestId,
+    });
+
+    res.json(updated);
+  }),
+);
+
+// ── Staff: photo uploads ────────────────────────────────────────────────
+
+/**
+ * Whether the upload button should be offered at all.
+ *
+ * Asked separately rather than discovered by a failed upload, so an editor on
+ * a deployment without storage never sees a control that can only fail.
+ */
+siteRouter.get(
+  "/uploads",
+  ...photoUploader,
+  (_req, res) => {
+    res.json({ enabled: uploadsEnabled, maxBytes: IMAGE_UPLOAD_MAX_BYTES });
+  },
+);
+
+/**
+ * Multipart parsing, held in memory and capped at the upload limit.
+ *
+ * Memory rather than a temp file because the whole file is needed anyway — its
+ * type is read from its bytes — and 8 MB is small. One file and no other
+ * fields: anything else in the form is a client this endpoint was not built for.
+ */
+const parseUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: IMAGE_UPLOAD_MAX_BYTES, files: 1, fields: 0, parts: 1 },
+}).single("file");
+
+/** Runs multer and turns its errors into the API's own. */
+const receiveFile: RequestHandler = (req, res, next) => {
+  parseUpload(req, res, (error: unknown) => {
+    if (!error) return next();
+
+    if (error instanceof multer.MulterError) {
+      return next(
+        error.code === "LIMIT_FILE_SIZE"
+          ? new AppError("PAYLOAD_TOO_LARGE", 413, "The photo is larger than 8 MB.")
+          : AppError.badRequest('Send exactly one file, in a form field named "file".'),
+      );
+    }
+
+    next(AppError.badRequest("The upload could not be read."));
+  });
+};
+
+/** Refused before the body is read, so a disabled store costs no 8 MB buffer. */
+const requireUploads: RequestHandler = (_req, _res, next) => {
+  next(uploadsEnabled ? undefined : uploadsUnavailable());
+};
+
+/**
+ * Stores a photo and returns the URL to put in an image field.
+ *
+ * Only stores it: attaching it to a page is the ordinary block PATCH, so the
+ * editor previews the photo in place and the change is validated and audited
+ * the same way as a pasted URL.
+ */
+siteRouter.post(
+  "/uploads",
+  ...photoUploader,
+  uploadRateLimit,
+  requireUploads,
+  receiveFile,
+  asyncHandler(async (req, res) => {
+    if (!req.file) {
+      throw AppError.badRequest('Send the photo in a form field named "file".');
+    }
+
+    // Decided by the bytes, not by req.file.mimetype or the file name — both
+    // are whatever the browser was told.
+    const checked = checkImageUpload(req.file.buffer);
+
+    if (!checked.ok) {
+      throw checked.reason === "too_large"
+        ? new AppError("PAYLOAD_TOO_LARGE", 413, "The photo is larger than 8 MB.")
+        : checked.reason === "empty"
+          ? AppError.badRequest("The file is empty.")
+          : new AppError(
+              "UNSUPPORTED_MEDIA_TYPE",
+              415,
+              "Only JPEG, PNG, WebP and AVIF photos can be uploaded. SVG is not accepted.",
+            );
+    }
+
+    const { key, url } = await storeImage(req.file.buffer, checked.format);
+
+    // The file is public the moment it is stored, whether or not a page ever
+    // uses it, so the upload itself is recorded — not only the later edit.
+    await recordAudit({
+      actor: { id: req.user!.id, email: req.user!.email },
+      action: "site.image_uploaded",
+      entityType: "upload",
+      entityId: key,
+      changes: {
+        contentType: checked.format.contentType,
+        bytes: req.file.size,
+        originalName: req.file.originalname.slice(0, 200),
+      },
+      ipAddress: req.ip,
+      requestId: req.requestId,
+    });
+
+    res.status(201).json({ url });
+  }),
+);
+
+/**
+ * Applies an edit to a block, and to its sibling locales when it is an image.
+ *
+ * A photograph is the same in every language, so an image block's rows are
+ * kept identical: editing the German row and leaving the Arabic page on the
+ * old photo would be a bug no editor could see from the form they were on.
+ * Text blocks are per locale and only the one row changes.
+ */
+async function writeBlock(
+  before: typeof contentBlocks.$inferSelect,
+  patch: { value?: string; isPublished?: boolean },
+  userId: string,
+): Promise<typeof contentBlocks.$inferSelect> {
+  const where =
+    before.kind === "image"
+      ? and(eq(contentBlocks.section, before.section), eq(contentBlocks.slot, before.slot))
+      : eq(contentBlocks.id, before.id);
+
+  const rows = await db
+    .update(contentBlocks)
+    .set({ ...patch, updatedAt: new Date(), updatedBy: userId })
+    .where(where)
+    .returning();
+
+  return rows.find((row) => row.id === before.id) ?? rows[0]!;
+}
+
+/**
  * Restores every theme setting to its seeded default.
  *
  * The escape hatch for an admin who has made the site unreadable — without it,
@@ -285,7 +495,7 @@ siteRouter.post(
   "/settings/reset-theme",
   ...themeEditor,
   asyncHandler(async (req, res) => {
-    const { THEME_DEFAULTS } = await import("@umzugplus/db/site-defaults");
+    const { THEME_DEFAULTS } = await import("@mon/db/site-defaults");
 
     for (const setting of THEME_DEFAULTS) {
       await db

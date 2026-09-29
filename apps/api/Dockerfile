@@ -1,9 +1,9 @@
 # Multi-stage build for the API.
 #
 # Built from the repository root so the workspace packages the API depends on
-# (@umzugplus/core, /db, /auth, /config) are available:
+# (@mon/core, /db, /auth, /config) are available:
 #
-#   docker build -f apps/api/Dockerfile -t umzugplus-api .
+#   docker build -f apps/api/Dockerfile -t mon-api .
 
 # ── Stage 1: install every dependency, including dev ──────────────────────
 FROM node:20-alpine AS deps
@@ -38,11 +38,11 @@ COPY packages ./packages
 COPY apps/api ./apps/api
 
 # Dependency order matters: config → core → db → auth → api.
-RUN pnpm --filter @umzugplus/config build \
- && pnpm --filter @umzugplus/core build \
- && pnpm --filter @umzugplus/db build \
- && pnpm --filter @umzugplus/auth build \
- && pnpm --filter @umzugplus/api build
+RUN pnpm --filter @mon/config build \
+ && pnpm --filter @mon/core build \
+ && pnpm --filter @mon/db build \
+ && pnpm --filter @mon/auth build \
+ && pnpm --filter @mon/api build
 
 # Drop dev dependencies now that compilation is done.
 RUN pnpm prune --prod

@@ -31,7 +31,7 @@ export function parseDatabaseUrl(url: string): ConnectionTarget {
 }
 
 /** The container that docker-compose.dev.yml creates. */
-const CONTAINER = process.env.POSTGRES_CONTAINER ?? "umzugplus-postgres";
+const CONTAINER = process.env.POSTGRES_CONTAINER ?? "mon-postgres";
 
 export type Runner = "host" | "container";
 

@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "node:http";
 
-import { env, isProduction } from "@umzugplus/config";
+import { env, isProduction } from "@mon/config";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -18,6 +18,7 @@ import { catalogRouter } from "./modules/catalog/catalog.routes.js";
 import { chatRouter } from "./modules/chat/chat.routes.js";
 import { complaintsRouter } from "./modules/complaints/complaints.routes.js";
 import { discountsRouter } from "./modules/discounts/discounts.routes.js";
+import { mailRouter } from "./modules/mail/mail.routes.js";
 import { faqRouter } from "./modules/faq/faq.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { ordersRouter } from "./modules/orders/orders.routes.js";
@@ -108,6 +109,8 @@ export function createServer(): Express {
   // Administration.
   app.use("/api/pricing", pricingRouter);
   app.use("/api/discounts", discountsRouter);
+  // Mail diagnostics — answers "is outbound email actually working?"
+  app.use("/api/admin/mail", mailRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

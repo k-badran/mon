@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
-import type { PriceBreakdown, QuoteInput } from "@umzugplus/core";
+import type { PriceBreakdown, QuoteInput } from "@mon/core";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
-import { telHref, useSiteSettings } from "@/lib/site/useSiteSettings";
 import type { CalculatorState } from "@/lib/calculator/machine";
+import { CalcHeader, primaryButton, QuoteSummary } from "./CalcChrome";
 
 /**
  * The confirmation screen — the last frame of the calculator.
@@ -34,9 +34,9 @@ import type { CalculatorState } from "@/lib/calculator/machine";
  */
 
 /** Mirrors the wizard's own key; the answers are handed over, not re-asked. */
-const WIZARD_STORAGE_KEY = "umzugplus.calculator.v1";
+const WIZARD_STORAGE_KEY = "mon.calculator.v1";
 
-/** Mirrors PASSWORD_MIN_LENGTH in `@umzugplus/auth`, which is server-only. */
+/** Mirrors PASSWORD_MIN_LENGTH in `@mon/auth`, which is server-only. */
 const PASSWORD_MIN_LENGTH = 10;
 
 /**
@@ -90,20 +90,11 @@ const PAYMENT_METHODS: Array<{
   },
 ];
 
-/** The five chips the three result frames share. */
-const TABS = [
-  "calc.tab.route",
-  "calc.tab.inventory",
-  "calc.tab.special",
-  "calc.tab.schedule",
-  "calc.tab.quote",
-];
-
 const ARRIVAL_TIMES = ["07:00", "08:00", "09:00", "10:00", "12:00", "14:00"];
 
 export function BookingConfirmation() {
   const { sdk, user, signUp } = useApi();
-  const { t, locale, formatCurrency, formatDate } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const params = useSearchParams();
 
@@ -333,7 +324,7 @@ export function BookingConfirmation() {
 
   return (
     <div className="min-h-screen bg-surface-page">
-      <CalcHeader />
+      <CalcHeader currentTab={t("calc.tab.quote")} />
 
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-4 py-8 lg:flex-row lg:items-start lg:px-12 lg:py-12">
         <main className="flex min-w-0 flex-1 flex-col gap-6">
@@ -370,9 +361,9 @@ export function BookingConfirmation() {
           ) : (
             <>
               {user ? null : (
-                <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-card p-5">
+                <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-subtle bg-surface-card p-5">
                   <div className="flex flex-col gap-1">
-                    <h2 className="text-h5 font-bold text-text-strong">
+                    <h2 className="font-sans text-h5 leading-5 font-bold tracking-normal text-text-heading">
                       {t("calc.confirm.registerTitle")}
                     </h2>
                     <p className="text-body-sm text-text-default">
@@ -392,7 +383,7 @@ export function BookingConfirmation() {
               <form
                 onSubmit={handleSubmit}
                 noValidate
-                className="flex flex-col gap-6 rounded-xl bg-surface-card p-6 sm:p-8"
+                className="flex flex-col gap-6 rounded-xl border border-border-subtle bg-surface-card p-6 sm:p-8"
               >
                 <div className="grid gap-4 sm:grid-cols-2">
                   <TextField
@@ -492,7 +483,7 @@ export function BookingConfirmation() {
                 <hr className="border-border-subtle" />
 
                 <fieldset className="flex flex-col gap-3 border-0 p-0">
-                  <legend className="text-body font-bold text-text-strong">
+                  <legend className="mb-3 text-body-sm font-bold text-text-strong">
                     {t("calc.confirm.paymentTitle")}
                   </legend>
 
@@ -500,7 +491,7 @@ export function BookingConfirmation() {
                     {PAYMENT_METHODS.map((method) => (
                       <label
                         key={method.value}
-                        className="flex cursor-pointer flex-col gap-1 rounded-md border border-border-subtle p-3 transition-colors has-[:checked]:border-brand-red has-[:checked]:bg-surface-page has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
+                        className="flex cursor-pointer flex-col gap-1 rounded-md border border-border-subtle p-3 transition-colors has-[:checked]:border-brand-red has-[:checked]:bg-surface-page has-[:checked]:shadow-[inset_0_0_0_1px_var(--color-brand-red)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-yellow"
                       >
                         <span className="flex items-center justify-between">
                           <span className="text-text-strong">{method.icon}</span>
@@ -515,10 +506,10 @@ export function BookingConfirmation() {
                           />
                         </span>
 
-                        <span className="text-body-sm font-bold text-text-strong">
+                        <span className="text-[13px] leading-[14px] font-bold text-text-strong">
                           {t(method.labelKey)}
                         </span>
-                        <span className="text-caption text-text-default">{t(method.hintKey)}</span>
+                        <span className="text-[11px] leading-3 text-text-default">{t(method.hintKey)}</span>
                       </label>
                     ))}
                   </div>
@@ -577,7 +568,7 @@ export function BookingConfirmation() {
 
                   <button
                     type="submit"
-                    className="btn primary large"
+                    className={`${primaryButton} min-h-11 rounded-md px-9 py-3.5 text-[15px] leading-4`}
                     disabled={!canSubmit || submitting}
                     data-loading={submitting ? "true" : undefined}
                   >
@@ -590,192 +581,34 @@ export function BookingConfirmation() {
         </main>
 
         {quote && !reference ? (
-          <aside className="flex w-full flex-col gap-6 rounded-xl bg-surface-card p-7 lg:w-[420px] lg:shrink-0">
-            <div className="flex flex-col gap-1.5">
-              <p className="text-caption font-semibold text-text-default">
-                {t("calc.confirm.service")}
-              </p>
-              <p className="text-h4 font-bold text-text-strong">
-                {t(`service.${quote.serviceType}`)}
-              </p>
-            </div>
-
-            <hr className="border-border-subtle" />
-
-            <dl className="flex flex-col gap-4">
-              <SummaryRow
-                label={t("calc.confirm.route")}
-                value={
-                  quote.input.destinationAddress
-                    ? `${quote.input.originAddress} → ${quote.input.destinationAddress}`
-                    : quote.input.originAddress
-                }
-                sub={
-                  quote.breakdown.distanceKm && Number.parseFloat(quote.breakdown.distanceKm) > 0
-                    ? t("calc.confirm.distance", {
-                        values: {
-                          km: Math.round(Number.parseFloat(quote.breakdown.distanceKm)),
-                        },
-                      })
-                    : undefined
-                }
-              />
-
-              <SummaryRow
-                label={t("calc.confirm.moveDate")}
-                value={scheduledDate ? formatDate(scheduledDate) : t("common.none")}
-                sub={
-                  arrivalTime
-                    ? t("calc.confirm.startingAt", { values: { time: arrivalTime } })
-                    : undefined
-                }
-              />
-
-              <SummaryRow
-                label={t("calc.confirm.inventory")}
-                value={
-                  quote.input.calculationMethod === "area"
-                    ? t("calc.confirm.areaValue", { values: { area: quote.input.areaSqm ?? 0 } })
-                    : t("calc.confirm.itemsValue", { count: countItems(quote.input.selectedItems) })
-                }
-                sub={
-                  quote.breakdown.estimatedHours
-                    ? t("calc.confirm.loadingEstimate", {
-                        values: { hours: quote.breakdown.estimatedHours },
-                      })
-                    : undefined
-                }
-              />
-
-              {quote.serviceType === "moving" ? (
-                <SummaryRow
-                  label={t("calc.confirm.crew")}
-                  value={t("calc.confirm.crewValue", {
-                    values: {
-                      crew: quote.input.crewSize,
-                      vans: quote.input.secondVan ? 2 : 1,
-                    },
-                  })}
-                />
-              ) : null}
-            </dl>
-
-            <hr className="border-border-subtle" />
-
-            <div className="flex flex-col gap-3">
-              <p className="text-caption font-semibold text-text-faint">
-                {t("calc.confirm.included")}
-              </p>
-
-              {/* The engine's own lines rather than a hand-written list of
-                  promises: this is exactly what the stored price pays for. */}
-              <ul className="flex flex-col gap-2.5">
-                {quote.breakdown.lines.map((line, position) => (
-                  <li
-                    key={`${line.key}-${position}`}
-                    className="flex items-center gap-2 text-body-sm text-text-default"
-                  >
-                    <span className="text-success">
-                      <IconCheck />
-                    </span>
-                    {t(`line.${line.key.replace("line.", "")}`)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <hr className="border-border-subtle" />
-
-            <div className="flex items-center justify-between gap-4 py-1">
-              <div className="flex flex-col gap-0.5">
-                <p className="text-body font-bold text-text-strong">{t("calc.confirm.total")}</p>
-                <p className="text-caption text-text-default">
-                  {t("calc.confirm.vatIncluded", { values: { rate: quote.breakdown.vatRate } })}
-                </p>
-              </div>
-
-              <p className="text-h3 font-extrabold tabular-nums text-text-strong">
-                {formatCurrency(quote.breakdown.totalGross)}
-              </p>
-            </div>
-          </aside>
+          <QuoteSummary
+            facts={{
+              serviceType: quote.serviceType,
+              originAddress: quote.input.originAddress,
+              destinationAddress: quote.input.destinationAddress,
+              distanceKm: quote.breakdown.distanceKm ?? undefined,
+              scheduledDate: scheduledDate || undefined,
+              scheduledTime: arrivalTime || undefined,
+              calculationMethod: quote.input.calculationMethod,
+              areaSqm: quote.input.areaSqm,
+              itemCount: countItems(quote.input.selectedItems),
+              crewSize: quote.serviceType === "moving" ? quote.input.crewSize : undefined,
+              secondVan: quote.input.secondVan,
+              estimatedHours: quote.breakdown.estimatedHours ?? undefined,
+              lines: quote.breakdown.lines,
+              vatRate: quote.breakdown.vatRate,
+              totalGross: quote.breakdown.totalGross,
+            }}
+          />
         ) : null}
       </div>
     </div>
   );
 }
 
-/** The calculator's own 72px header: no marketing nav, and the hotline is the CMS's. */
-function CalcHeader() {
-  const { t } = useI18n();
-  const { phone, brandName } = useSiteSettings();
-
-  return (
-    <header className="bg-surface-card">
-      <div className="flex h-[72px] items-center justify-between gap-4 px-4 lg:px-10">
-        <img src="/images/brand/logo.png" alt={brandName} className="h-[47px] w-auto" />
-
-        {phone ? (
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end gap-0.5">
-              <span className="text-caption text-text-default">{t("calc.confirm.needHelp")}</span>
-              <a className="text-body-sm font-bold text-brand-red" href={telHref(phone)}>
-                {phone}
-              </a>
-            </div>
-
-            <a
-              href={telHref(phone)}
-              aria-label={t("calc.confirm.callUs")}
-              className="grid size-10 place-items-center rounded-full bg-surface-page text-brand-red"
-            >
-              <IconPhone />
-            </a>
-          </div>
-        ) : null}
-      </div>
-
-      {/* The five chips the result frames share. Everything before this screen
-          has been answered, so only the last one is current. */}
-      <ol className="flex gap-4 overflow-x-auto px-4 lg:gap-8 lg:px-12">
-        {TABS.map((key, position) => {
-          const current = position === TABS.length - 1;
-
-          return (
-            <li
-              key={key}
-              aria-current={current ? "step" : undefined}
-              className={`flex shrink-0 items-center gap-2 border-b pb-3 ${
-                current ? "border-brand-red" : "border-transparent"
-              }`}
-            >
-              <span
-                className={`grid size-6 place-items-center rounded-full text-caption font-bold ${
-                  current ? "bg-brand-red text-text-on-brand" : "bg-success text-text-on-brand"
-                }`}
-                aria-hidden="true"
-              >
-                {current ? position + 1 : <IconCheck />}
-              </span>
-
-              <span
-                className={`text-body-sm font-semibold ${
-                  current ? "text-text-strong" : "text-text-default"
-                }`}
-              >
-                {t(key)}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-    </header>
-  );
-}
-
-/** The design's field: a 44px sunken box with no border, not the wizard's outlined input. */
+/** The design's field: a 44px sunken box with a hairline, not the wizard's white input. */
 const fieldClass =
-  "h-11 w-full rounded-md bg-surface-page px-4 text-body text-text-strong " +
+  "h-11 w-full rounded-md border border-border-subtle bg-surface-page px-4 text-body-sm text-text-strong " +
   "placeholder:text-text-faint focus-visible:outline-2 focus-visible:outline-offset-2 " +
   "focus-visible:outline-brand-yellow";
 
@@ -836,26 +669,6 @@ function TextField({
   );
 }
 
-function SummaryRow({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub?: string | undefined;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-caption font-semibold text-text-faint">{label}</dt>
-      <dd className="flex flex-col gap-1">
-        <span className="text-body-sm font-semibold text-text-strong">{value}</span>
-        {sub ? <span className="text-caption text-text-default">{sub}</span> : null}
-      </dd>
-    </div>
-  );
-}
-
 function Notice({ children }: { children: ReactNode }) {
   return (
     <p className="rounded-xl border border-border-subtle bg-surface-card px-6 py-5 text-body text-text-default">
@@ -878,22 +691,6 @@ const stroke = {
   strokeLinejoin: "round" as const,
   "aria-hidden": true,
 };
-
-function IconPhone() {
-  return (
-    <svg {...stroke} width="18" height="18" viewBox="0 0 24 24">
-      <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" />
-    </svg>
-  );
-}
-
-function IconCheck() {
-  return (
-    <svg {...stroke} width="14" height="14" viewBox="0 0 24 24">
-      <path d="m20 6-11 11-5-5" />
-    </svg>
-  );
-}
 
 function IconShield() {
   return (

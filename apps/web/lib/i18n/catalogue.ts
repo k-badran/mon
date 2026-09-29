@@ -136,7 +136,7 @@ export const MESSAGES = {
   "calc.step.scope": { de: "Umfang", en: "Scope", ar: "النطاق", tr: "Kapsam" },
   "calc.step.schedule": { de: "Termin", en: "Date", ar: "الموعد", tr: "Tarih" },
   "calc.step.contact": { de: "Kontakt", en: "Contact", ar: "التواصل", tr: "İletişim" },
-  "calc.progress": { de: "Fortschritt", en: "Progress", ar: "التقدّم", tr: "İlerleme" },
+  "calc.progress": { de: "Fortschritt", en: "Wizard progress", ar: "التقدّم", tr: "İlerleme" },
   "calc.whichService": {
     de: "Welche Leistung brauchst du?",
     en: "Which service do you need?",
@@ -348,6 +348,104 @@ export const MESSAGES = {
     de: "Mein Profil", en: "My Profile", ar: "ملفي الشخصي", tr: "Profilim",
   },
 
+  // ── Auth: reset, confirm and one-time code ──────────────────────────
+  "auth.forgotTitle": {
+    de: "Passwort vergessen", en: "Forgot password", ar: "نسيت كلمة السر", tr: "Şifremi unuttum",
+  },
+  "auth.forgotSub": {
+    de: "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.", en: "Enter your email address and we'll send you a reset link.", ar: "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.", tr: "E-posta adresini gir, sıfırlama bağlantısı gönderelim.",
+  },
+  "auth.forgotSubmit": {
+    de: "Link senden", en: "Send link", ar: "إرسال الرابط", tr: "Bağlantı gönder",
+  },
+  "auth.forgotSending": {
+    de: "Wird gesendet…", en: "Sending…", ar: "جارٍ الإرسال…", tr: "Gönderiliyor…",
+  },
+  "auth.forgotSent": {
+    de: "Falls ein Konto zu dieser Adresse gehört, ist ein Link auf dem Weg. Prüfe auch den Spam-Ordner.", en: "If an account exists for that address, a link is on its way. Check your spam folder too.", ar: "إذا كان هناك حساب مرتبط بهذا العنوان، فالرابط في الطريق. تحقّق من مجلد السبام أيضاً.", tr: "Bu adrese ait bir hesap varsa bağlantı yolda. Spam klasörünü de kontrol et.",
+  },
+  "auth.backToLogin": {
+    de: "Zurück zur Anmeldung", en: "Back to sign in", ar: "رجوع لتسجيل الدخول", tr: "Girişe dön",
+  },
+  "auth.resetTitle": {
+    de: "Neues Passwort wählen", en: "Choose a new password", ar: "اختر كلمة سر جديدة", tr: "Yeni şifre seç",
+  },
+  "auth.resetSub": {
+    de: "Wähle ein neues Passwort für dein Konto.", en: "Pick a new password for your account.", ar: "اختر كلمة سر جديدة لحسابك.", tr: "Hesabın için yeni bir şifre belirle.",
+  },
+  "auth.resetSubmit": {
+    de: "Passwort speichern", en: "Save password", ar: "حفظ كلمة السر", tr: "Şifreyi kaydet",
+  },
+  "auth.resetSaving": {
+    de: "Wird gespeichert…", en: "Saving…", ar: "جارٍ الحفظ…", tr: "Kaydediliyor…",
+  },
+  "auth.resetDone": {
+    de: "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden.", en: "Your password has been changed. You can sign in now.", ar: "تم تغيير كلمة السر. بتقدر تسجّل دخول هلق.", tr: "Şifren değiştirildi. Şimdi giriş yapabilirsin.",
+  },
+  "auth.confirmPassword": {
+    de: "Passwort bestätigen", en: "Confirm password", ar: "تأكيد كلمة السر", tr: "Şifreyi onayla",
+  },
+  "auth.passwordMismatch": {
+    de: "Die Passwörter stimmen nicht überein.", en: "The passwords do not match.", ar: "كلمتا السر غير متطابقتين.", tr: "Şifreler eşleşmiyor.",
+  },
+  "auth.linkInvalid": {
+    de: "Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen an.", en: "This link is invalid or has expired. Request a new one.", ar: "هذا الرابط غير صالح أو منتهي. اطلب رابطاً جديداً.", tr: "Bu bağlantı geçersiz veya süresi dolmuş. Yenisini talep et.",
+  },
+  "auth.linkMissing": {
+    de: "Es fehlt ein Token. Öffne den Link direkt aus der E-Mail.", en: "The token is missing. Open the link straight from the email.", ar: "الرمز مفقود. افتح الرابط من الإيميل مباشرة.", tr: "Belirteç eksik. Bağlantıyı doğrudan e-postadan aç.",
+  },
+  "auth.verifyTitle": {
+    de: "E-Mail bestätigen", en: "Confirm your email", ar: "تأكيد البريد الإلكتروني", tr: "E-postanı onayla",
+  },
+  "auth.verifyChecking": {
+    de: "Wird bestätigt…", en: "Confirming…", ar: "جارٍ التأكيد…", tr: "Onaylanıyor…",
+  },
+  "auth.verifyDone": {
+    de: "Deine E-Mail-Adresse ist bestätigt. Vielen Dank.", en: "Your email address is confirmed. Thank you.", ar: "تم تأكيد بريدك الإلكتروني. شكراً لك.", tr: "E-posta adresin onaylandı. Teşekkürler.",
+  },
+  "auth.verifyResend": {
+    de: "Bestätigungslink erneut senden", en: "Resend confirmation link", ar: "إعادة إرسال رابط التأكيد", tr: "Onay bağlantısını yeniden gönder",
+  },
+  "auth.verifySent": {
+    de: "Wir haben dir einen neuen Link geschickt.", en: "We've sent you a new link.", ar: "بعتنالك رابط جديد.", tr: "Sana yeni bir bağlantı gönderdik.",
+  },
+  "auth.otpTitle": {
+    de: "Mit Code anmelden", en: "Sign in with a code", ar: "الدخول برمز", tr: "Kod ile giriş",
+  },
+  "auth.otpSub": {
+    de: "Wir senden dir einen sechsstelligen Code per E-Mail — kein Passwort nötig.", en: "We'll email you a six-digit code — no password needed.", ar: "نبعتلك رمز من ٦ أرقام على الإيميل — بدون كلمة سر.", tr: "Sana e-postayla altı haneli bir kod göndereceğiz — şifre gerekmez.",
+  },
+  "auth.otpRequest": {
+    de: "Code senden", en: "Send code", ar: "إرسال الرمز", tr: "Kod gönder",
+  },
+  "auth.otpSent": {
+    de: "Falls ein Konto zu dieser Adresse gehört, ist ein Code auf dem Weg.", en: "If an account exists for that address, a code is on its way.", ar: "إذا كان هناك حساب مرتبط بهذا العنوان، فالرمز في الطريق.", tr: "Bu adrese ait bir hesap varsa kod yolda.",
+  },
+  "auth.otpCode": {
+    de: "Sechsstelliger Code", en: "Six-digit code", ar: "الرمز المكوّن من ٦ أرقام", tr: "Altı haneli kod",
+  },
+  "auth.otpVerify": {
+    de: "Anmelden", en: "Sign in", ar: "تسجيل الدخول", tr: "Giriş yap",
+  },
+  "auth.otpVerifying": {
+    de: "Wird geprüft…", en: "Checking…", ar: "جارٍ التحقّق…", tr: "Kontrol ediliyor…",
+  },
+  "auth.otpInvalid": {
+    de: "Dieser Code ist falsch oder abgelaufen.", en: "That code is wrong or has expired.", ar: "هذا الرمز خطأ أو منتهي.", tr: "Bu kod yanlış veya süresi dolmuş.",
+  },
+  "auth.otpChangeEmail": {
+    de: "Andere E-Mail-Adresse verwenden", en: "Use a different email", ar: "استخدام بريد آخر", tr: "Başka bir e-posta kullan",
+  },
+  "auth.otpLink": {
+    de: "Stattdessen Code per E-Mail", en: "Email me a code instead", ar: "أرسل لي رمزاً بدلاً من ذلك", tr: "Bunun yerine kod gönder",
+  },
+  "auth.passwordLink": {
+    de: "Mit Passwort anmelden", en: "Sign in with a password", ar: "الدخول بكلمة السر", tr: "Şifre ile giriş",
+  },
+  "auth.otpNotDelivered": {
+    de: "Hinweis: Der Mailversand ist deaktiviert (MAIL_DRIVER=log) — die Nachricht wurde nur lokal gespeichert.", en: "Note: mail sending is disabled (MAIL_DRIVER=log) — the message was only recorded locally.", ar: "ملاحظة: إرسال الإيميل معطّل (MAIL_DRIVER=log) — الرسالة انحفظت محلياً بس.", tr: "Not: e-posta gönderimi kapalı (MAIL_DRIVER=log) — mesaj yalnızca yerel olarak kaydedildi.",
+  },
+
   // ── Orders ──────────────────────────────────────────────────────────
   "orders.title": {
     de: "Meine Aufträge", en: "My Orders", ar: "طلباتي", tr: "Siparişlerim",
@@ -428,10 +526,10 @@ export const MESSAGES = {
     tr: "Yorumlar yüklenemedi.",
   },
   "reviews.adminReply": {
-    de: "Antwort von UmzugPlus:",
-    en: "Reply from UmzugPlus:",
-    ar: "ردّ من UmzugPlus:",
-    tr: "UmzugPlus'tan yanıt:",
+    de: "Antwort von m.on:",
+    en: "Reply from m.on:",
+    ar: "ردّ من m.on:",
+    tr: "m.on'tan yanıt:",
   },
   "reviews.stars": {
     de: "{rating} von 5 Sternen",
@@ -502,7 +600,7 @@ export const MESSAGES = {
     de: "Ja, sperren", en: "Yes, block", ar: "نعم، احظر", tr: "Evet, engelle",
   },
   // ── Roles ───────────────────────────────────────────────────────────
-  // One entry per role in `@umzugplus/core`. A role without a label here
+  // One entry per role in `@mon/core`. A role without a label here
   // renders as its raw key on the admin screen, which is how the removed
   // "staff" entry was spotted.
   "admin.role.customer": { de: "Kunde", en: "Customer", ar: "عميل", tr: "Müşteri" },
@@ -647,7 +745,7 @@ export const MESSAGES = {
 
   // ── Chat ────────────────────────────────────────────────────────────
   "chat.title": {
-    de: "UmzugPlus-Assistent", en: "UmzugPlus Assistant", ar: "مساعد UmzugPlus", tr: "UmzugPlus Asistanı",
+    de: "m.on-Assistent", en: "m.on Assistant", ar: "مساعد m.on", tr: "m.on Asistanı",
   },
   "chat.subtitle": {
     de: "Antwortet meist sofort",
@@ -796,6 +894,24 @@ export const MESSAGES = {
   "site.section.home": { de: "Startseite", en: "Home page", ar: "الصفحة الرئيسية", tr: "Ana sayfa" },
   "site.section.auth": { de: "Anmeldeseite", en: "Login page", ar: "صفحة الدخول", tr: "Giriş sayfası" },
   "site.section.footer": { de: "Fußzeile", en: "Footer", ar: "التذييل", tr: "Alt bilgi" },
+  // One per `content_blocks` section the seeds create. Without them the
+  // editor printed the raw key ("site.section.service-moving") as the heading.
+  "site.section.service-moving": { de: "Umzug", en: "Moving page", ar: "صفحة النقل", tr: "Taşınma sayfası" },
+  "site.section.service-cleaning": { de: "Reinigung", en: "Cleaning page", ar: "صفحة التنظيف", tr: "Temizlik sayfası" },
+  "site.section.service-disposal": { de: "Entrümpelung", en: "Clearance page", ar: "صفحة الإخلاء", tr: "Boşaltma sayfası" },
+  "site.section.page-about": { de: "Über uns", en: "About us", ar: "من نحن", tr: "Hakkımızda" },
+  "site.section.page-blog": { de: "Ratgeber", en: "Guide / blog", ar: "المدوّنة", tr: "Rehber / blog" },
+  "site.section.page-contact": { de: "Kontakt", en: "Contact", ar: "اتصل بنا", tr: "İletişim" },
+  "site.section.page-faq": { de: "FAQ", en: "FAQ page", ar: "صفحة الأسئلة الشائعة", tr: "SSS sayfası" },
+  "site.section.page-for-business": { de: "Für Unternehmen", en: "For business", ar: "للشركات", tr: "Kurumsal" },
+  "site.section.page-how-it-works": { de: "So funktioniert's", en: "How it works", ar: "كيف نعمل", tr: "Nasıl çalışır" },
+  "site.section.page-partner": { de: "Partner werden", en: "Become a partner", ar: "كن شريكًا", tr: "Partner olun" },
+  "site.section.page-pricing": { de: "Preise", en: "Pricing", ar: "الأسعار", tr: "Fiyatlar" },
+  "site.section.page-reviews": { de: "Kundenstimmen", en: "Reviews", ar: "آراء العملاء", tr: "Müşteri yorumları" },
+  "site.section.page-imprint": { de: "Impressum", en: "Imprint", ar: "بيانات الناشر", tr: "Künye" },
+  "site.section.page-privacy": { de: "Datenschutz", en: "Privacy", ar: "الخصوصية", tr: "Gizlilik" },
+  "site.section.page-terms": { de: "AGB", en: "Terms", ar: "الشروط والأحكام", tr: "Şartlar" },
+  "site.section.page-legal-cookie": { de: "Cookies", en: "Cookies", ar: "ملفات تعريف الارتباط", tr: "Çerezler" },
   "site.published": { de: "Veröffentlicht", en: "Published", ar: "منشور", tr: "Yayında" },
   "site.saved": {
     de: "Gespeichert — auf der Website in bis zu einer Minute sichtbar.",
@@ -817,6 +933,39 @@ export const MESSAGES = {
     en: "Copy is maintained per language.",
     ar: "النصوص تُحرَّر لكل لغة على حدة.",
     tr: "Metinler her dil için ayrı tutulur.",
+  },
+  "site.image.hint": {
+    de: "Ein Pfad unter /images/ oder eine https://-Adresse. Fotos gelten für alle Sprachen.",
+    en: "A path under /images/ or an https:// address. Photos apply to every language.",
+    ar: "مسار ضمن ‎/images/‎ أو عنوان يبدأ بـ ‎https://‎. تسري الصور على جميع اللغات.",
+    tr: "/images/ altında bir yol veya https:// adresi. Fotoğraflar tüm diller için geçerlidir.",
+  },
+  "site.image.empty": {
+    de: "Kein Foto gesetzt — die Seite zeigt ihr eigenes oder keins.",
+    en: "No photo set — the page shows its own, or none.",
+    ar: "لا توجد صورة — تعرض الصفحة صورتها الافتراضية أو لا شيء.",
+    tr: "Fotoğraf yok — sayfa kendi fotoğrafını gösterir ya da hiç göstermez.",
+  },
+  "site.image.invalid": {
+    de: "Nur Pfade unter /images/ oder https://-Adressen sind erlaubt.",
+    en: "Only paths under /images/ or https:// addresses are allowed.",
+    ar: "يُسمح فقط بمسارات ضمن ‎/images/‎ أو بعناوين ‎https://‎.",
+    tr: "Yalnızca /images/ altındaki yollar veya https:// adresleri kabul edilir.",
+  },
+  "site.image.broken": {
+    de: "Das Bild konnte nicht geladen werden.",
+    en: "The image could not be loaded.",
+    ar: "تعذّر تحميل الصورة.",
+    tr: "Görsel yüklenemedi.",
+  },
+  "site.image.reset": {
+    de: "Standardfoto", en: "Default photo", ar: "الصورة الافتراضية", tr: "Varsayılan fotoğraf",
+  },
+  "site.image.wasReset": {
+    de: "Das Standardfoto ist wiederhergestellt.",
+    en: "The default photo has been restored.",
+    ar: "أُعيدت الصورة الافتراضية.",
+    tr: "Varsayılan fotoğraf geri yüklendi.",
   },
   "site.loadFailed": {
     de: "Die Website-Einstellungen konnten nicht geladen werden.",
@@ -1532,10 +1681,10 @@ export const MESSAGES = {
 
   // Two placeholders, so each language keeps its own word order around the links.
   "calc.confirm.consent": {
-    de: "Ich akzeptiere die {terms} und die {privacy} von UmzugPlus.",
-    en: "I agree to the {terms} and {privacy} of UmzugPlus.",
-    ar: "أوافق على {terms} و{privacy} الخاصة بـ UmzugPlus.",
-    tr: "UmzugPlus'ın {terms} ve {privacy} belgelerini kabul ediyorum.",
+    de: "Ich akzeptiere die {terms} und die {privacy} von m.on.",
+    en: "I agree to the {terms} and {privacy} of m.on.",
+    ar: "أوافق على {terms} و{privacy} الخاصة بـ m.on.",
+    tr: "m.on'ın {terms} ve {privacy} belgelerini kabul ediyorum.",
   },
   "calc.confirm.terms": {
     de: "AGB", en: "Terms of Service",
@@ -1849,6 +1998,123 @@ export const MESSAGES = {
     ar: "اكتمل {percent}٪", tr: "%{percent} tamamlandı",
   },
 
+  // The wizard's buttons, worded per screen as the frames word them (3:622 … 3:2018).
+  "calc.nextStep": { de: "Nächster Schritt", en: "Next Step", ar: "الخطوة التالية", tr: "Sonraki adım" },
+  /** The fourth node of the five-node rail (3:653); the ten-segment rail keeps the short name. */
+  "calc.node.volume": {
+    de: "Volumenschätzung", en: "Volume Estimate", ar: "تقدير الحجم", tr: "Hacim tahmini",
+  },
+  "calc.cta.continue": {
+    de: "Speichern & weiter", en: "Save & Continue", ar: "حفظ ومتابعة", tr: "Kaydet ve devam et",
+  },
+  "calc.cta.toSpecial": {
+    de: "Weiter zu Sondergegenständen", en: "Continue to Special Items",
+    ar: "المتابعة إلى القطع الخاصة", tr: "Özel eşyalara geç",
+  },
+  "calc.cta.toPhotos": {
+    de: "Weiter zu den Fotos", en: "Continue to Photos",
+    ar: "المتابعة إلى الصور", tr: "Fotoğraflara geç",
+  },
+  "calc.cta.toDates": {
+    de: "Weiter zum Termin", en: "Continue to Dates",
+    ar: "المتابعة إلى المواعيد", tr: "Tarihlere geç",
+  },
+  "calc.cta.toReview": {
+    de: "Endgültiges Angebot prüfen", en: "Review Final Offer",
+    ar: "مراجعة العرض النهائي", tr: "Son teklifi incele",
+  },
+  "calc.cta.back": {
+    de: "Zurück zum vorherigen Schritt", en: "Back to Previous Step",
+    ar: "العودة إلى الخطوة السابقة", tr: "Önceki adıma dön",
+  },
+
+  // The two result screens (3:2348 instant quote, 3:2496 pending review).
+  "calc.tab.pending": {
+    de: "Vorläufige Schätzung", en: "Pending Estimate", ar: "تقدير قيد المراجعة", tr: "Bekleyen tahmin",
+  },
+  "calc.quote.badge": {
+    de: "Sofortpreis — jetzt buchen", en: "Instant Price — Book Now",
+    ar: "سعر فوري — احجز الآن", tr: "Anında fiyat — Hemen rezervasyon yap",
+  },
+  "calc.quote.title": {
+    de: "Wir haben Ihren besten Preis berechnet!", en: "We calculated your best rate!",
+    ar: "لقد حسبنا لك أفضل سعر!", tr: "Sizin için en iyi fiyatı hesapladık!",
+  },
+  "calc.quote.body": {
+    de: "Garantierter Preis auf Basis Ihrer aktuellen Angaben. Keine versteckten Gebühren oder Überraschungen. Der Preis gilt bis {date}.",
+    en: "Guaranteed price based on your current entries. No hidden fees or surprise charges. Price held until {date}.",
+    ar: "سعر مضمون بناءً على بياناتك الحالية. لا رسوم خفية ولا مفاجآت. السعر ثابت حتى {date}.",
+    tr: "Mevcut bilgilerinize dayalı garantili fiyat. Gizli ücret veya sürpriz masraf yok. Fiyat {date} tarihine kadar geçerlidir.",
+  },
+  "calc.quote.accept": {
+    de: "Annehmen & jetzt buchen", en: "Accept & Book Now", ar: "قبول والحجز الآن", tr: "Kabul et ve rezervasyon yap",
+  },
+  "calc.quote.save": { de: "Angebot speichern", en: "Save Quote", ar: "حفظ العرض", tr: "Teklifi kaydet" },
+  /** There is no PDF endpoint; the button opens the print dialog, which saves one. */
+  "calc.quote.pdf": {
+    de: "Als PDF speichern", en: "Download as PDF", ar: "تنزيل بصيغة PDF", tr: "PDF olarak indir",
+  },
+  "calc.quote.breakdown": {
+    de: "Detaillierte Preisaufstellung", en: "Itemized Price Breakdown",
+    ar: "تفصيل السعر", tr: "Ayrıntılı fiyat dökümü",
+  },
+  "calc.quote.total": {
+    de: "Garantierter Gesamtbetrag", en: "Total Guaranteed Amount",
+    ar: "المبلغ الإجمالي المضمون", tr: "Garantili toplam tutar",
+  },
+  "calc.pending.badge": {
+    de: "Schätzung — Prüfung ausstehend", en: "Estimate — Pending Review",
+    ar: "تقدير — بانتظار المراجعة", tr: "Tahmin — İnceleme bekliyor",
+  },
+  "calc.pending.title": {
+    de: "Wir erstellen Ihr individuelles Angebot", en: "We are preparing your custom quote",
+    ar: "نحن نُعدّ عرضك المخصّص", tr: "Size özel teklifinizi hazırlıyoruz",
+  },
+  "calc.pending.estimate": { de: "(Schätzung)", en: "(estimate)", ar: "(تقديري)", tr: "(tahmini)" },
+  "calc.pending.body": {
+    de: "Einige Ihrer Angaben muss unser Dispositionsteam kurz von Hand prüfen, bevor wir einen Preis garantieren. Der Betrag oben ist unsere aktuelle Schätzung.",
+    en: "Some of your answers need a manual check by our dispatch team before we can guarantee a price. The figure above is our current estimate.",
+    ar: "تحتاج بعض إجاباتك إلى تحقّق يدوي من فريق التنسيق لدينا قبل أن نضمن السعر. المبلغ أعلاه هو تقديرنا الحالي.",
+    tr: "Bir fiyatı garanti edebilmemiz için bazı yanıtlarınızın sevk ekibimiz tarafından elle kontrol edilmesi gerekiyor. Yukarıdaki tutar güncel tahminimizdir.",
+  },
+  "calc.pending.whyTitle": {
+    de: "Warum wird das geprüft?", en: "Why is this pending review?",
+    ar: "لماذا يخضع هذا للمراجعة؟", tr: "Bu neden inceleniyor?",
+  },
+  "calc.pending.whyBody": {
+    de: "Unsere Umzugsexperten prüfen die folgenden Punkte, damit es am Umzugstag keine Überraschungen gibt. Den endgültigen Preis bestätigen wir innerhalb eines Werktags.",
+    en: "Our moving experts check the points below so there are no surprise complications on your moving day. We confirm the final price within one working day.",
+    ar: "يتحقّق خبراء النقل لدينا من النقاط أدناه حتى لا تحدث مفاجآت يوم النقل. نؤكّد السعر النهائي خلال يوم عمل واحد.",
+    tr: "Taşınma gününde sürpriz yaşanmaması için taşıma uzmanlarımız aşağıdaki noktaları kontrol eder. Nihai fiyatı bir iş günü içinde onaylarız.",
+  },
+  "calc.pending.timeline": {
+    de: "Nächste Schritte", en: "Next Steps Timeline", ar: "الخطوات التالية", tr: "Sonraki adımlar",
+  },
+  "calc.pending.step1": {
+    de: "Schätzung berechnet", en: "Estimate Calculated", ar: "تم حساب التقدير", tr: "Tahmin hesaplandı",
+  },
+  "calc.pending.step1Sub": { de: "Gerade erledigt", en: "Done just now", ar: "تمّ للتو", tr: "Az önce tamamlandı" },
+  "calc.pending.step2": {
+    de: "Prüfung durch Experten", en: "Expert Assessment", ar: "تقييم الخبراء", tr: "Uzman değerlendirmesi",
+  },
+  "calc.pending.step2Sub": {
+    de: "In Bearbeitung (innerhalb 24 h)", en: "In progress (within 24h)",
+    ar: "قيد التنفيذ (خلال 24 ساعة)", tr: "Devam ediyor (24 saat içinde)",
+  },
+  "calc.pending.step3": {
+    de: "Endgültiges Angebot", en: "Final Quote Sent", ar: "إرسال العرض النهائي", tr: "Nihai teklif gönderildi",
+  },
+  "calc.pending.step3Sub": { de: "Per E-Mail", en: "By email", ar: "عبر البريد الإلكتروني", tr: "E-posta ile" },
+  "calc.pending.step4": { de: "Sicher buchen", en: "Safe Booking", ar: "حجز آمن", tr: "Güvenli rezervasyon" },
+  "calc.pending.step4Sub": {
+    de: "Termin sofort sichern", en: "Secure your date instantly", ar: "احجز موعدك فورًا", tr: "Tarihinizi hemen ayırtın",
+  },
+  /** Signing up with the quote id adopts the quote, which gives dispatch a way to reply. */
+  "calc.pending.save": {
+    de: "Schätzung speichern & Konto erstellen", en: "Save Estimate & Create Account",
+    ar: "حفظ التقدير وإنشاء حساب", tr: "Tahmini kaydet ve hesap oluştur",
+  },
+
   "common.skip": { de: "Überspringen", en: "Skip", ar: "تخطَّ", tr: "Atla" },
   "common.yes": { de: "Ja", en: "Yes", ar: "نعم", tr: "Evet" },
   "common.no": { de: "Nein", en: "No", ar: "لا", tr: "Hayır" },
@@ -1925,8 +2191,8 @@ export const MESSAGES = {
     tr: "Fiyatı netleştirmek için adres ve bilgileri girin.",
   },
   "calc.panel.guaranteeTitle": {
-    de: "UmzugPlus Garantie", en: "UmzugPlus Guarantee",
-    ar: "ضمان UmzugPlus", tr: "UmzugPlus Garantisi",
+    de: "m.on Garantie", en: "m.on Guarantee",
+    ar: "ضمان m.on", tr: "m.on Garantisi",
   },
   "calc.panel.guaranteeBody": {
     de: "Keine versteckten Kosten. Transportversicherung inklusive.",
@@ -2069,7 +2335,7 @@ export const MESSAGES = {
     ar: "تم تطبيق الحد الأدنى لقيمة الطلب", tr: "Asgari sipariş tutarı uygulandı",
   },
 
-  "brand.name": { de: "UmzugPlus", en: "UmzugPlus", ar: "UmzugPlus", tr: "UmzugPlus" },
+  "brand.name": { de: "m.on", en: "m.on", ar: "m.on", tr: "m.on" },
   // The wordmark is two runs: the lead in ink, the accent in brand red.
   "brand.nameLead": { de: "Umzug", en: "Umzug", ar: "Umzug", tr: "Umzug" },
   "brand.nameAccent": { de: "Plus", en: "Plus", ar: "Plus", tr: "Plus" },
@@ -2079,6 +2345,25 @@ export const MESSAGES = {
   "nav.faq": {
     de: "FAQ", en: "FAQ", ar: "الأسئلة الشائعة", tr: "SSS",
   },
+  // FAQ topics, one per key in FAQ_CATEGORIES (@mon/core). Interface labels
+  // rather than CMS rows: the set of topics is fixed in code, so a CMS row
+  // could rename a topic but never add one. `all` backs the "all topics" chip
+  // when the homepage's `faq.all` row is missing.
+  "faq.category.all": { de: "Alle", en: "All", ar: "الكل", tr: "Tümü" },
+  "faq.category.insurance": {
+    de: "Versicherung", en: "Insurance", ar: "التأمين", tr: "Sigorta",
+  },
+  "faq.category.billing": {
+    de: "Abrechnung", en: "Billing", ar: "الفوترة", tr: "Faturalandırma",
+  },
+  "faq.category.booking": {
+    de: "Buchung", en: "Booking", ar: "الحجز", tr: "Rezervasyon",
+  },
+  "faq.category.cleaning": {
+    de: "Reinigung", en: "Cleaning", ar: "التنظيف", tr: "Temizlik",
+  },
+  "faq.category.moving": { de: "Umzug", en: "Moving", ar: "النقل", tr: "Taşınma" },
+  "faq.category.general": { de: "Allgemein", en: "General", ar: "عام", tr: "Genel" },
   "nav.contact": {
     de: "Kontakt", en: "Contact", ar: "اتصل بنا", tr: "İletişim",
   },
@@ -2099,6 +2384,21 @@ export const MESSAGES = {
   },
   "nav.partner": {
     de: "Partner werden", en: "Become a Partner", ar: "كن شريكاً", tr: "Ortak Ol",
+  },
+  /**
+   * The black pill of the new nav-bar (86:5213) and the white one of the
+   * footer (101:163). Rendered uppercase, as drawn; Arabic has no case.
+   */
+  "nav.getApp": {
+    de: "App holen", en: "Get app", ar: "حمّل التطبيق", tr: "Uygulamayı indir",
+  },
+  /** The nav-bar's shopping cart (86:5339), which opens the calculator. */
+  "nav.cart": {
+    de: "Ihr Angebot", en: "Your quote", ar: "عرض السعر الخاص بك", tr: "Teklifiniz",
+  },
+  /** Names the footer's link row for screen readers, apart from the header's. */
+  "footer.navLabel": {
+    de: "Fußzeilen-Navigation", en: "Footer navigation", ar: "روابط التذييل", tr: "Alt bilgi gezinmesi",
   },
 
   // ── Errors ──────────────────────────────────────────────────────────

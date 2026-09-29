@@ -1,6 +1,6 @@
-# UmzugPlus — Monorepo
+# m.on — Monorepo
 
-A pnpm + Turborepo monorepo containing the UmzugPlus backend API and web
+A pnpm + Turborepo monorepo containing the m.on backend API and web
 frontend: online quotes, booking and dispatch for moving, disposal and cleaning
 services in North Rhine-Westphalia.
 
@@ -32,7 +32,6 @@ services in North Rhine-Westphalia.
 │   ├── client/             # Typed SDK the frontend calls the API with
 │   ├── core/               # Pure domain logic: pricing, dates, holidays, availability
 │   ├── db/                 # Drizzle schema, client, migrations, seed
-│   ├── eslint-config/      # Shared ESLint configuration
 │   └── typescript-config/  # Shared tsconfig bases
 │
 ├── docker-compose.dev.yml  # Local PostgreSQL + Redis
@@ -52,12 +51,12 @@ where all 51 database writes ran client-side against a public key.
 Browser ──HTTPS──► Express API ──► PostgreSQL
                         │
                         ├──► Redis      (rate limits, cache, pub/sub)
-                        └──► Resend / Anthropic / Geocoding
+                        └──► SMTP / Anthropic / Geocoding
 ```
 
 ### Packages
 
-#### `packages/core` — `@umzugplus/core`
+#### `packages/core` — `@mon/core`
 
 Pure, dependency-free domain logic. Every function is deterministic and unit
 tested, which is what makes a disputed invoice reproducible.
@@ -70,7 +69,7 @@ tested, which is what makes a disputed invoice reproducible.
 | `availability` | Day classification: past, too soon, closed, holiday, blocked, full, free. |
 | `pricing` | The single pricing engine. One implementation, server-side only. |
 
-#### `packages/client` — `@umzugplus/client`
+#### `packages/client` — `@mon/client`
 
 The typed SDK. The frontend calls the Express API **directly** through this —
 there are deliberately no Next.js route handlers proxying the backend, which
@@ -89,10 +88,10 @@ It attaches the access token, refreshes once transparently on a 401
 tripped), times requests out, and throws a typed `ApiError` carrying the API's
 machine-readable `code` — callers branch on `code`, never on message text.
 
-Request and response types come from `@umzugplus/core`, so a change to
+Request and response types come from `@mon/core`, so a change to
 `QuoteInput` breaks the frontend build rather than failing at runtime.
 
-#### `packages/auth` — `@umzugplus/auth`
+#### `packages/auth` — `@mon/auth`
 
 - `hashPassword` / `verifyPassword` — Argon2id at the OWASP 2024 baseline,
   with transparent re-hashing when parameters are strengthened.
@@ -100,9 +99,9 @@ Request and response types come from `@umzugplus/core`, so a change to
   payload shape validated after the signature.
 - `generateRefreshToken` — 256 bits of CSPRNG entropy, stored as a SHA-256 hash.
 
-#### `packages/db` — `@umzugplus/db`
+#### `packages/db` — `@mon/db`
 
-Drizzle schema across 19 tables. Money is `numeric(10,2)`; booking days are
+Drizzle schema across 23 tables. Money is `numeric(10,2)`; booking days are
 `date`; order status, roles and service types are Postgres enums so an invalid
 value is a write error rather than a silent typo.
 
@@ -127,6 +126,12 @@ Base URL `http://localhost:4000`. All errors share one shape:
 | `GET  /me` | Bearer | The verified identity from the token. |
 | `GET  /sessions` | Bearer | List live sessions, so a user can see their devices. |
 | `POST /change-password` | Bearer | Change password and revoke all other sessions. |
+| `POST /request-password-reset` | — | Email a reset link. Always answers `202`, even for an unknown address — a different answer would make this an account-enumeration oracle. |
+| `POST /confirm-password-reset` | — | Set a new password from the link's token and revoke every session. Does not sign the caller in: they proved control of the mailbox, not of the account. |
+| `POST /send-verification` | Bearer | Send (or re-send) the address-confirmation link. `409` if already confirmed. |
+| `POST /verify-email` | — | Confirm an address from the link. Unauthenticated on purpose — the link is opened from a mail client, often on a device that has never signed in. |
+| `POST /otp/request` | — | Email a six-digit login code, valid 10 minutes. Same `202` for every address, for the same reason as the reset. |
+| `POST /otp/verify` | — | Exchange a correct code for a full session. Five wrong guesses kill the code, counted on the row rather than per IP. |
 
 ### Quotes — `/api/quotes`
 
@@ -170,6 +175,7 @@ Shared across instances via Redis, so limits cannot be multiplied by process cou
 | `chat` | 12 / min |
 | `quote` | 30 / min |
 | `geocoding` | 30 / min |
+| `upload` (dashboard photo uploads) | 30 / 10 min |
 | global | 300 / min |
 
 ---
@@ -231,12 +237,18 @@ openssl rand -base64 48   # JWT_REFRESH_SECRET
 pnpm db:up
 ```
 
-Postgres listens on `5432` and Redis on `6390`.
+Postgres listens on `POSTGRES_PORT` (default `5432`) and Redis on `6390`.
 
-> **Ports on this machine.** Another project already holds `3000` (nginx) and
-> `6379` (Redis), so this project uses `3200` for the web app and `6390` for
-> Redis. `WEB_ORIGIN` in `.env` must always match the web app's actual origin,
-> or the browser blocks every API call with a CORS error.
+> **Ports on this machine.** Other projects already hold `3000` (nginx), `6379`
+> (Redis) and `5432` (a Homebrew Postgres serving other databases). So this
+> project uses `3200` for the web app, `6390` for Redis, and `POSTGRES_PORT=5433`
+> in `.env` for its container — set it before `pnpm db:up`, and keep
+> `DATABASE_URL` in agreement with it. Two Postgres servers on one port fails at
+> container start with a bind error, which is the good case; the bad one is
+> connecting to the wrong server and migrating somebody else's database.
+>
+> `WEB_ORIGIN` in `.env` must always match the web app's actual origin, or the
+> browser blocks every API call with a CORS error.
 
 ### 4. Migrate
 
@@ -256,6 +268,28 @@ pnpm seed
 pnpm dev          # everything
 pnpm dev:api      # API only
 ```
+
+---
+
+## Keeping in sync with Figma
+
+The website is built from the M.io Figma file. `design/figma-sync.json` records
+which saved version of that file the code implements.
+
+```sh
+pnpm figma:check         # frames added, removed, moved or edited since that version
+pnpm figma:mark-synced   # after implementing them: record the current version
+```
+
+`figma:check` needs `FIGMA_TOKEN` (a Figma personal access token) in the root
+`.env`. Tokens expire, so an HTTP 403 means it is time for a new one. Whole-file
+reads are rate-limited per seat; on a View or Collab seat Figma allows only a
+few a month, and the script reports when the block lifts rather than waiting.
+Downloaded versions are cached in `.figma-cache/`.
+
+After changing copy seeds in `packages/db/src/*-content.ts`, apply them to an
+existing database with `pnpm --filter @mon/db seed:home --force` (add
+`--section=<name>` to limit it, `--prune` to drop rows the seed no longer has).
 
 ---
 
@@ -316,6 +350,139 @@ try {
 
 ---
 
+## Outbound email
+
+Mail goes out over SMTP through `@mon/mailer`. The package renders a
+template and hands the result to a transport; `MAIL_DRIVER` picks which one.
+
+| Driver | What it does |
+| --- | --- |
+| `log` | Writes each message to `MAIL_OUTBOX_DIR` as an openable `.html` file and sends nothing. The default outside production. |
+| `smtp` | Real delivery over a pooled TLS connection, with two retries on transient failures only. Required in production. |
+
+`log` is not a stub — it is what makes local work possible. Development needs no
+credentials, the test suite cannot email a customer by accident, and a network
+that blocks outbound SMTP stops being a blocker. It reports `delivered: false`
+so a caller can tell that nothing left the machine.
+
+### Templates
+
+Three so far — `otp`, `verify-email`, `password-reset` — each in German,
+English, Arabic and Turkish, with an obligatory plain-text alternative (an
+HTML-only message reads as bulk mail to every spam filter). Arabic renders
+right-to-left, while a one-time code stays `dir="ltr"` inside it: letting an RTL
+context reorder the digits hands the customer a code that does not work.
+
+Templates are registered in `packages/mailer/src/templates/registry.ts`, and
+`mailer.send` is generic over the key — asking for `otp` with a reset payload
+does not compile.
+
+### Setting it up with Namecheap Private Email
+
+1. **DNS first**, because it takes time to propagate. In Advanced DNS for the
+   sending domain, use *Auto-configure EMAIL records* → Private Email. That adds
+   the MX records and SPF. Add DKIM from the Private Email dashboard, and a
+   `_dmarc` TXT record of `v=DMARC1; p=none; rua=mailto:<your address>` —
+   tighten `p` once reports look clean. Without these, valid credentials still
+   produce mail that lands in spam.
+2. **Use an application password**, not the mailbox's master password.
+3. **Single-quote it in the env file.** These passwords routinely contain `#`,
+   which dotenv reads as the start of a comment and truncates. The symptom is an
+   authentication failure with a password that looks correct on screen.
+4. `MAIL_FROM` must be on the same domain as `SMTP_USER`, or SPF will not align
+   and the message is treated as spoofed.
+
+Host is `mail.privateemail.com`, port 465 with `SMTP_SECURE=true`, or 587 with
+`SMTP_SECURE=false`. Unencrypted connections are refused by the server.
+
+### Checking whether it works
+
+```bash
+GET  /api/admin/mail/status   # driver, and whether it can connect and authenticate
+POST /api/admin/mail/test     # sends a message with an inert 000000 code
+```
+
+Both need the `settings.write` permission. In production the config schema
+refuses to start at all when `MAIL_DRIVER=smtp` without a host, user and
+password — a deployment that boots and silently drops every password reset is
+worse than one that refuses to boot.
+
+**If sending times out locally**, check the port before suspecting the code:
+
+```bash
+nc -vz mail.privateemail.com 465
+```
+
+Most home and mobile networks block outbound 25, 465 and 587. There is no way
+around that from the client side — Private Email offers no alternative port — so
+verify real delivery from the server, and develop against `MAIL_DRIVER=log`.
+
+## Photo uploads
+
+Page photos are image content blocks; an editor can paste a path or URL, or,
+once S3 is configured, press **Upload photo** in *Website → Content*. The file
+goes to the API, which reads its type from the bytes (JPEG, PNG, WebP or AVIF
+only — SVG is refused because it can carry script), caps it at 8 MB, and writes
+it to `uploads/<yyyy>/<mm>/<uuid>.<ext>` with the detected `Content-Type` and
+`Cache-Control: public, max-age=31536000, immutable`. The returned URL fills the
+field; the editor then saves with ✓ as for a pasted URL.
+
+```bash
+GET  /api/site/uploads   # { enabled, maxBytes } — the dashboard hides the button when false
+POST /api/site/uploads   # multipart/form-data, one field "file" → 201 { url }
+```
+
+Both need `content.write`. Errors: 413 `PAYLOAD_TOO_LARGE`, 415
+`UNSUPPORTED_MEDIA_TYPE`, 503 `SERVICE_UNAVAILABLE` (the message names the
+missing variables). Every upload is written to the audit log as
+`site.image_uploaded`.
+
+Uploads are off until `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID` and
+`S3_SECRET_ACCESS_KEY` are all set. To set them up:
+
+1. **Create the bucket** in the region closest to visitors (e.g. `eu-central-1`).
+2. **Make `uploads/` publicly readable**, one of two ways:
+   - *CloudFront (preferred).* Keep *Block Public Access* on, create a
+     distribution with the bucket as an origin using Origin Access Control, and
+     set `S3_PUBLIC_BASE_URL` to the distribution's `https://…` URL (or your own
+     domain on it). Files are then cached near visitors and the bucket itself
+     stays private.
+   - *Bucket policy.* Turn off *Block public access* for bucket policies and add
+
+     ```json
+     { "Version": "2012-10-17", "Statement": [{
+         "Effect": "Allow", "Principal": "*", "Action": "s3:GetObject",
+         "Resource": "arn:aws:s3:::<bucket>/uploads/*" }] }
+     ```
+
+     Leave `S3_PUBLIC_BASE_URL` blank to use
+     `https://<bucket>.s3.<region>.amazonaws.com`.
+3. **Create an IAM user for the API** with only this policy, and put its access
+   key in the env file:
+
+   ```json
+   { "Version": "2012-10-17", "Statement": [{
+       "Effect": "Allow", "Action": "s3:PutObject",
+       "Resource": "arn:aws:s3:::<bucket>/uploads/*" }] }
+   ```
+
+   The API never reads, lists or deletes, so a leaked key can write under
+   `uploads/` and nothing else — not delete, not list, not touch the rest of the
+   bucket. Rotate it if it leaks: it could still overwrite a photo whose URL it
+   knows. Turning on bucket versioning makes such an overwrite recoverable.
+4. **No CORS rule is needed.** The browser sends the file to the API, not to the
+   bucket; that is also what lets the API check the bytes before anything is
+   stored.
+
+`S3_ENDPOINT` is only for an S3-compatible store (MinIO, R2); when it is set the
+client uses path-style addressing. Note that the site renders only `https://`
+image URLs, so a local store served over plain http accepts uploads whose URLs
+the image field then refuses — put it behind https, or test the upload call on
+its own.
+
+An uploaded photo that is never saved to a page stays in the bucket; clean those
+up with a lifecycle rule if it matters.
+
 ## Moving the database to a server
 
 The database runs locally in Docker and is built to transfer without surprises.
@@ -326,7 +493,7 @@ It is reproducible from the Drizzle migrations in `packages/db/drizzle/`. A fres
 server needs only:
 
 ```sh
-pnpm db:migrate    # creates all 19 tables, enums, indexes and constraints
+pnpm db:migrate    # creates all 23 tables, enums, indexes and constraints
 pnpm seed          # rate card, catalog, holidays, discount codes, FAQ, admin
 ```
 
@@ -336,7 +503,7 @@ server ends up at a known, version-controlled schema.
 ### When the local data must come along
 
 ```sh
-pnpm db:dump                  # → backups/umzugplus-<timestamp>.dump
+pnpm db:dump                  # → backups/mon-<timestamp>.dump
 pnpm db:dump --schema-only    # structure only
 pnpm db:dump --data-only      # rows only
 ```
@@ -348,9 +515,9 @@ Postgres container instead — no separate install needed on Windows or macOS.
 Then on the server:
 
 ```sh
-scp backups/umzugplus-<timestamp>.dump user@server:/tmp/
+scp backups/mon-<timestamp>.dump user@server:/tmp/
 ssh user@server
-pnpm db:restore /tmp/umzugplus-<timestamp>.dump
+pnpm db:restore /tmp/mon-<timestamp>.dump
 pnpm db:migrate               # confirm the schema is at the latest migration
 ```
 
@@ -394,7 +561,7 @@ Set `DATABASE_URL` directly and delete the `postgres` service from
 `docker-compose.prod.yml`. Managed providers require TLS:
 
 ```
-DATABASE_URL=postgresql://user:pass@host:5432/umzugplus?sslmode=require
+DATABASE_URL=postgresql://user:pass@host:5432/mon?sslmode=require
 ```
 
 ### Backups
@@ -403,7 +570,7 @@ DATABASE_URL=postgresql://user:pass@host:5432/umzugplus?sslmode=require
 Postgres container. A nightly cron entry:
 
 ```
-0 3 * * * cd /srv/umzugplus && pnpm db:dump >> /var/log/umzugplus-backup.log 2>&1
+0 3 * * * cd /srv/mon && pnpm db:dump >> /var/log/mon-backup.log 2>&1
 ```
 
 A backup you have never restored is a guess. Test one into a scratch database

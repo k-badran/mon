@@ -1,4 +1,4 @@
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 import {
   classifyRange,
   firstDayOfMonth,
@@ -8,8 +8,8 @@ import {
   type AvailabilitySnapshot,
   type CalendarDate,
   type DayAvailability,
-} from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+} from "@mon/core";
+import { db, schema } from "@mon/db";
 import { and, between, eq, ne, sql } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";

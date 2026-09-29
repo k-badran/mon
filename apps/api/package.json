@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/api",
+  "name": "@mon/api",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -13,11 +13,13 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1141.0",
+    "@mon/auth": "workspace:*",
+    "@mon/config": "workspace:*",
+    "@mon/core": "workspace:*",
+    "@mon/db": "workspace:*",
+    "@mon/mailer": "workspace:*",
     "@socket.io/redis-adapter": "^8.3.0",
-    "@umzugplus/auth": "workspace:*",
-    "@umzugplus/config": "workspace:*",
-    "@umzugplus/core": "workspace:*",
-    "@umzugplus/db": "workspace:*",
     "compression": "^1.7.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -26,6 +28,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "ioredis": "^5.4.2",
+    "multer": "^2.4.0",
     "pino": "^9.6.0",
     "pino-http": "^10.3.0",
     "rate-limit-redis": "^4.2.0",
@@ -33,13 +36,14 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@mon/typescript-config": "workspace:*",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.10.5",
     "@types/supertest": "^6.0.2",
-    "@umzugplus/typescript-config": "workspace:*",
     "pino-pretty": "^13.0.0",
     "socket.io-client": "^4.8.3",
     "supertest": "^7.0.0",

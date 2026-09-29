@@ -1,10 +1,11 @@
 import { createServer as createHttpServer } from "node:http";
 
-import { env } from "@umzugplus/config";
-import { closeDatabase } from "@umzugplus/db";
+import { env } from "@mon/config";
+import { closeDatabase } from "@mon/db";
 
 import { closeRedis } from "./lib/redis.js";
 import { logger } from "./lib/logger.js";
+import { mailer, verifyMailer } from "./lib/mailer.js";
 import { closeRealtimeGateway, createRealtimeGateway } from "./realtime/gateway.js";
 import { createServer } from "./server.js";
 
@@ -28,6 +29,11 @@ httpServer.listen(env.API_PORT, () => {
     { port: env.API_PORT, env: env.NODE_ENV, timezone: env.BUSINESS_TIMEZONE },
     `API listening on http://localhost:${env.API_PORT}`,
   );
+
+  // Checked after the port is open, and not awaited: a slow or unreachable mail
+  // host must not delay the server becoming ready, and a broken one must not
+  // stop it. The result is logged either way — see `verifyMailer`.
+  void verifyMailer();
 });
 
 /** Requests in flight get this long to finish before the process exits. */
@@ -56,7 +62,10 @@ async function shutdown(signal: string): Promise<void> {
     // Close sockets before the database: a handler mid-flight would
     // otherwise query a pool that is already shutting down.
     await closeRealtimeGateway();
-    await Promise.allSettled([closeDatabase(), closeRedis()]);
+    // `mailer.close()` joins the same group: it releases the SMTP connection
+    // pool, and like the others it must not be able to hold up the exit — hence
+    // allSettled rather than all.
+    await Promise.allSettled([closeDatabase(), closeRedis(), mailer.close()]);
 
     logger.info("Shutdown complete");
     process.exit(0);

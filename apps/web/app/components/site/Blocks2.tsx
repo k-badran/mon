@@ -23,218 +23,6 @@ const PAD = "py-14 md:py-20";
 const TITLE_20 =
   "font-display text-h4 leading-[1.575rem] font-bold text-text-strong";
 
-/**
- * The step timeline on "how it works".
- *
- * Each step is a full-width row with the copy on one side and a photograph on
- * the other. With `alternate` the sides flip as you go down; the flip is purely
- * visual, so the markup order stays the reading order and a screen reader is
- * unaffected. The "how it works" frame keeps every photograph on the right, so
- * that page opts out.
- */
-export function StepsTimeline({
-  eyebrow,
-  headline,
-  subline,
-  steps,
-  images,
-  stepLabel,
-  alternate = true,
-}: {
-  eyebrow?: string | undefined;
-  headline?: string | undefined;
-  subline?: string | undefined;
-  steps: Array<{ title: string; body: string }>;
-  images: string[];
-  stepLabel?: string | undefined;
-  alternate?: boolean;
-}) {
-  const heading = eyebrow || headline || subline;
-
-  return (
-    <section className="bg-surface-page">
-      <div className={`${SHELL} ${PAD} grid gap-14`}>
-        {heading ? (
-          <SectionHeading
-            eyebrow={eyebrow}
-            headline={headline}
-            subline={subline}
-          />
-        ) : null}
-
-        <ol className="grid gap-12">
-          {steps.map((step, index) => {
-            const flipped = alternate && index % 2 === 1;
-            const number = String(index + 1).padStart(2, "0");
-
-            /* 580 copy · 80 gap · 560 photograph inside the 1280 track, written
-               as percentages of it so the proportion holds at every width. Equal
-               halves would pull the two 48px together and stretch the photograph
-               past its 560. */
-            return (
-              <li
-                key={step.title}
-                className="grid items-center gap-8 md:grid-cols-[45.3125%_43.75%] md:gap-x-[6.25%] [&>*]:min-w-0"
-              >
-                <div className={`grid gap-5 ${flipped ? "md:order-2" : ""}`}>
-                  <span className="w-fit rounded-full bg-brand-yellow px-4 py-2 font-display text-body-sm font-extrabold text-text-heading uppercase">
-                    {stepLabel ? `${stepLabel} ${number}` : number}
-                  </span>
-                  <h3 className="font-display text-[1.5rem] leading-[1.25] font-extrabold text-text-heading md:text-[2rem]">
-                    {step.title}
-                  </h3>
-                  <p className="text-body text-text-default">{step.body}</p>
-                </div>
-
-                {images[index] ? (
-                  <img
-                    src={images[index]}
-                    alt=""
-                    width={560}
-                    height={360}
-                    loading="lazy"
-                    className={`aspect-[14/9] w-full rounded-xl object-cover ${
-                      flipped ? "md:order-1" : ""
-                    }`}
-                  />
-                ) : null}
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/**
- * The us-versus-them table.
- *
- * A real `<table>` with a header row, so it is navigable as a table rather
- * than as three columns of unrelated text. On a phone each row becomes a
- * labelled block, which is the only way three columns fit 320px.
- *
- * `markOurs` ticks the middle column. It is opt-in because the tick asserts the
- * cell is the better answer, which only holds where that column is a positive
- * claim.
- */
-export function ComparisonTable({
-  eyebrow,
-  headline,
-  columns,
-  rows,
-  markOurs = false,
-}: {
-  eyebrow?: string | undefined;
-  headline?: string | undefined;
-  columns: { feature: string; ours: string; theirs: string };
-  rows: Array<{ feature: string; ours: string; theirs: string }>;
-  markOurs?: boolean;
-}) {
-  if (rows.length === 0) return null;
-
-  return (
-    <section className="bg-neutral-0">
-      <div className={`${SHELL} ${PAD} grid gap-10`}>
-        <SectionHeading eyebrow={eyebrow} headline={headline} eyebrowSize="md" />
-
-        {/* The frame's plate is 1280x408: a 68px ink header row and five 68px
-            body rows, each ruled 1px #d1d5db along its bottom. The last rule
-            and the plate's own bottom border land on the same line, so only
-            one of them is drawn. Nothing sets that 68: it is 24px of padding
-            either side of the label column's intrinsic 20.16px line box, which
-            is why the header and feature cells are written literally at 16/1.26
-            in the display family. On `text-body`'s 1.5rem line box the rows
-            came out 72 and the plate 432. The columns are 384 / 320 / 576 of the plate
-            — 24px of padding before the first cell and after the last, and
-            none at all between them. */}
-        <div className="overflow-hidden rounded-lg border border-border-default bg-surface-page">
-          <table className="block w-full border-collapse text-start md:table md:table-fixed">
-            <thead
-              className={`bg-[#111827] ${"absolute h-px w-px overflow-hidden [clip-path:inset(50%)] whitespace-nowrap md:static md:h-auto md:w-auto md:[clip-path:none]"}`}
-            >
-              <tr>
-                <th
-                  scope="col"
-                  className="w-[30%] py-6 ps-6 pe-0 text-start font-display text-[1rem] leading-[1.26] font-bold text-white"
-                >
-                  {columns.feature}
-                </th>
-                <th
-                  scope="col"
-                  className="w-[25%] px-0 py-6 text-start font-display text-[1rem] leading-[1.26] font-bold text-brand-yellow"
-                >
-                  {columns.ours}
-                </th>
-                <th
-                  scope="col"
-                  className="w-[45%] py-6 ps-0 pe-6 text-start font-display text-[1rem] leading-[1.26] font-bold text-white"
-                >
-                  {columns.theirs}
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="block md:table-row-group">
-              {rows.map((row) => (
-                <tr
-                  key={row.feature}
-                  className="block border-b border-border-default last:border-b-0 md:table-row"
-                >
-                  <th
-                    scope="row"
-                    className="block p-5 pb-2 text-start font-display text-[1rem] leading-[1.26] font-bold text-text-heading md:table-cell md:py-6 md:ps-6 md:pe-0"
-                  >
-                    {row.feature}
-                  </th>
-
-                  <td
-                    className="block px-5 pb-2 text-[0.9375rem] leading-[1.3] font-bold text-text-heading md:table-cell md:px-0 md:py-6"
-                    data-label={columns.ours}
-                  >
-                    {/* The column headers repeat inside each cell only below
-                        md, where the row stacks and the header row is hidden.
-                        At the frame's width they are not rendered. */}
-                    <span className="mb-1 block text-caption font-bold text-brand-red uppercase md:hidden">
-                      {columns.ours}
-                    </span>
-                    <span className="flex items-start gap-2">
-                      {markOurs ? (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                          className="mt-0.5 shrink-0 text-success"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="m8.5 12.5 2.5 2.5 4.5-5" />
-                        </svg>
-                      ) : null}
-                      {row.ours}
-                    </span>
-                  </td>
-
-                  <td className="block px-5 pb-5 text-[0.9375rem] leading-[1.3] text-text-default md:table-cell md:py-6 md:ps-0 md:pe-6">
-                    <span className="mb-1 block text-caption font-bold text-text-faint uppercase md:hidden">
-                      {columns.theirs}
-                    </span>
-                    {row.theirs}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /**
  * The rate card: factor, price, explanation.
@@ -376,7 +164,12 @@ export function TeamGrid({
             <li
               key={member.name}
               className={`grid content-start gap-4 ${
-                card ? "rounded-lg bg-neutral-0 p-6" : ""
+                /* The frame strokes each card 1px #f3f4f6 — barely there on
+                   the #f9fafb canvas, but it is what separates the white
+                   panels from the ground. An inset ring rather than a border,
+                   because a Figma stroke takes no layout space and a border
+                   would narrow the 363 photograph by two pixels. */
+                card ? "rounded-lg bg-neutral-0 p-6 ring-1 ring-neutral-100 ring-inset" : ""
               }`}
             >
               {member.photo ? (
@@ -386,7 +179,8 @@ export function TeamGrid({
                   width={363}
                   height={260}
                   loading="lazy"
-                  className={`aspect-[7/5] w-full object-cover ${
+                  /* 363x260 exactly; 7/5 drew it a pixel short. */
+                  className={`aspect-[363/260] w-full object-cover ${
                     card ? "rounded-md" : "rounded-2xl"
                   }`}
                 />
@@ -396,7 +190,9 @@ export function TeamGrid({
                 <p className="font-display text-h5 leading-[1.26] font-bold text-text-heading">
                   {member.name}
                 </p>
-                <p className="text-body-sm text-brand-red">{member.role}</p>
+                {/* 14 on an 18.2 line box in the frame (the card is 369 tall),
+                    not the body-sm token's 20. */}
+                <p className="text-body-sm leading-[1.3] text-brand-red">{member.role}</p>
               </div>
             </li>
           ))}
@@ -423,7 +219,11 @@ export function StatsRow({
 
   return (
     <section className="bg-[#111827]">
-      <div className={`${SHELL} py-12 md:py-15`}>
+      {/* The strip is padded 60 all round, not the 80 of the content
+          column: three 400 figures + two 60 gaps = 1320, which the 1280
+          column squeezed to 387 each and pulled the outer two figures
+          inwards. The same steps as `SHELL` below 1440, 60 at 1440. */}
+      <div className="mx-auto w-full max-w-[1440px] px-5 py-12 md:px-10 md:py-15 2xl:px-15">
         <dl className="flex flex-wrap justify-center gap-x-15 gap-y-10 text-center">
           {stats.map((stat) => (
             <div
@@ -438,7 +238,7 @@ export function StatsRow({
                   while the markup keeps the dt-before-dd order a <dl>
                   requires. The frame sets these labels UPPER and pure
                   #ffffff. */}
-              <dt className="order-2 text-body-sm text-neutral-0 uppercase">
+              <dt className="order-2 text-body-sm leading-[1.3] text-neutral-0 uppercase">
                 {stat.label}
               </dt>
               {/* 48/800 at lineHeight 60.48 in the frame. The 1.26 ratio is
@@ -503,7 +303,9 @@ export function SplitFeature({
             {points.length > 0 ? (
               <ul className="grid gap-3">
                 {points.map((point) => (
-                  <li key={point} className="flex items-center gap-2 text-body-sm text-[#1f2937]">
+                  /* Each row is 18 tall in the frame (14 on 18.2), so the
+                     three ticks stack to 78, not the token's 84. */
+                  <li key={point} className="flex items-center gap-2 text-body-sm leading-[1.3] text-[#1f2937]">
                     {/* A bare 14px glyph stroked in brand red. No check mark in the
                         design document sits on a plate, so none is drawn here. */}
                     <svg
@@ -2831,101 +2633,6 @@ export function ApplicationSection({
             ) : null}
           </form>
         ) : null}
-      </div>
-    </section>
-  );
-}
-
-/**
- * The cleaning page's programme cards.
- *
- * Each card carries a name, an optional per-m² rate on a red plate, a
- * description and the same four guarantees — the frame repeats that list
- * verbatim on all three cards rather than varying it, so it is passed in once
- * and rendered per card.
- */
-export function ProgrammeCards({
-  eyebrow,
-  headline,
-  programmes,
-  cta,
-  href,
-}: {
-  eyebrow?: string | undefined;
-  headline?: string | undefined;
-  programmes: Array<{
-    title: string;
-    body: string;
-    price?: string;
-    checks: string[];
-  }>;
-  cta?: string | undefined;
-  href: string;
-}) {
-  if (programmes.length === 0) return null;
-
-  return (
-    <section className="bg-neutral-0">
-      <div className={`${SHELL} ${PAD} grid gap-12`}>
-        <SectionHeading eyebrow={eyebrow} headline={headline} />
-
-        <div className="grid gap-6 md:grid-cols-3 [&>*]:min-w-0">
-          {programmes.map((programme) => (
-            <article
-              key={programme.title}
-              className="flex flex-col gap-5 rounded-2xl bg-neutral-50 p-8"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-display text-h4 font-extrabold text-text-strong">
-                  {programme.title}
-                </h3>
-
-                {programme.price ? (
-                  <span className="rounded-md bg-brand-red px-3 py-1.5 text-body-sm font-bold whitespace-nowrap text-white">
-                    {programme.price}
-                  </span>
-                ) : null}
-              </div>
-
-              <p className="text-body-sm text-text-muted">{programme.body}</p>
-
-              <ul className="grid gap-2 border-t border-border-subtle pt-3">
-                {programme.checks.map((check) => (
-                  <li
-                    key={check}
-                    className="flex items-start gap-2 text-body-sm text-text-default"
-                  >
-                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-success-soft text-success-text">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    </span>
-                    {check}
-                  </li>
-                ))}
-              </ul>
-
-              {cta ? (
-                <Link
-                  href={href}
-                  className="mt-auto rounded-md bg-brand-red px-5 py-3 text-center text-body-sm font-bold text-white transition-colors hover:bg-neutral-900"
-                >
-                  {cta}
-                </Link>
-              ) : null}
-            </article>
-          ))}
-        </div>
       </div>
     </section>
   );

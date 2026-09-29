@@ -1,4 +1,4 @@
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({

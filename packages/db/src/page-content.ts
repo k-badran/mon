@@ -13,7 +13,8 @@
 export interface ContentSeed {
   section: string;
   slot: string;
-  kind: "text" | "textarea";
+  /** "image" holds a picture's path or https URL, the same in every locale. */
+  kind: "text" | "textarea" | "image";
   label: string;
   sortOrder: number;
   values: { de: string; en: string; ar: string; tr: string };
@@ -101,10 +102,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Included — subline",
     12,
     {
-      de: "Anders als einfache Transportdienste garantiert UmzugPlus einen durchgehend hochwertigen Umzug, durchgeführt von zertifizierten Teams.",
-      en: "Unlike basic transport services, UmzugPlus guarantees a premium end-to-end relocation experience handled by certified crews.",
-      ar: "بخلاف خدمات النقل البسيطة، تضمن UmzugPlus تجربة نقل متكاملة وعالية الجودة تنفّذها فرق معتمدة.",
-      tr: "Basit nakliye hizmetlerinin aksine UmzugPlus, sertifikalı ekiplerce yürütülen uçtan uca premium bir taşınma deneyimi garanti eder.",
+      de: "Anders als einfache Transportdienste garantiert m.on einen durchgehend hochwertigen Umzug, durchgeführt von zertifizierten Teams.",
+      en: "Unlike basic transport services, m.on guarantees a premium end-to-end relocation experience handled by certified crews.",
+      ar: "بخلاف خدمات النقل البسيطة، تضمن m.on تجربة نقل متكاملة وعالية الجودة تنفّذها فرق معتمدة.",
+      tr: "Basit nakliye hizmetlerinin aksine m.on, sertifikalı ekiplerce yürütülen uçtan uca premium bir taşınma deneyimi garanti eder.",
     },
     "textarea",
   ),
@@ -185,6 +186,44 @@ export const PAGE_CONTENT: ContentSeed[] = [
     },
     "textarea",
   ),
+
+  // The trust chips under the included cards (frame 106:10195, `trust-row`).
+  row(S, "trust.1.value", "Trust chip 1 — figure", 21, {
+    de: "4.500+",
+    en: "4,500+",
+    ar: "4,500+",
+    tr: "4.500+",
+  }),
+  row(S, "trust.1.label", "Trust chip 1 — label", 22, {
+    de: "Fünf-Sterne-Bewertungen",
+    en: "Five-Star Reviews",
+    ar: "تقييم بخمس نجوم",
+    tr: "Beş Yıldızlı Yorum",
+  }),
+  row(S, "trust.2.value", "Trust chip 2 — figure", 23, {
+    de: "100 %",
+    en: "100%",
+    ar: "100%",
+    tr: "%100",
+  }),
+  row(S, "trust.2.label", "Trust chip 2 — label", 24, {
+    de: "Zertifizierte Teams",
+    en: "Certified Crews",
+    ar: "فرق معتمدة",
+    tr: "Sertifikalı Ekipler",
+  }),
+  row(S, "trust.3.value", "Trust chip 3 — figure", 25, {
+    de: "99,9 %",
+    en: "99.9%",
+    ar: "99.9%",
+    tr: "%99,9",
+  }),
+  row(S, "trust.3.label", "Trust chip 3 — label", 26, {
+    de: "Pünktliche Lieferung",
+    en: "On-Time Delivery",
+    ar: "تسليم في الموعد",
+    tr: "Zamanında Teslimat",
+  }),
 
   row(S, "factors.eyebrow", "Pricing factors — eyebrow", 30, {
     de: "Dynamischer Rechner",
@@ -333,75 +372,25 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "textarea",
   ),
 
-  row(S, "faq.eyebrow", "FAQ — eyebrow", 60, {
-    de: "Hilfe",
-    en: "Help Desk",
-    ar: "مكتب المساعدة",
-    tr: "Yardım Masası",
+  // The masonry gallery's caption pills, in the frame's order (tall photo first).
+  row(S, "gallery.1.caption", "Gallery photo 1 — caption", 53, {
+    de: "Privatumzug",
+    en: "Residential Move",
+    ar: "نقل سكني",
+    tr: "Konut Taşıma",
   }),
-  row(S, "faq.headline", "FAQ — headline", 61, {
-    de: "Häufig gestellte Fragen",
-    en: "Frequently Asked Questions",
-    ar: "الأسئلة الشائعة",
-    tr: "Sık Sorulan Sorular",
+  row(S, "gallery.2.caption", "Gallery photo 2 — caption", 54, {
+    de: "Antiquitäten-Transport",
+    en: "Antique Handling",
+    ar: "نقل التحف",
+    tr: "Antika Taşıma",
   }),
-  row(S, "faq.1.question", "FAQ 1 — question", 62, {
-    de: "Wie lange im Voraus sollte ich meinen Umzug buchen?",
-    en: "How far in advance should I reserve my relocation?",
-    ar: "قبل كم من الوقت ينبغي أن أحجز موعد النقل؟",
-    tr: "Taşınmamı ne kadar önceden ayırtmalıyım?",
+  row(S, "gallery.3.caption", "Gallery photo 3 — caption", 55, {
+    de: "Lagerung & Logistik",
+    en: "Storage & Logistics",
+    ar: "التخزين والخدمات اللوجستية",
+    tr: "Depolama ve Lojistik",
   }),
-  row(
-    S,
-    "faq.1.answer",
-    "FAQ 1 — answer",
-    63,
-    {
-      de: "Wir empfehlen mindestens 2–3 Wochen Vorlauf. Dank unserer großen regionalen Flotte können wir jedoch oft auch dringende Last-Minute-Umzüge übernehmen.",
-      en: "We recommend booking at least 2-3 weeks in advance. However, with our extensive regional fleet, we are often able to accommodate emergency last-minute moves.",
-      ar: "نوصي بالحجز قبل 2–3 أسابيع على الأقل. لكن بفضل أسطولنا الإقليمي الواسع، غالباً ما نستطيع تلبية عمليات النقل الطارئة في اللحظة الأخيرة.",
-      tr: "En az 2-3 hafta önceden rezervasyon öneririz. Ancak geniş bölgesel filomuz sayesinde çoğu zaman acil, son dakika taşımalarını da karşılayabiliyoruz.",
-    },
-    "textarea",
-  ),
-  row(S, "faq.2.question", "FAQ 2 — question", 64, {
-    de: "Sind meine wertvollen Elektrogeräte versichert?",
-    en: "Are my valuable electronics covered by the damage insurance?",
-    ar: "هل أجهزتي الإلكترونية الثمينة مشمولة بالتأمين؟",
-    tr: "Değerli elektronik eşyalarım hasar sigortası kapsamında mı?",
-  }),
-  row(
-    S,
-    "faq.2.answer",
-    "FAQ 2 — answer",
-    65,
-    {
-      de: "Ja. Alle über unser Inventarverzeichnis erfassten Güter sind vollständig durch unsere umfassende Transportversicherung bis 500.000 € gedeckt.",
-      en: "Yes, all goods checked in via our structural inventory catalog are fully covered under our comprehensive transport insurance policy up to €500,000.",
-      ar: "نعم، كل الأغراض المسجَّلة في قائمة الجرد مشمولة بالكامل بوثيقة تأمين النقل الشاملة حتى 500,000 €.",
-      tr: "Evet, envanter kataloğumuza kaydedilen tüm eşyalar kapsamlı nakliye sigorta poliçemizle 500.000 €'ya kadar tamamen korunur.",
-    },
-    "textarea",
-  ),
-  row(S, "faq.3.question", "FAQ 3 — question", 66, {
-    de: "Muss ich meine Kartons selbst packen?",
-    en: "Do I need to pack my own cardboard boxes?",
-    ar: "هل عليّ تعبئة صناديقي بنفسي؟",
-    tr: "Kutularımı kendim mi paketlemeliyim?",
-  }),
-  row(
-    S,
-    "faq.3.answer",
-    "FAQ 3 — answer",
-    67,
-    {
-      de: "Sie können selbst packen oder unseren Full-Service-Packservice unten dazubuchen. Wenn Sie das Upgrade wählen, kommen wir mit Kartons, Etiketten und Luftpolsterfolie und verpacken alles sicher.",
-      en: "You can pack them yourself, or add our full-service packing upgrade below. If you choose the upgrade, we arrive with boxes, labels, bubble wrap, and pack everything safely.",
-      ar: "يمكنك التعبئة بنفسك أو إضافة خدمة التغليف الكاملة أدناه. وإذا اخترت الترقية، نصل ومعنا الصناديق والملصقات وورق الفقاعات، ونغلّف كل شيء بأمان.",
-      tr: "Kendiniz paketleyebilir ya da aşağıdaki tam hizmet paketleme eklentimizi alabilirsiniz. Eklentiyi seçerseniz kutular, etiketler ve balonlu naylonla gelir, her şeyi güvenle paketleriz.",
-    },
-    "textarea",
-  ),
 
   row(S, "addons.eyebrow", "Add-ons — eyebrow", 70, {
     de: "Zusatzmodule",
@@ -510,31 +499,6 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "Rezervasyona Ekle",
   }),
 
-  row(S, "cta.headline", "Closing CTA — headline", 90, {
-    de: "Bereit, Ihren garantierten Preis zu berechnen?",
-    en: "Ready to Calculate Your Guaranteed Price?",
-    ar: "جاهز لحساب سعرك المضمون؟",
-    tr: "Garantili Fiyatınızı Hesaplamaya Hazır mısınız?",
-  }),
-  row(
-    S,
-    "cta.body",
-    "Closing CTA — body",
-    91,
-    {
-      de: "Geben Sie Ihre Adressen und Ihr Inventar in unseren digitalen Rechner ein und erhalten Sie in weniger als 3 Minuten sofort einen vertraglich verbindlichen Preis. Kein Telefonat nötig.",
-      en: "Enter your locations and inventory in our digital calculator to receive an instant contract binding price in less than 3 minutes. No calls required.",
-      ar: "أدخل عناوينك وقائمة أغراضك في حاسبتنا الرقمية لتحصل على سعر فوري ومُلزم تعاقدياً في أقل من 3 دقائق. دون الحاجة إلى أي مكالمة.",
-      tr: "Adreslerinizi ve eşya envanterinizi dijital hesaplayıcımıza girin, 3 dakikadan kısa sürede anında ve sözleşmeye bağlayıcı bir fiyat alın. Telefon görüşmesi gerekmez.",
-    },
-    "textarea",
-  ),
-  row(S, "cta.button", "Closing CTA — button", 92, {
-    de: "Rechner starten",
-    en: "Start Calculator",
-    ar: "ابدأ الحاسبة",
-    tr: "Hesaplayıcıyı Başlat",
-  }),
   // ══ How it works ═══════════════════════════════════════════════════
   row(H, "hero.eyebrow", "Hero — eyebrow", 1, {
     de: "Klarer Fahrplan",
@@ -554,10 +518,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Hero — subline",
     3,
     {
-      de: "UmzugPlus ersetzt stressige Telefon-Updates und vage Stundenschätzungen durch einen vollständig digitalen Buchungsablauf.",
-      en: "UmzugPlus replaces stressful phone updates and vague hourly estimates with a fully digitized booking stream.",
-      ar: "يستبدل UmzugPlus متابعات الهاتف المرهقة والتقديرات الغامضة بالساعة بمسار حجز رقمي بالكامل.",
-      tr: "UmzugPlus, stresli telefon güncellemelerini ve belirsiz saatlik tahminleri tamamen dijital bir rezervasyon akışıyla değiştirir.",
+      de: "m.on ersetzt stressige Telefon-Updates und vage Stundenschätzungen durch einen vollständig digitalen Buchungsablauf.",
+      en: "m.on replaces stressful phone updates and vague hourly estimates with a fully digitized booking stream.",
+      ar: "يستبدل m.on متابعات الهاتف المرهقة والتقديرات الغامضة بالساعة بمسار حجز رقمي بالكامل.",
+      tr: "m.on, stresli telefon güncellemelerini ve belirsiz saatlik tahminleri tamamen dijital bir rezervasyon akışıyla değiştirir.",
     },
     "textarea",
   ),
@@ -652,10 +616,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "İnceleyin ve Karşılaştırın",
   }),
   row(H, "compare.headline", "Comparison — headline", 31, {
-    de: "UmzugPlus im Vergleich zu klassischen Umzugsfirmen",
-    en: "UmzugPlus vs. Traditional Movers",
-    ar: "UmzugPlus مقابل شركات النقل التقليدية",
-    tr: "UmzugPlus ile Geleneksel Nakliyeciler",
+    de: "m.on im Vergleich zu klassischen Umzugsfirmen",
+    en: "m.on vs. Traditional Movers",
+    ar: "m.on مقابل شركات النقل التقليدية",
+    tr: "m.on ile Geleneksel Nakliyeciler",
   }),
   row(H, "compare.col.feature", "Comparison — column 1 header", 32, {
     de: "Leistung / Vorteil",
@@ -664,10 +628,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "Özellik / Avantaj",
   }),
   row(H, "compare.col.ours", "Comparison — column 2 header", 33, {
-    de: "UmzugPlus",
-    en: "UmzugPlus",
-    ar: "UmzugPlus",
-    tr: "UmzugPlus",
+    de: "m.on",
+    en: "m.on",
+    ar: "m.on",
+    tr: "m.on",
   }),
   row(H, "compare.col.theirs", "Comparison — column 3 header", 34, {
     de: "Klassische Anbieter",
@@ -681,7 +645,7 @@ export const PAGE_CONTENT: ContentSeed[] = [
     ar: "وقت الحصول على العرض",
     tr: "Teklif Süresi",
   }),
-  row(H, "compare.1.ours", "Comparison row 1 — UmzugPlus", 36, {
+  row(H, "compare.1.ours", "Comparison row 1 — m.on", 36, {
     de: "Sofortiges digitales Angebot (verbindlich)",
     en: "Instant Digital Offer (Binding)",
     ar: "عرض رقمي فوري (ملزم)",
@@ -699,7 +663,7 @@ export const PAGE_CONTENT: ContentSeed[] = [
     ar: "شفافية التسعير",
     tr: "Fiyat Şeffaflığı",
   }),
-  row(H, "compare.2.ours", "Comparison row 2 — UmzugPlus", 39, {
+  row(H, "compare.2.ours", "Comparison row 2 — m.on", 39, {
     de: "Keine versteckten Kosten, vertraglich fixiert",
     en: "Zero Hidden Fees, Contract Fixed",
     ar: "بلا رسوم خفية، مثبّت في العقد",
@@ -717,7 +681,7 @@ export const PAGE_CONTENT: ContentSeed[] = [
     ar: "تأمين الأضرار عند التسليم",
     tr: "Teslimatta Hasar Sigortası",
   }),
-  row(H, "compare.3.ours", "Comparison row 3 — UmzugPlus", 42, {
+  row(H, "compare.3.ours", "Comparison row 3 — m.on", 42, {
     de: "Inklusive – bis zu 500.000 €",
     en: "Included Up to €500,000",
     ar: "مشمول حتى 500,000 €",
@@ -735,7 +699,7 @@ export const PAGE_CONTENT: ContentSeed[] = [
     ar: "تنسيق عملية الانتقال",
     tr: "Taşınma Koordinasyonu",
   }),
-  row(H, "compare.4.ours", "Comparison row 4 — UmzugPlus", 45, {
+  row(H, "compare.4.ours", "Comparison row 4 — m.on", 45, {
     de: "Eigenes digitales Kundenportal",
     en: "Dedicated digital customer portal",
     ar: "بوابة عملاء رقمية مخصّصة",
@@ -753,11 +717,11 @@ export const PAGE_CONTENT: ContentSeed[] = [
     ar: "توحيد معايير الفريق",
     tr: "Ekip Standardizasyonu",
   }),
-  row(H, "compare.5.ours", "Comparison row 5 — UmzugPlus", 48, {
-    de: "UmzugPlus-zertifiziert und geprüft",
-    en: "UmzugPlus Certified & Vetted",
-    ar: "معتمدون ومدقّقون من UmzugPlus",
-    tr: "UmzugPlus Sertifikalı ve Denetimli",
+  row(H, "compare.5.ours", "Comparison row 5 — m.on", 48, {
+    de: "m.on-zertifiziert und geprüft",
+    en: "m.on Certified & Vetted",
+    ar: "معتمدون ومدقّقون من m.on",
+    tr: "m.on Sertifikalı ve Denetimli",
   }),
   row(H, "compare.5.theirs", "Comparison row 5 — others", 49, {
     de: "Wechselnde Freelancer oder Subunternehmer",
@@ -791,10 +755,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Hero — subline",
     3,
     {
-      de: "UmzugPlus wurde in Berlin gegründet — aus dem Ärger über komplizierte Umzugsverträge auf Papier und unvorhersehbare Abrechnungen.",
-      en: "Founded in Berlin, UmzugPlus was born out of frustration with complex paper-only moving contracts and unpredictable billing patterns.",
-      ar: "تأسّست UmzugPlus في برلين نتيجة الضيق من عقود النقل الورقية المعقّدة وأنماط الفوترة غير المتوقّعة.",
-      tr: "UmzugPlus, karmaşık ve yalnızca kâğıt üzerinde yürüyen taşınma sözleşmelerinden ve öngörülemeyen faturalandırmadan duyulan rahatsızlıkla Berlin'de kuruldu.",
+      de: "m.on wurde in Berlin gegründet — aus dem Ärger über komplizierte Umzugsverträge auf Papier und unvorhersehbare Abrechnungen.",
+      en: "Founded in Berlin, m.on was born out of frustration with complex paper-only moving contracts and unpredictable billing patterns.",
+      ar: "تأسّست m.on في برلين نتيجة الضيق من عقود النقل الورقية المعقّدة وأنماط الفوترة غير المتوقّعة.",
+      tr: "m.on, karmaşık ve yalnızca kâğıt üzerinde yürüyen taşınma sözleşmelerinden ve öngörülemeyen faturalandırmadan duyulan rahatsızlıkla Berlin'de kuruldu.",
     },
     "textarea",
   ),
@@ -913,10 +877,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "Yönetim Ekibimiz",
   }),
   row(A, "team.headline", "Team — headline", 41, {
-    de: "Das Team hinter UmzugPlus",
-    en: "The Crew Behind UmzugPlus",
-    ar: "الفريق وراء UmzugPlus",
-    tr: "UmzugPlus'ın Arkasındaki Ekip",
+    de: "Das Team hinter m.on",
+    en: "The Crew Behind m.on",
+    ar: "الفريق وراء m.on",
+    tr: "m.on'ın Arkasındaki Ekip",
   }),
   row(A, "team.1.name", "Team — 1 name", 42, {
     de: "Max Reinhardt",
@@ -1288,10 +1252,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
   }),
 
   row(B, "benefits.headline", "Benefits — headline", 18, {
-    de: "Warum Unternehmen UmzugPlus vertrauen",
-    en: "Why Business Trusts UmzugPlus",
-    ar: "لماذا تثق الشركات بـ UmzugPlus",
-    tr: "Şirketler Neden UmzugPlus'a Güveniyor",
+    de: "Warum Unternehmen m.on vertrauen",
+    en: "Why Business Trusts m.on",
+    ar: "لماذا تثق الشركات بـ m.on",
+    tr: "Şirketler Neden m.on'a Güveniyor",
   }),
   row(
     B,
@@ -1781,10 +1745,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Clause 1 — body",
     13,
     {
-      de: "Cookies sind kleine Textdateien, die eine Website auf Ihrem Gerät speichert, um Ihren Browser bei einem späteren Besuch wiederzuerkennen. UmzugPlus nutzt sie, damit Angebots- und Buchungsstrecke funktionieren, um Ihre Sprachauswahl zu merken und um nachzuvollziehen, wie die Website genutzt wird, damit wir sie verbessern können.",
-      en: "Cookies are small text files a website stores on your device so it can recognise your browser on a later visit. UmzugPlus uses them to keep the quote and booking flow working, to remember the language you chose, and to understand how the site is used so we can improve it.",
-      ar: "ملفات تعريف الارتباط ملفات نصّية صغيرة يخزّنها الموقع على جهازك ليتعرّف على متصفّحك عند زيارتك التالية. وتستخدمها UmzugPlus لإبقاء مسار التسعير والحجز يعمل، ولتذكّر اللغة التي اخترتها، ولفهم طريقة استخدام الموقع حتى نتمكّن من تحسينه.",
-      tr: "Çerezler, bir web sitesinin tarayıcınızı sonraki ziyaretinizde tanıyabilmesi için cihazınıza kaydettiği küçük metin dosyalarıdır. UmzugPlus bunları teklif ve rezervasyon akışının çalışması, seçtiğiniz dilin hatırlanması ve siteyi geliştirebilmek için nasıl kullanıldığını anlamamız amacıyla kullanır.",
+      de: "Cookies sind kleine Textdateien, die eine Website auf Ihrem Gerät speichert, um Ihren Browser bei einem späteren Besuch wiederzuerkennen. m.on nutzt sie, damit Angebots- und Buchungsstrecke funktionieren, um Ihre Sprachauswahl zu merken und um nachzuvollziehen, wie die Website genutzt wird, damit wir sie verbessern können.",
+      en: "Cookies are small text files a website stores on your device so it can recognise your browser on a later visit. m.on uses them to keep the quote and booking flow working, to remember the language you chose, and to understand how the site is used so we can improve it.",
+      ar: "ملفات تعريف الارتباط ملفات نصّية صغيرة يخزّنها الموقع على جهازك ليتعرّف على متصفّحك عند زيارتك التالية. وتستخدمها m.on لإبقاء مسار التسعير والحجز يعمل، ولتذكّر اللغة التي اخترتها، ولفهم طريقة استخدام الموقع حتى نتمكّن من تحسينه.",
+      tr: "Çerezler, bir web sitesinin tarayıcınızı sonraki ziyaretinizde tanıyabilmesi için cihazınıza kaydettiği küçük metin dosyalarıdır. m.on bunları teklif ve rezervasyon akışının çalışması, seçtiğiniz dilin hatırlanması ve siteyi geliştirebilmek için nasıl kullanıldığını anlamamız amacıyla kullanır.",
     },
     "textarea",
   ),
@@ -1838,10 +1802,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Clause 4 — body",
     19,
     {
-      de: "Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen; der Widerruf ist genauso einfach wie die Erteilung. Wenn Sie in den Einstellungen Ihres Browsers die Cookies für umzugplus.de löschen, werden alle nicht notwendigen Cookies entfernt und wir fragen beim nächsten Besuch erneut. Die meisten Browser können Cookies auch vollständig blockieren — die Angebots- und Buchungsstrecke funktioniert dann allerdings nicht mehr durchgängig.",
-      en: "You can withdraw your consent at any time with effect for the future, and withdrawing it is as easy as giving it. Clearing the cookies for umzugplus.de in your browser settings removes every non-essential cookie and makes us ask again on your next visit. Most browsers can also block cookies outright, though the quote and booking flow will then no longer work end to end.",
-      ar: "يمكنك سحب موافقتك في أي وقت وبأثر مستقبلي، وسحبها سهل تماماً كمنحها. وحذف ملفات تعريف الارتباط الخاصة بـ umzugplus.de من إعدادات متصفّحك يزيل كل الملفات غير الضرورية ويجعلنا نسألك مجدداً في زيارتك التالية. كما يمكن لمعظم المتصفّحات حظر هذه الملفات كلياً، غير أنّ مسار التسعير والحجز لن يعمل حينها من أوّله إلى آخره.",
-      tr: "Onayınızı ileriye dönük olarak dilediğiniz zaman geri çekebilirsiniz; geri çekmek, onay vermek kadar kolaydır. Tarayıcı ayarlarınızdan umzugplus.de adresine ait çerezleri silmeniz zorunlu olmayan tüm çerezleri kaldırır ve bir sonraki ziyaretinizde size yeniden sormamızı sağlar. Çoğu tarayıcı çerezleri tamamen de engelleyebilir; ancak bu durumda teklif ve rezervasyon akışı baştan sona çalışmaz.",
+      de: "Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen; der Widerruf ist genauso einfach wie die Erteilung. Wenn Sie in den Einstellungen Ihres Browsers die Cookies für moveongo.de löschen, werden alle nicht notwendigen Cookies entfernt und wir fragen beim nächsten Besuch erneut. Die meisten Browser können Cookies auch vollständig blockieren — die Angebots- und Buchungsstrecke funktioniert dann allerdings nicht mehr durchgängig.",
+      en: "You can withdraw your consent at any time with effect for the future, and withdrawing it is as easy as giving it. Clearing the cookies for moveongo.de in your browser settings removes every non-essential cookie and makes us ask again on your next visit. Most browsers can also block cookies outright, though the quote and booking flow will then no longer work end to end.",
+      ar: "يمكنك سحب موافقتك في أي وقت وبأثر مستقبلي، وسحبها سهل تماماً كمنحها. وحذف ملفات تعريف الارتباط الخاصة بـ moveongo.de من إعدادات متصفّحك يزيل كل الملفات غير الضرورية ويجعلنا نسألك مجدداً في زيارتك التالية. كما يمكن لمعظم المتصفّحات حظر هذه الملفات كلياً، غير أنّ مسار التسعير والحجز لن يعمل حينها من أوّله إلى آخره.",
+      tr: "Onayınızı ileriye dönük olarak dilediğiniz zaman geri çekebilirsiniz; geri çekmek, onay vermek kadar kolaydır. Tarayıcı ayarlarınızdan moveongo.de adresine ait çerezleri silmeniz zorunlu olmayan tüm çerezleri kaldırır ve bir sonraki ziyaretinizde size yeniden sormamızı sağlar. Çoğu tarayıcı çerezleri tamamen de engelleyebilir; ancak bu durumda teklif ve rezervasyon akışı baştan sona çalışmaz.",
     },
     "textarea",
   ),
@@ -1864,10 +1828,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Contact card — group 1 lines",
     22,
     {
-      de: "UmzugPlus GmbH\nAmtsgericht München: HRB 123456\nUSt-IdNr.: DE 987654321",
-      en: "UmzugPlus GmbH\nAmtsgericht München: HRB 123456\nVAT ID: DE 987654321",
-      ar: "UmzugPlus GmbH\nمحكمة ميونخ الابتدائية: HRB 123456\nالرقم الضريبي: DE 987654321",
-      tr: "UmzugPlus GmbH\nMünih Yerel Mahkemesi: HRB 123456\nVergi No: DE 987654321",
+      de: "m.on GmbH\nAmtsgericht München: HRB 123456\nUSt-IdNr.: DE 987654321",
+      en: "m.on GmbH\nAmtsgericht München: HRB 123456\nVAT ID: DE 987654321",
+      ar: "m.on GmbH\nمحكمة ميونخ الابتدائية: HRB 123456\nالرقم الضريبي: DE 987654321",
+      tr: "m.on GmbH\nMünih Yerel Mahkemesi: HRB 123456\nVergi No: DE 987654321",
     },
     "textarea",
   ),
@@ -1883,10 +1847,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "Contact card — group 2 lines",
     24,
     {
-      de: "Adresse: Müllerstraße 14, 80469 München\nE-Mail: legal@umzugplus.de\nTel.: +49 (0) 89 555 1234",
-      en: "Address: Müllerstraße 14, 80469 München\nEmail: legal@umzugplus.de\nTel: +49 (0) 89 555 1234",
-      ar: "العنوان: Müllerstraße 14, 80469 München\nالبريد الإلكتروني: legal@umzugplus.de\nهاتف: +49 (0) 89 555 1234",
-      tr: "Adres: Müllerstraße 14, 80469 München\nE-posta: legal@umzugplus.de\nTel: +49 (0) 89 555 1234",
+      de: "Adresse: Müllerstraße 14, 80469 München\nE-Mail: legal@moveongo.de\nTel.: +49 (0) 89 555 1234",
+      en: "Address: Müllerstraße 14, 80469 München\nEmail: legal@moveongo.de\nTel: +49 (0) 89 555 1234",
+      ar: "العنوان: Müllerstraße 14, 80469 München\nالبريد الإلكتروني: legal@moveongo.de\nهاتف: +49 (0) 89 555 1234",
+      tr: "Adres: Müllerstraße 14, 80469 München\nE-posta: legal@moveongo.de\nTel: +49 (0) 89 555 1234",
     },
     "textarea",
   ),
@@ -1914,7 +1878,7 @@ export const PAGE_CONTENT: ContentSeed[] = [
     "textarea",
   ),
   // The frame's three consent buttons. They record the decision under
-  // `umzugplus.cookie-consent`; nothing non-essential runs until it says so.
+  // `mon.cookie-consent`; nothing non-essential runs until it says so.
   row(L, "consent.reject", "Cookie band — reject button", 32, {
     de: "Nicht notwendige ablehnen",
     en: "Reject Non-Essential",
@@ -1942,10 +1906,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "Partner Olun",
   }),
   row(PARTNER, "hero.headline", "Hero — headline", 1, {
-    de: "Erweitern Sie Ihr Geschäft mit UmzugPlus",
-    en: "Grow Your Business with UmzugPlus",
-    ar: "طوّر أعمالك مع UmzugPlus",
-    tr: "İşinizi UmzugPlus ile Büyütün",
+    de: "Erweitern Sie Ihr Geschäft mit m.on",
+    en: "Grow Your Business with m.on",
+    ar: "طوّر أعمالك مع m.on",
+    tr: "İşinizi m.on ile Büyütün",
   }),
   row(
     PARTNER,
@@ -2279,10 +2243,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
     tr: "Doğrulanmış",
   }),
   row(R, "feed.responseLabel", "Review card — response label", 16, {
-    de: "Antwort des UmzugPlus-Teams:",
-    en: "UmzugPlus Team Response:",
-    ar: "ردّ فريق UmzugPlus:",
-    tr: "UmzugPlus Ekibi Yanıtı:",
+    de: "Antwort des m.on-Teams:",
+    en: "m.on Team Response:",
+    ar: "ردّ فريق m.on:",
+    tr: "m.on Ekibi Yanıtı:",
   }),
   row(R, "feed.more", "Review feed — load more button", 17, {
     de: "Weitere Bewertungen laden",
@@ -2915,10 +2879,10 @@ export const PAGE_CONTENT: ContentSeed[] = [
   }),
 
   row("page-faq", "cat1.1.question", "General 1 — question", 30, {
-    de: "Welche Leistungen bietet UmzugPlus an?",
-    en: "What services does UmzugPlus offer?",
-    ar: "ما الخدمات التي تقدّمها UmzugPlus؟",
-    tr: "UmzugPlus hangi hizmetleri sunuyor?",
+    de: "Welche Leistungen bietet m.on an?",
+    en: "What services does m.on offer?",
+    ar: "ما الخدمات التي تقدّمها m.on؟",
+    tr: "m.on hangi hizmetleri sunuyor?",
   }),
   row(
     "page-faq",

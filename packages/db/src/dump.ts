@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 
 import { detectRunner, parseDatabaseUrl, runPgTool } from "./pg-tools.js";
 
@@ -47,7 +47,7 @@ async function main(): Promise<void> {
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const suffix = schemaOnly ? "-schema" : dataOnly ? "-data" : "";
-  const outFile = resolve(backupsDir, `umzugplus-${stamp}${suffix}.dump`);
+  const outFile = resolve(backupsDir, `mon-${stamp}${suffix}.dump`);
 
   const pgArgs = [
     "--format", "custom",

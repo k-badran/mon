@@ -105,7 +105,8 @@
 .auth-form { inline-size: 100%; max-inline-size: 26rem; }
 
 /* On a narrow screen the red panel is gone, so the logo carries the brand. */
-.auth-form .auth-logo { display: block; block-size: 34px; margin-block-end: var(--space-8); }
+/* 46px, not the old 34: the brand.logo PNG is padded to the nav bar's 86x47 box, so the mark inside it matches the tight SVG it replaced. */
+.auth-form .auth-logo { display: block; block-size: 46px; margin-block-end: var(--space-8); }
 @media (min-width: 900px) { .auth-form .auth-logo { display: none; } }
 
 .auth-form h1 {
@@ -241,6 +242,72 @@
   border: 1px solid var(--red-200);
 }
 .auth-alert.is-info { background: var(--info-soft); color: #1d4ed8; border-color: #bfd7fe; }
+
+/* ── Auth: the code / reset / confirm pages ──────────────────────────── */
+
+/*
+ * The alternative sign-in route, above the social divider.
+ *
+ * Its own class rather than reusing `.auth-switch`: that one is the bottom
+ * "no account yet?" line and carries a large top margin, which here would push
+ * the divider away from the button it belongs under.
+ */
+.auth-alt {
+  text-align: center;
+  margin-block-start: var(--space-3);
+  font-size: var(--text-sm);
+}
+.auth-alt a {
+  color: var(--brand-red);
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-alt a:hover { text-decoration: underline; }
+
+/* Field-level guidance, e.g. the minimum password length. */
+.hint {
+  display: block;
+  margin-block-start: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/*
+ * A button that reads as a link.
+ *
+ * Kept as a <button> in the markup — "use a different email" changes state on
+ * this page and navigates nowhere, and an <a href="#"> that does that is a
+ * link a keyboard and a screen reader both announce wrongly.
+ */
+.linkish {
+  display: block;
+  margin: var(--space-4) auto 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.linkish:hover { color: var(--brand-red); }
+
+/*
+ * The one-time code input.
+ *
+ * Wide tracking and a monospace face so six digits are read as six digits, and
+ * centred because there is nothing else on the line. `text-align` and the
+ * `dir="ltr"` on the element are doing different jobs: this is presentation,
+ * that keeps the digit order correct inside a right-to-left page.
+ */
+.auth-form input[autocomplete="one-time-code"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--text-2xl);
+  letter-spacing: 0.5em;
+  text-align: center;
+  padding-inline: var(--space-4);
+}
 
 /* ── Public site header ──────────────────────────────────────────────── */
 

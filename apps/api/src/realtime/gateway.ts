@@ -1,9 +1,9 @@
 import type { Server as HttpServer } from "node:http";
 
-import { env } from "@umzugplus/config";
-import { verifyAccessToken, type UserRole } from "@umzugplus/auth";
-import { can } from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+import { env } from "@mon/config";
+import { verifyAccessToken, type UserRole } from "@mon/auth";
+import { can } from "@mon/core";
+import { db, schema } from "@mon/db";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { eq } from "drizzle-orm";
 import { Server, type Socket } from "socket.io";

@@ -1,4 +1,4 @@
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@umzugplus/auth";
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@mon/auth";
 import { z } from "zod";
 
 /**
@@ -68,7 +68,30 @@ export const confirmPasswordResetSchema = z.object({
   newPassword: password,
 });
 
+export const confirmEmailSchema = z.object({ token: z.string().min(1) });
+
+export const requestOtpSchema = z.object({ email });
+
+export const verifyOtpSchema = z.object({
+  email,
+  /**
+   * Exactly six digits.
+   *
+   * `regex` rather than a coerced number: a numeric type would accept `1234.0`
+   * and would drop a leading zero, and a code that begins with a zero is one
+   * the generator produces a tenth of the time.
+   */
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "The code is six digits."),
+});
+
 export type RegisterBody = z.infer<typeof registerSchema>;
 export type LoginBody = z.infer<typeof loginSchema>;
 export type RefreshBody = z.infer<typeof refreshSchema>;
 export type ChangePasswordBody = z.infer<typeof changePasswordSchema>;
+export type RequestPasswordResetBody = z.infer<typeof requestPasswordResetSchema>;
+export type ConfirmPasswordResetBody = z.infer<typeof confirmPasswordResetSchema>;
+export type RequestOtpBody = z.infer<typeof requestOtpSchema>;
+export type VerifyOtpBody = z.infer<typeof verifyOtpSchema>;

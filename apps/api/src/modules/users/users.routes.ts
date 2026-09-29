@@ -5,14 +5,14 @@ import {
   canAssignRole,
   isStaffRole,
   type Role,
-} from "@umzugplus/core";
+} from "@mon/core";
 import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   generateTemporaryPassword,
   hashPassword,
-} from "@umzugplus/auth";
-import { db, schema } from "@umzugplus/db";
+} from "@mon/auth";
+import { db, schema } from "@mon/db";
 import { and, desc, eq, ilike, or, type SQL } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";

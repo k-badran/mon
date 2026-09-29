@@ -1,6 +1,6 @@
 "use client";
 
-import type { DayAvailability } from "@umzugplus/core";
+import type { DayAvailability } from "@mon/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useApi } from "@/lib/api";

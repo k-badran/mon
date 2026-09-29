@@ -1,5 +1,5 @@
-import { isProduction } from "@umzugplus/config";
-import { PricingError } from "@umzugplus/core";
+import { isProduction } from "@mon/config";
+import { PricingError } from "@mon/core";
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 

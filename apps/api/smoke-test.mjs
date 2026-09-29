@@ -58,7 +58,14 @@ const reg = await call("POST", "/api/auth/register", {
 customerToken = reg.json?.accessToken ?? "";
 
 const login = await call("POST", "/api/auth/login", {
-  body: { email: "admin@umzugplus.de", password: "ChangeMe123!" },
+  // Read from the environment when it is set, so the script keeps working when
+  // the seeded administrator is not the default one. Hardcoding these meant a
+  // changed SEED_ADMIN_EMAIL failed the login step and then cascaded into every
+  // admin-guarded check below it, reporting eight failures for one cause.
+  body: {
+    email: process.env.SEED_ADMIN_EMAIL ?? "admin@moveongo.de",
+    password: process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!",
+  },
 });
 adminToken = login.json?.accessToken ?? "";
 

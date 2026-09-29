@@ -1,5 +1,7 @@
 "use client";
 
+import { PASSWORD_MIN_LENGTH } from "@mon/core";
+
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
@@ -8,7 +10,6 @@ import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
 
 /** Mirrors the server's policy, so the form can say so before submitting. */
-const PASSWORD_MIN_LENGTH = 10;
 
 /**
  * The field look the login screen gets from `.input-wrap input` in site.css.

@@ -1,4 +1,4 @@
-import { db, schema } from "@umzugplus/db";
+import { db, schema } from "@mon/db";
 import { asc, eq } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";

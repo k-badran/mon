@@ -1,5 +1,5 @@
 {
-  "name": "@umzugplus/auth",
+  "name": "@mon/auth",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -18,15 +18,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@umzugplus/config": "workspace:*",
+    "@mon/config": "workspace:*",
     "argon2": "^0.41.1",
     "jose": "^5.9.6",
     "zod": "^3.24.1",
-    "@umzugplus/core": "workspace:*"
+    "@mon/core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@umzugplus/typescript-config": "workspace:*",
+    "@mon/typescript-config": "workspace:*",
     "typescript": "^5.9.2",
     "vitest": "^2.1.8"
   }

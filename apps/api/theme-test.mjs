@@ -26,7 +26,7 @@ async function api(path, { method = "GET", body, token } = {}) {
 
 const admin = await api("/api/auth/login", {
   method: "POST",
-  body: { email: "admin@umzugplus.de", password: "ChangeMe123!" },
+  body: { email: "admin@moveongo.de", password: "ChangeMe123!" },
 });
 console.log("1. signed in as admin\n");
 

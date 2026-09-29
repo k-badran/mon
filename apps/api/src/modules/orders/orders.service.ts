@@ -1,12 +1,12 @@
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 import {
   addDays,
   requiresSecondDay,
   toCalendarDate,
   toInstant,
   type CalendarDate,
-} from "@umzugplus/core";
-import { db, schema } from "@umzugplus/db";
+} from "@mon/core";
+import { db, schema } from "@mon/db";
 import { and, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
 
 import { AppError } from "../../lib/errors.js";

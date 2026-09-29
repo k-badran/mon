@@ -1,4 +1,4 @@
-import type { QuoteInput } from "@umzugplus/core";
+import type { QuoteInput } from "@mon/core";
 
 /**
  * The calculator's state machine.

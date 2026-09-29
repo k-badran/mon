@@ -31,11 +31,27 @@ const { resolve } = require("node:path");
  * edge sandbox, which is handed a copy of this process's environment at request
  * time, so setting them here works under both `next dev` and `next start`.
  */
-const FROM_ROOT_ENV = ["JWT_ACCESS_SECRET", "JWT_HINT_SECRET", "JWT_ISSUER"];
+const FROM_ROOT_ENV = [
+  "JWT_ACCESS_SECRET",
+  "JWT_HINT_SECRET",
+  "JWT_ISSUER",
+  /**
+   * The API origin the browser calls.
+   *
+   * Next only reads `.env` files inside this app, and this repo keeps one at the
+   * root — so on a server this was simply absent at build time and every page
+   * shipped the `http://localhost:4000` fallback baked into the bundle. The
+   * symptom is a site that renders perfectly and cannot sign anyone in: the
+   * visitor's own browser is asked to call port 4000 on the visitor's own
+   * machine. A deploy cannot be trusted to remember to export it, so it is read
+   * from the same file as everything else.
+   */
+  "NEXT_PUBLIC_API_URL",
+];
 
 /** Mirrors `deriveHintSecret` in packages/auth — one rule, written twice. */
 function deriveHintSecret(source) {
-  return createHash("sha256").update(`umzugplus:session-hint:v1:${source}`).digest("base64");
+  return createHash("sha256").update(`mon:session-hint:v1:${source}`).digest("base64");
 }
 
 function readRootEnv() {
@@ -68,6 +84,13 @@ function loadRootEnv() {
   // redirect every signed-in user to /login.
   if (!process.env.JWT_ISSUER && fromFile.JWT_ISSUER) {
     process.env.JWT_ISSUER = fromFile.JWT_ISSUER;
+  }
+
+  // Same rule: an injected value wins, the file fills the gap. This one is
+  // inlined into the client bundle at build time, so it has to be set before
+  // Next starts compiling — which is exactly when this file runs.
+  if (!process.env.NEXT_PUBLIC_API_URL && fromFile.NEXT_PUBLIC_API_URL) {
+    process.env.NEXT_PUBLIC_API_URL = fromFile.NEXT_PUBLIC_API_URL;
   }
 
   if (process.env.JWT_HINT_SECRET) return;

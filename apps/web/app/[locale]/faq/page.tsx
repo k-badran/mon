@@ -31,7 +31,7 @@ export async function generateMetadata({
   const sections = await fetchSiteContent(params.locale, SECTION);
   const name = sections[SECTION]?.["meta.title"];
 
-  return { title: name ? `${name} — UmzugPlus` : "UmzugPlus" };
+  return { title: name ? `${name} — m.on` : "m.on" };
 }
 
 export default async function FaqPage({ params }: { params: { locale: Locale } }) {

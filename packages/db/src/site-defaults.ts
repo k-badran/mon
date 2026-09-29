@@ -21,7 +21,7 @@ export interface SettingSeed {
 export const THEME_DEFAULTS: SettingSeed[] = [
   {
     key: "color.brand",
-    value: "#D71635",
+    value: "#E62039",
     group: "theme",
     kind: "color",
     label: "Primary / brand",
@@ -30,7 +30,7 @@ export const THEME_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "color.brandHover",
-    value: "#B80F2A",
+    value: "#C4162E",
     group: "theme",
     kind: "color",
     label: "Primary — pressed",
@@ -113,7 +113,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   // ── Brand ─────────────────────────────────────────────────────────────
   {
     key: "brand.name",
-    value: "UmzugPlus",
+    value: "m.on",
     group: "brand",
     kind: "text",
     label: "Company name",
@@ -121,7 +121,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "brand.legalName",
-    value: "UmzugPlus GmbH",
+    value: "m.on GmbH",
     group: "brand",
     kind: "text",
     label: "Legal name",
@@ -130,10 +130,11 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "brand.logo",
-    value: "/images/logo.svg",
+    value: "/images/brand/logo.png",
     group: "brand",
     kind: "image",
     label: "Logo",
+    description: "Shown in the header, the footer and on the sign-in pages. Upload one, or give a path under /images/ or an https:// address.",
     sortOrder: 3,
   },
   {
@@ -143,6 +144,20 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
     kind: "text",
     label: "Tagline",
     sortOrder: 4,
+  },
+  /**
+   * The "GET APP" pill in the nav bar (86:5213) and footer (101:163). No app
+   * listing exists yet, so it ships empty and the site sends the button to
+   * the online calculator until an App Store / Play Store link is entered.
+   */
+  {
+    key: "brand.appUrl",
+    value: "",
+    group: "brand",
+    kind: "text",
+    label: "App download link",
+    description: "App Store / Play Store URL for the GET APP button. Empty: links to the calculator.",
+    sortOrder: 5,
   },
 
   // ── Contact ───────────────────────────────────────────────────────────
@@ -156,7 +171,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   },
   {
     key: "contact.email",
-    value: "info@umzugplus.de",
+    value: "info@moveongo.de",
     group: "contact",
     kind: "email",
     label: "Email",
@@ -182,7 +197,7 @@ export const SETTING_DEFAULTS: SettingSeed[] = [
   // ── SEO ───────────────────────────────────────────────────────────────
   {
     key: "seo.titleSuffix",
-    value: "UmzugPlus",
+    value: "m.on",
     group: "seo",
     kind: "text",
     label: "Title suffix",
@@ -218,71 +233,9 @@ export interface BlockSeed {
  * text box.
  */
 export const CONTENT_DEFAULTS: BlockSeed[] = [
-  {
-    section: "home",
-    slot: "hero.headline",
-    label: "Hero headline",
-    kind: "text",
-    sortOrder: 1,
-    translations: {
-      de: "Umzug, Entsorgung & Reinigung — fair, transparent, sofort kalkuliert.",
-      en: "Moving, disposal & cleaning — fair, transparent, calculated instantly.",
-      ar: "نقل وتخلّص من الأثاث وتنظيف — عادل وشفّاف ويُحسب فورًا.",
-      tr: "Nakliye, tasfiye ve temizlik — adil, şeffaf, anında hesaplanır.",
-    },
-  },
-  {
-    section: "home",
-    slot: "hero.subline",
-    label: "Hero subline",
-    kind: "textarea",
-    sortOrder: 2,
-    translations: {
-      de: "Berechne deinen Preis in wenigen Klicks — ganz ohne Konto.",
-      en: "Calculate your price in a few clicks — no account required.",
-      ar: "احسب سعرك خلال نقرات — بلا حاجة إلى حساب.",
-      tr: "Fiyatınızı birkaç tıkla hesaplayın — hesap gerekmez.",
-    },
-  },
-  {
-    section: "home",
-    slot: "hero.cta",
-    label: "Hero button",
-    kind: "text",
-    sortOrder: 3,
-    translations: {
-      de: "Preis berechnen",
-      en: "Calculate price",
-      ar: "احسب السعر",
-      tr: "Fiyat hesapla",
-    },
-  },
-  {
-    section: "home",
-    slot: "trust.insured",
-    label: "Trust badge — insurance",
-    kind: "text",
-    sortOrder: 4,
-    translations: {
-      de: "Vollständig versichert",
-      en: "Fully insured",
-      ar: "مؤمَّن بالكامل",
-      tr: "Tam sigortalı",
-    },
-  },
-  {
-    section: "home",
-    slot: "trust.rating",
-    label: "Trust badge — rating",
-    kind: "text",
-    sortOrder: 5,
-    translations: {
-      de: "4,6/5 Bewertung",
-      en: "4.6/5 rating",
-      ar: "تقييم 4.6/5",
-      tr: "4,6/5 puan",
-    },
-  },
+  // No "home" rows: home-content.ts seeds the homepage from the design. Rows
+  // here were inserted first and, since seed-home never overwrites, left a
+  // fresh database on older wording than the Figma frame.
   {
     section: "auth",
     slot: "panel.headline",

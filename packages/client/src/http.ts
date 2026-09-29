@@ -64,6 +64,8 @@ export type ApiErrorCode =
   | "INVALID_STATE_TRANSITION"
   | "QUOTE_EXPIRED"
   | "QUOTE_ALREADY_USED"
+  | "PAYLOAD_TOO_LARGE"
+  | "UNSUPPORTED_MEDIA_TYPE"
   | "UNPROCESSABLE"
   | "PRICING_FAILED"
   | "RATE_LIMITED"
@@ -114,6 +116,8 @@ interface RequestOptions {
   /** Skips the Authorization header — used by login and register. */
   anonymous?: boolean;
   signal?: AbortSignal;
+  /** Overrides the client's timeout — an upload takes longer than a JSON call. */
+  timeoutMs?: number;
 }
 
 const DEFAULT_TIMEOUT_MS = 15_000;
@@ -179,7 +183,11 @@ export class ApiClient {
 
     const headers: Record<string, string> = { Accept: "application/json" };
 
-    if (options.body !== undefined) {
+    // A FormData body is sent as-is: the browser writes the multipart
+    // Content-Type itself, boundary included, and a hand-set one lacks it.
+    const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
+
+    if (options.body !== undefined && !isForm) {
       headers["Content-Type"] = "application/json";
     }
 
@@ -195,7 +203,7 @@ export class ApiClient {
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
-      this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+      options.timeoutMs ?? this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     );
 
     // Honour a caller-supplied signal alongside our own timeout.
@@ -205,7 +213,9 @@ export class ApiClient {
       return await fetch(url, {
         method: options.method ?? "GET",
         headers,
-        ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
+        ...(options.body !== undefined
+          ? { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) }
+          : {}),
         signal: controller.signal,
         // Sent on every request, not only on refresh: the API is a different
         // origin, so without this the browser would withhold the session

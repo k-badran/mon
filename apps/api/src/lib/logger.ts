@@ -1,4 +1,4 @@
-import { env, isProduction } from "@umzugplus/config";
+import { env, isProduction } from "@mon/config";
 import pino from "pino";
 
 /**

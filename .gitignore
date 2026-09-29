@@ -6,16 +6,26 @@ node_modules/
 .env
 .env.*
 !.env.example
+# `.env.*` above would otherwise swallow this one too, and it holds no secrets:
+# it is the template README tells you to copy to .env.production.
+!.env.production.example
 
 # build output
 dist/
 build/
 .next/
+# `next build` writes here when NEXT_DIST_DIR is set, which apps/web's
+# `build:check` script does. 662 files of generated output were tracked because
+# only `.next/` was listed.
+.next-build/
 out/
 *.tsbuildinfo
 
 # turborepo
 .turbo/
+
+# figma-sync.mjs caches whole-file downloads here
+.figma-cache/
 
 # logs
 *.log
@@ -28,6 +38,9 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# recorded mail from MAIL_DRIVER=log — real recipient addresses, never commit
+.mail-outbox/
 
 # test / coverage
 coverage/

@@ -33,7 +33,7 @@ export async function generateMetadata({
   // one — it is at least the page's own name in the reader's language.
   const name = copy["meta.title"] ?? copy["hero.headline"];
 
-  return { title: name ? `${name} — UmzugPlus` : "UmzugPlus" };
+  return { title: name ? `${name} — m.on` : "m.on" };
 }
 
 export default async function PricingPage({ params }: { params: { locale: Locale } }) {

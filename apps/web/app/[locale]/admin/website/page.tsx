@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_BYTES, isSafeImageSrc } from "@mon/core";
 
 import { ApiError, useApi } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -42,6 +44,7 @@ interface ContentBlock {
   slot: string;
   locale: string;
   value: string;
+  /** "text", "textarea" or "image" (a photo's path or https URL). */
   kind: string;
   label: string;
   isPublished: boolean;
@@ -61,6 +64,32 @@ export default function WebsiteControlPage() {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [status, setStatus] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [resetting, setResetting] = useState(false);
+  const [uploadsEnabled, setUploadsEnabled] = useState(false);
+
+  // Asked once, apart from `load`: a deployment without storage, or a failed
+  // check, just means no upload button — never a failed page.
+  useEffect(() => {
+    sdk.http
+      .get<{ enabled: boolean }>("/api/site/uploads")
+      .then((caps) => setUploadsEnabled(caps.enabled))
+      .catch(() => setUploadsEnabled(false));
+  }, [sdk]);
+
+  /** Stores a photo and returns its public URL; the caller decides where it goes. */
+  const uploadImage = useCallback(
+    async (file: File): Promise<string> => {
+      const form = new FormData();
+      form.append("file", file);
+
+      // A photo over a slow connection outlasts the client's JSON timeout.
+      const { url } = await sdk.http.post<{ url: string }>("/api/site/uploads", form, {
+        timeoutMs: 120_000,
+      });
+
+      return url;
+    },
+    [sdk],
+  );
 
   const load = useCallback(async () => {
     try {
@@ -111,6 +140,25 @@ export default function WebsiteControlPage() {
       await sdk.http.patch(`/api/site/blocks/${id}`, patch);
       setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
       setStatus({ kind: "ok", text: t("site.saved") });
+    } catch (caught) {
+      setStatus({
+        kind: "error",
+        text: caught instanceof ApiError ? caught.message : t("error.saveFailed"),
+      });
+    } finally {
+      setSavingKey(null);
+    }
+  }
+
+  /** Puts an image block back to the photo the page shipped with. */
+  async function resetBlock(id: string) {
+    setSavingKey(id);
+    setStatus(null);
+
+    try {
+      const updated = await sdk.http.post<ContentBlock>(`/api/site/blocks/${id}/reset`);
+      setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, value: updated.value } : b)));
+      setStatus({ kind: "ok", text: t("site.image.wasReset") });
     } catch (caught) {
       setStatus({
         kind: "error",
@@ -226,6 +274,7 @@ export default function WebsiteControlPage() {
                 setting={setting}
                 saving={savingKey === setting.key}
                 onSave={(value) => void saveSetting(setting.key, value)}
+                onUpload={uploadsEnabled ? uploadImage : undefined}
               />
             ))}
           </div>
@@ -274,6 +323,8 @@ export default function WebsiteControlPage() {
                     saving={savingKey === block.id}
                     publishedLabel={t("site.published")}
                     onSave={(patch) => void saveBlock(block.id, patch)}
+                    onReset={() => void resetBlock(block.id)}
+                    onUpload={uploadsEnabled ? uploadImage : undefined}
                   />
                 ))}
               </div>
@@ -290,10 +341,13 @@ function SettingField({
   setting,
   saving,
   onSave,
+  onUpload,
 }: {
   setting: Setting;
   saving: boolean;
   onSave: (value: string) => void;
+  /** Absent when the API has no upload storage configured. */
+  onUpload?: ((file: File) => Promise<string>) | undefined;
 }) {
   const [draft, setDraft] = useState(setting.value);
   const dirty = draft !== setting.value;
@@ -314,6 +368,20 @@ function SettingField({
         </p>
       )}
 
+      {/* The logo: previewed and uploadable like a page photo. */}
+      {setting.kind === "image" ? (
+        <ImagePicker
+          inputId={inputId}
+          saved={setting.value}
+          draft={draft}
+          setDraft={setDraft}
+          dirty={dirty}
+          saving={saving}
+          onSave={onSave}
+          onUpload={onUpload}
+          fit="contain"
+        />
+      ) : (
       <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
         {setting.kind === "color" ? (
           <>
@@ -365,6 +433,7 @@ function SettingField({
           </button>
         )}
       </div>
+      )}
     </div>
   );
 }
@@ -374,11 +443,16 @@ function BlockField({
   saving,
   publishedLabel,
   onSave,
+  onReset,
+  onUpload,
 }: {
   block: ContentBlock;
   saving: boolean;
   publishedLabel: string;
   onSave: (patch: { value?: string; isPublished?: boolean }) => void;
+  onReset: () => void;
+  /** Absent when the API has no upload storage configured. */
+  onUpload?: ((file: File) => Promise<string>) | undefined;
 }) {
   const [draft, setDraft] = useState(block.value);
   const dirty = draft !== block.value;
@@ -386,6 +460,22 @@ function BlockField({
   useEffect(() => setDraft(block.value), [block.value]);
 
   const inputId = `block-${block.id}`;
+
+  if (block.kind === "image") {
+    return (
+      <ImageBlockField
+        block={block}
+        draft={draft}
+        setDraft={setDraft}
+        dirty={dirty}
+        saving={saving}
+        publishedLabel={publishedLabel}
+        onSave={onSave}
+        onReset={onReset}
+        onUpload={onUpload}
+      />
+    );
+  }
 
   return (
     <div>
@@ -435,6 +525,293 @@ function BlockField({
               ✕
             </button>
           </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A photo slot: a path or URL field beside a live thumbnail of what it points at.
+ *
+ * The field takes a file already shipped under `/images/` or an https URL —
+ * typed, or filled in by uploading a photo when the API has storage. The same
+ * rule the API enforces is checked as the editor types, so a bad value is
+ * flagged before a round trip rather than after. The photo is the same in
+ * every language: saving here changes it on all four locales' pages at once.
+ *
+ * An upload fills the draft and stops there; it is not saved automatically.
+ * That is how every other field here behaves, and it matters more for this
+ * one: saving swaps the photo on four live pages at once, so the editor sees
+ * the new photo in the thumbnail and commits with ✓ — or discards with ✕ —
+ * exactly as with a pasted URL.
+ */
+function ImageBlockField({
+  block,
+  draft,
+  setDraft,
+  dirty,
+  saving,
+  publishedLabel,
+  onSave,
+  onReset,
+  onUpload,
+}: {
+  block: ContentBlock;
+  draft: string;
+  setDraft: (value: string) => void;
+  dirty: boolean;
+  saving: boolean;
+  publishedLabel: string;
+  onSave: (patch: { value?: string; isPublished?: boolean }) => void;
+  onReset: () => void;
+  onUpload?: ((file: File) => Promise<string>) | undefined;
+}) {
+  const { t } = useI18n();
+  const inputId = `block-${block.id}`;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBlockEnd: 4 }}>
+        <label htmlFor={inputId} style={{ fontWeight: 600, color: "var(--text-strong)" }}>
+          {block.label}
+        </label>
+        <code style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)" }}>{block.slot}</code>
+
+        <label style={{ marginInlineStart: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
+          <input
+            type="checkbox"
+            checked={block.isPublished}
+            onChange={(event) => onSave({ isPublished: event.target.checked })}
+            disabled={saving}
+          />
+          {publishedLabel}
+        </label>
+      </div>
+
+      <ImagePicker
+        inputId={inputId}
+        saved={block.value}
+        draft={draft}
+        setDraft={setDraft}
+        dirty={dirty}
+        saving={saving}
+        onSave={(value) => onSave({ value })}
+        onUpload={onUpload}
+        optional
+        extra={(busy) => (
+          <button type="button" className="btn ghost small" onClick={onReset} disabled={saving || busy}>
+            {t("site.image.reset")}
+          </button>
+        )}
+      />
+    </div>
+  );
+}
+
+/**
+ * Thumbnail, path field and upload button for one image value.
+ *
+ * Shared by the page-photo blocks and the logo setting, so a logo and a photo
+ * are checked, previewed and uploaded the same way. The upload only fills the
+ * draft; saving stays the caller's ✓, as for every other field on this page.
+ */
+function ImagePicker({
+  inputId,
+  saved,
+  draft,
+  setDraft,
+  dirty,
+  saving,
+  onSave,
+  onUpload,
+  extra,
+  fit = "cover",
+  optional = false,
+}: {
+  inputId: string;
+  saved: string;
+  draft: string;
+  setDraft: (value: string) => void;
+  dirty: boolean;
+  saving: boolean;
+  onSave: (value: string) => void;
+  onUpload?: ((file: File) => Promise<string>) | undefined;
+  /** Further actions after the upload button, told whether an upload is running. */
+  extra?: ((busy: boolean) => ReactNode) | undefined;
+  /** "contain" for a logo, whose edges matter more than filling the frame. */
+  fit?: "cover" | "contain";
+  /** Page photos may be cleared: empty means "no photo set". The logo may not. */
+  optional?: boolean;
+}) {
+  const { t } = useI18n();
+  const [broken, setBroken] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [upload, setUpload] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const trimmed = draft.trim();
+  const empty = optional && trimmed === "";
+  const valid = empty || isSafeImageSrc(trimmed);
+
+  // A new value gets a fresh chance to load.
+  useEffect(() => setBroken(false), [trimmed]);
+
+  async function pickFile(file: File | undefined) {
+    if (!file || !onUpload) return;
+
+    // Checked here only to spare the editor an 8 MB round trip; the server
+    // decides, and reads the type from the bytes rather than trusting this.
+    if (file.size > IMAGE_UPLOAD_MAX_BYTES) {
+      setUpload({ kind: "error", text: t("site.image.uploadTooLarge") });
+      return;
+    }
+
+    setUploading(true);
+    setUpload(null);
+
+    try {
+      setDraft(await onUpload(file));
+      setUpload({ kind: "ok", text: t("site.image.uploaded") });
+    } catch (caught) {
+      const code = caught instanceof ApiError ? caught.code : undefined;
+      setUpload({
+        kind: "error",
+        text:
+          code === "PAYLOAD_TOO_LARGE"
+            ? t("site.image.uploadTooLarge")
+            : code === "UNSUPPORTED_MEDIA_TYPE"
+              ? t("site.image.uploadType")
+              : caught instanceof ApiError && caught.status !== 0 && caught.status < 500
+                ? caught.message
+                : t("site.image.uploadFailed"),
+      });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const hintId = `${inputId}-hint`;
+
+  return (
+    <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "flex-start", flexWrap: "wrap" }}>
+      {/* The thumbnail shows the draft, not the saved value, so the editor
+          sees the photo before committing to it. */}
+      <div
+        style={{
+          inlineSize: 160,
+          blockSize: 100,
+          flexShrink: 0,
+          borderRadius: "var(--radius-md)",
+          border: "1px solid var(--border-default)",
+          background: "var(--surface-sunken)",
+          overflow: "hidden",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        {empty ? (
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)", padding: "var(--space-2)", textAlign: "center" }}>
+            {t("site.image.empty")}
+          </span>
+        ) : valid && !broken ? (
+          <img
+            src={trimmed}
+            alt=""
+            onError={() => setBroken(true)}
+            style={{ inlineSize: "100%", blockSize: "100%", objectFit: fit }}
+          />
+        ) : (
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)", padding: "var(--space-2)", textAlign: "center" }}>
+            {valid ? t("site.image.broken") : t("site.image.invalid")}
+          </span>
+        )}
+      </div>
+
+      <div style={{ flex: 1, minInlineSize: 240, display: "grid", gap: "var(--space-2)" }}>
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+          {/* Paths and URLs read left to right in every locale. */}
+          <input
+            id={inputId}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            dir="ltr"
+            spellCheck={false}
+            inputMode="url"
+            aria-describedby={hintId}
+            aria-invalid={!valid}
+            style={{
+              flex: 1,
+              fontFamily: "ui-monospace, monospace",
+              padding: "var(--space-2) var(--space-3)",
+              border: `1px solid ${valid ? "var(--border-default)" : "var(--danger)"}`,
+              borderRadius: "var(--radius-md)",
+            }}
+          />
+
+          {dirty && (
+            <>
+              <button
+                type="button"
+                className="btn primary small"
+                onClick={() => onSave(trimmed)}
+                disabled={saving || !valid}
+              >
+                {saving ? "…" : "✓"}
+              </button>
+              <button type="button" className="btn ghost small" onClick={() => setDraft(saved)} disabled={saving}>
+                ✕
+              </button>
+            </>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" }}>
+          <span id={hintId} style={{ fontSize: "var(--text-sm)", color: valid ? "var(--text-muted)" : "var(--danger)" }}>
+            {valid ? t("site.image.hint") : t("site.image.invalid")}
+          </span>
+
+          {/* Pushes the actions to the end of the row, whichever are present. */}
+          <span aria-hidden="true" style={{ marginInlineStart: "auto" }} />
+
+          {onUpload && (
+            <>
+              {/* Hidden behind a button so the control matches the others;
+                  `accept` only narrows the picker — the server checks bytes. */}
+              <input
+                ref={fileInput}
+                type="file"
+                accept={IMAGE_UPLOAD_ACCEPT}
+                hidden
+                onChange={(event) => {
+                  void pickFile(event.target.files?.[0]);
+                  // Cleared so choosing the same file again still fires.
+                  event.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                className="btn ghost small"
+                onClick={() => fileInput.current?.click()}
+                disabled={saving || uploading}
+                aria-busy={uploading}
+              >
+                {uploading ? t("site.image.uploading") : t("site.image.upload")}
+              </button>
+            </>
+          )}
+
+          {extra?.(uploading)}
+        </div>
+
+        {/* The success note is only true while the uploaded URL is unsaved. */}
+        {upload && (upload.kind === "error" || dirty) && (
+          <span
+            role={upload.kind === "error" ? "alert" : "status"}
+            style={{ fontSize: "var(--text-sm)", color: upload.kind === "error" ? "var(--danger)" : "var(--success)" }}
+          >
+            {upload.text}
+          </span>
         )}
       </div>
     </div>

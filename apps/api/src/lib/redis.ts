@@ -1,4 +1,4 @@
-import { env } from "@umzugplus/config";
+import { env } from "@mon/config";
 import { Redis } from "ioredis";
 
 import { logger } from "./logger.js";

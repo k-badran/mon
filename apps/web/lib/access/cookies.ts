@@ -10,6 +10,6 @@
  * The refresh cookie is deliberately absent. It is httpOnly; no code in this
  * app can see it or remove it, and naming it here would only suggest otherwise.
  */
-export const HINT_COOKIE = "umzugplus_sh";
+export const HINT_COOKIE = "mon_sh";
 
-export const LOCALE_COOKIE = "umzugplus_locale";
+export const LOCALE_COOKIE = "mon_locale";

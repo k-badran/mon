@@ -161,6 +161,17 @@ export const faqEntries = pgTable(
     locale: text("locale").notNull().default("de"),
     question: text("question").notNull(),
     answer: text("answer").notNull(),
+    /**
+     * The topic the website files the question under — one of
+     * `FAQ_CATEGORIES` in @mon/core. The API validates it on write, and the
+     * homepage builds its filter chips from the distinct values.
+     *
+     * Nullable, and null reads as "general": rows written before the column
+     * existed are left alone rather than given a topic guessed from their
+     * wording. Plain text rather than a Postgres enum, so adding a topic is a
+     * code change instead of an `ALTER TYPE` migration.
+     */
+    category: text("category"),
     sortOrder: integer("sort_order").notNull().default(0),
     isPublished: boolean("is_published").notNull().default(true),
 
@@ -225,6 +236,12 @@ export const contentBlocks = pgTable(
     locale: text("locale").notNull().default("de"),
 
     value: text("value").notNull(),
+    /**
+     * "text", "textarea" or "image". An image block's value is a picture's
+     * `/images/...` path or https URL; a photo does not change with the
+     * language, so it is seeded identically in all four locales and the API
+     * writes an edit to every locale's row at once.
+     */
     kind: text("kind").notNull().default("text"),
     label: text("label").notNull(),
 

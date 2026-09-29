@@ -1,4 +1,4 @@
-import { isTest } from "@umzugplus/config";
+import { isTest } from "@mon/config";
 import type { Request } from "express";
 import rateLimit, { type RateLimitRequestHandler } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
@@ -76,6 +76,18 @@ export const quoteRateLimit = createLimiter({
   windowMs: 60_000,
   max: 30,
   prefix: "quote",
+  byUserOrIp: true,
+});
+
+/**
+ * Photo uploads. Each one can be 8 MB and becomes a paid S3 object, so the
+ * ceiling is far below the global one — generous for an editor swapping a
+ * page's photos, small enough that a stolen session cannot fill the bucket.
+ */
+export const uploadRateLimit = createLimiter({
+  windowMs: 10 * 60_000,
+  max: 30,
+  prefix: "upload",
   byUserOrIp: true,
 });
 

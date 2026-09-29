@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
 import { readList, type Copy } from "@/app/components/site/Blocks";
 import { ArticleIndex, FeaturedArticle } from "@/app/components/site/Blocks2";
@@ -28,7 +29,7 @@ import { ArticleIndex, FeaturedArticle } from "@/app/components/site/Blocks2";
 const SECTION = "page-blog";
 
 export const metadata: Metadata = {
-  title: "Ratgeber — UmzugPlus",
+  title: "Ratgeber — m.on",
 };
 
 const ARTICLE_IMAGES = [
@@ -49,7 +50,7 @@ export default async function GuidePage({ params }: { params: { locale: Locale }
       category: entry.category,
       date: entry.date,
       readTime: entry.readTime,
-      image: ARTICLE_IMAGES[index],
+      image: imageSrc(copy, `articles.${index + 1}.image`, ARTICLE_IMAGES[index]),
     }),
   );
 
@@ -67,7 +68,7 @@ export default async function GuidePage({ params }: { params: { locale: Locale }
         excerpt={copy["featured.excerpt"]}
         date={copy["featured.date"]}
         readTime={copy["featured.readTime"]}
-        image="/images/page-blog/rectangle.jpg"
+        image={imageSrc(copy, "featured.image", "/images/page-blog/rectangle.jpg")}
       />
 
       <ArticleIndex

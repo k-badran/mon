@@ -30,12 +30,15 @@ const BARE_PREFIXES = [
   // The booking confirmation brings the calculator's own header and has no
   // footer; the marketing nav above it would offer a way out of a checkout.
   "/buchen",
+  // So does every wizard and result frame (3:618 … 3:2496): logo, hotline, no nav or footer.
+  "/rechner",
 ];
 const APP_PREFIXES = ["/dashboard", "/admin"];
 
 export function SiteChrome({
   children,
   footer,
+  appUrl,
 }: {
   children: ReactNode;
   /**
@@ -43,6 +46,8 @@ export function SiteChrome({
    * Passed through rather than imported so this file stays client-side.
    */
   footer?: ReactNode;
+  /** `brand.appUrl` from the settings, for the nav bar's "GET APP". */
+  appUrl?: string | undefined;
 }) {
   const pathname = usePathname();
 
@@ -64,7 +69,7 @@ export function SiteChrome({
 
   return (
     <>
-      <Navbar />
+      <Navbar appUrl={appUrl} />
       {children}
       {footer}
       <ChatWidget />

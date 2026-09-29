@@ -29,7 +29,7 @@ async function api(path, { method = "GET", body, token } = {}) {
 // 1. Admin signs in and opens a socket.
 const admin = await api("/api/auth/login", {
   method: "POST",
-  body: { email: "admin@umzugplus.de", password: "ChangeMe123!" },
+  body: { email: "admin@moveongo.de", password: "ChangeMe123!" },
 });
 console.log("1. admin signed in     :", admin.user.email, `(${admin.user.role})`);
 
