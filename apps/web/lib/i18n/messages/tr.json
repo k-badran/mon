@@ -290,6 +290,7 @@
   "site.themeReset": "Tema varsayılanlarına döndürüldü.",
   "site.contentHint": "Metinler her dil için ayrı tutulur.",
   "site.image.hint": "/images/ altında bir yol veya https:// adresi. Fotoğraflar tüm diller için geçerlidir.",
+  "site.image.empty": "Fotoğraf yok — sayfa kendi fotoğrafını gösterir ya da hiç göstermez.",
   "site.image.invalid": "Yalnızca /images/ altındaki yollar veya https:// adresleri kabul edilir.",
   "site.image.broken": "Görsel yüklenemedi.",
   "site.image.reset": "Varsayılan fotoğraf",

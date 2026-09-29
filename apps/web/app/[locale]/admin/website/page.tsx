@@ -598,6 +598,7 @@ function ImageBlockField({
         saving={saving}
         onSave={(value) => onSave({ value })}
         onUpload={onUpload}
+        optional
         extra={(busy) => (
           <button type="button" className="btn ghost small" onClick={onReset} disabled={saving || busy}>
             {t("site.image.reset")}
@@ -626,6 +627,7 @@ function ImagePicker({
   onUpload,
   extra,
   fit = "cover",
+  optional = false,
 }: {
   inputId: string;
   saved: string;
@@ -639,6 +641,8 @@ function ImagePicker({
   extra?: ((busy: boolean) => ReactNode) | undefined;
   /** "contain" for a logo, whose edges matter more than filling the frame. */
   fit?: "cover" | "contain";
+  /** Page photos may be cleared: empty means "no photo set". The logo may not. */
+  optional?: boolean;
 }) {
   const { t } = useI18n();
   const [broken, setBroken] = useState(false);
@@ -647,7 +651,8 @@ function ImagePicker({
   const fileInput = useRef<HTMLInputElement>(null);
 
   const trimmed = draft.trim();
-  const valid = isSafeImageSrc(trimmed);
+  const empty = optional && trimmed === "";
+  const valid = empty || isSafeImageSrc(trimmed);
 
   // A new value gets a fresh chance to load.
   useEffect(() => setBroken(false), [trimmed]);
@@ -705,7 +710,11 @@ function ImagePicker({
           placeItems: "center",
         }}
       >
-        {valid && !broken ? (
+        {empty ? (
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-faint)", padding: "var(--space-2)", textAlign: "center" }}>
+            {t("site.image.empty")}
+          </span>
+        ) : valid && !broken ? (
           <img
             src={trimmed}
             alt=""

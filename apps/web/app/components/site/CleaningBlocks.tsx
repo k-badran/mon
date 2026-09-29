@@ -164,6 +164,90 @@ function FeatureChips({ features }: { features: string[] }) {
   );
 }
 
+/* ── Programmes as text cards ────────────────────────────────────────── */
+
+export type TextProgramme = {
+  title: string;
+  body: string;
+  /** A rate or "Request quote" on a red pill; drawn only when the CMS has one. */
+  price?: string | undefined;
+  checks: string[];
+};
+
+/**
+ * Three text cards, measured from the original `cleaning-services` section
+ * (3:8412): a #f9fafb card with 16 corners and 32 padding, the title at 22/800
+ * beside an optional red price pill, 14/21 body, and 13/17 items after a 14px
+ * green check with no plate. The clearance page uses it — its design is this
+ * layout without the prices, and the pill comes back if the dashboard sets one.
+ */
+export function ProgramTextCards({
+  eyebrow,
+  headline,
+  programmes,
+}: {
+  eyebrow?: string | undefined;
+  headline?: string | undefined;
+  programmes: TextProgramme[];
+}) {
+  if (programmes.length === 0) return null;
+
+  return (
+    <section className="bg-neutral-0">
+      <div className={`${SHELL} ${PAD} grid gap-12`}>
+        <SectionHeading eyebrow={eyebrow} headline={headline} eyebrowSize="md" />
+
+        <div className="grid gap-6 md:grid-cols-3 [&>*]:min-w-0">
+          {programmes.map((programme) => (
+            <article key={programme.title} className="grid content-start gap-5 rounded-2xl bg-surface-page p-8">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="font-display text-[1.375rem] leading-[1.75rem] font-extrabold text-text-heading">
+                  {programme.title}
+                </h3>
+
+                {programme.price ? (
+                  <span className="rounded-full bg-brand-red px-3 py-1.5 text-caption leading-4 font-bold tracking-normal whitespace-nowrap text-white">
+                    {programme.price}
+                  </span>
+                ) : null}
+              </div>
+
+              <p className="text-body-sm leading-[1.3125rem] text-text-default">{programme.body}</p>
+
+              {programme.checks.length > 0 ? (
+                <ul className="grid gap-2 pt-3">
+                  {programme.checks.map((check) => (
+                    <li
+                      key={check}
+                      className="flex items-center gap-2 text-[0.8125rem] leading-[1.0625rem] text-neutral-800"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="shrink-0 text-success"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      {check}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Before / after ──────────────────────────────────────────────────── */
 
 /**
@@ -313,6 +397,13 @@ const CROSS_SELL_ICONS = {
       <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
       <path d="M10 11v6" />
       <path d="M14 11v6" />
+    </>
+  ),
+  // Lucide "sparkles", for the clearance page's card pointing at cleaning.
+  sparkles: (
+    <>
+      <path d="M9.94 14.06 4 21" />
+      <path d="M11.02 2.27a1 1 0 0 1 1.96 0l.97 4.67a4 4 0 0 0 3.11 3.11l4.67.97a1 1 0 0 1 0 1.96l-4.67.97a4 4 0 0 0-3.11 3.11l-.97 4.67a1 1 0 0 1-1.96 0l-.97-4.67a4 4 0 0 0-3.11-3.11l-4.67-.97a1 1 0 0 1 0-1.96l4.67-.97a4 4 0 0 0 3.11-3.11z" />
     </>
   ),
 } as const;

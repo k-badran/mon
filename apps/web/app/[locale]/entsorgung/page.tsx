@@ -1,34 +1,40 @@
 import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
+import { imageSrc } from "@/lib/site/image";
 import { fetchSiteContent } from "@/lib/site/theme";
+import { DarkHero, path, readList, type Copy } from "@/app/components/site/Blocks";
 import {
-  CardGrid,
-  ChecklistSection,
-  CtaBand,
-  DarkHero,
-  FaqSection,
-  NumberedGrid,
-  path,
-  readList,
-  type Copy,
-} from "@/app/components/site/Blocks";
+  CleaningBeforeAfter,
+  CleaningCrossSell,
+  CleaningGuarantee,
+  ProgramTextCards,
+  type CrossSellIcon,
+} from "@/app/components/site/CleaningBlocks";
 
 /**
  * The clearance and disposal service page.
  *
- * The M.io file draws `service-moving` and `service-cleaning` but has no frame
- * for clearance, even though it is one of the three services on the homepage,
- * an add-on on the moving page, and a footer link. Rather than leave a sold
- * service with no page, this follows the two service pages' structure exactly;
- * the copy is in `service-disposal` and derives from what the design does say
- * about clearance.
+ * The M.io file has no clearance frame, so the page takes the layout the user
+ * supplied for it: the cleaning page's sections (`service-cleaning`, 3:8379),
+ * with the programmes as three text cards and no prices — hero, programmes,
+ * before/after, the handover guarantee and the cross-sell. The copy is in
+ * `service-disposal` and draws on what the design does say about clearance:
+ * the homepage service card, the moving page's add-on and the footer.
  *
- * No photographs: the design supplies none for this service, and a stock image
- * would misrepresent work we have no picture of.
+ * The before/after pair shows only once both photos are set. The design has
+ * no clearance photos, and an unrelated one in the "before" frame would claim
+ * a result nobody photographed; the "after" defaults to the cleared loft the
+ * homepage's clearance card already uses.
  */
 
 const SECTION = "service-disposal";
+
+/** The cross-sell cards in order: relocation, then final cleaning. */
+const CROSS_SELL_TARGETS: Array<{ route: string; icon: CrossSellIcon }> = [
+  { route: "/umzug", icon: "truck" },
+  { route: "/reinigung", icon: "sparkles" },
+];
 
 export const metadata: Metadata = {
   title: "Entsorgung — m.on",
@@ -39,19 +45,26 @@ export default async function DisposalPage({ params }: { params: { locale: Local
   const sections = await fetchSiteContent(locale, SECTION);
   const copy: Copy = sections[SECTION] ?? {};
 
-  const included = readList(copy, "included") as Array<{ title: string; body: string }>;
-  const factors = readList(copy, "factors") as Array<{ title: string; body: string }>;
-  const faq = readList(copy, "faq", ["question", "answer"]) as Array<{
-    question: string;
-    answer: string;
-  }>;
-
-  const addons = readList(copy, "addons").map((entry) => ({
+  const programmes = readList(copy, "programs", ["title", "body", "price"]).map((entry, index) => ({
     title: entry.title ?? "",
     body: entry.body ?? "",
-    href: path(locale, entry.title === copy["addons.1.title"] ? "/reinigung" : "/umzug"),
-    ...(copy["addons.cta"] ? { cta: copy["addons.cta"] } : {}),
+    price: entry.price,
+    checks: [1, 2, 3, 4]
+      .map((n) => copy[`programs.${index + 1}.check.${n}`])
+      .filter((value): value is string => Boolean(value)),
   }));
+
+  const before = imageSrc(copy, "gallery.beforeImage");
+  const after = imageSrc(copy, "gallery.afterImage", "/images/home/circular-photo-wrapper-2.jpg");
+
+  const crossSell = readList(copy, "crossSell")
+    .slice(0, CROSS_SELL_TARGETS.length)
+    .map((entry, index) => ({
+      title: entry.title ?? "",
+      body: entry.body ?? "",
+      href: path(locale, CROSS_SELL_TARGETS[index]!.route),
+      icon: CROSS_SELL_TARGETS[index]!.icon,
+    }));
 
   return (
     <>
@@ -69,45 +82,42 @@ export default async function DisposalPage({ params }: { params: { locale: Local
             ? { label: copy["hero.ctaSecondary"], href: path(locale, "/preise") }
             : undefined
         }
+        image={imageSrc(copy, "hero.image", "/images/entsorgung.jpg")}
       />
 
-      <ChecklistSection
-        eyebrow={copy["included.eyebrow"]}
-        headline={copy["included.headline"]}
-        subline={copy["included.subline"]}
-        items={included}
+      <ProgramTextCards
+        eyebrow={copy["programs.eyebrow"]}
+        headline={copy["programs.headline"]}
+        programmes={programmes}
       />
 
-      <NumberedGrid
-        eyebrow={copy["factors.eyebrow"]}
-        headline={copy["factors.headline"]}
-        subline={copy["factors.subline"]}
-        items={factors}
-        columns={4}
-      />
+      {before ? (
+        <CleaningBeforeAfter
+          eyebrow={copy["gallery.eyebrow"]}
+          headline={copy["gallery.headline"]}
+          subline={copy["gallery.subline"]}
+          beforeLabel={copy["gallery.before"]}
+          afterLabel={copy["gallery.after"]}
+          before={before}
+          after={after}
+        />
+      ) : null}
 
-      <FaqSection
-        eyebrow={copy["faq.eyebrow"]}
-        headline={copy["faq.headline"]}
-        entries={faq}
-        tone="white"
-      />
-
-      <CardGrid
-        eyebrow={copy["addons.eyebrow"]}
-        headline={copy["addons.headline"]}
-        cards={addons}
-        tone="subtle"
-      />
-
-      <CtaBand
-        headline={copy["cta.headline"]}
-        subline={copy["cta.body"]}
-        primary={
-          copy["cta.button"]
-            ? { label: copy["cta.button"], href: path(locale, "/rechner") }
+      <CleaningGuarantee
+        title={copy["guarantee.title"]}
+        body={copy["guarantee.body"]}
+        cta={
+          copy["guarantee.cta"]
+            ? { label: copy["guarantee.cta"], href: path(locale, "/rechner") }
             : undefined
         }
+      />
+
+      <CleaningCrossSell
+        eyebrow={copy["crossSell.eyebrow"]}
+        headline={copy["crossSell.headline"]}
+        subline={copy["crossSell.subline"]}
+        cards={crossSell}
       />
     </>
   );

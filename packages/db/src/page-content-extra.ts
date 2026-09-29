@@ -8,11 +8,11 @@
  * **Clearance (`service-disposal`).** The M.io file draws `service-moving` and
  * `service-cleaning` but not clearance — even though clearance is one of the
  * three services on the homepage, one of the add-ons on the moving page, and a
- * link in the footer. Leaving it out would give the site a dead end on a
- * service it sells, so it is built on the two service pages' structure, and
- * every string below is drawn from what the design *does* say about clearance:
- * the homepage service card, the moving page's "Clearance & Disposal" add-on,
- * and the footer's "Household Clearance".
+ * link in the footer. It takes the layout the user supplied for it, the
+ * cleaning page's sections with text programme cards and no prices, and every
+ * string below is drawn from what the design *does* say about clearance: the
+ * homepage service card, the moving page's "Clearance & Disposal" add-on, and
+ * the footer's "Household Clearance".
  *
  * **Legal pages.** Imprint, privacy and terms carry statutory text, not
  * marketing copy. The rows here are the page's own headings and its lead
@@ -44,10 +44,10 @@ export const EXTRA_CONTENT: ContentSeed[] = [
     tr: "Boşaltma",
   }),
   row(D, "hero.headline", "Hero — headline", 2, {
-    de: "Professionelle und saubere **Haushaltsauflösungen**",
-    en: "Professional and spotless **household clearances**",
-    ar: "إخلاء منزلي احترافي و**نظيف تماماً**",
-    tr: "Profesyonel ve **tertemiz ev boşaltma**",
+    de: "Professionelle und saubere Haushaltsauflösungen",
+    en: "Professional and spotless household clearances",
+    ar: "إخلاء منزلي احترافي ونظيف تماماً",
+    tr: "Profesyonel ve tertemiz ev boşaltma",
   }),
   row(
     D,
@@ -75,360 +75,261 @@ export const EXTRA_CONTENT: ContentSeed[] = [
     tr: "Fiyatlarımız",
   }),
 
-  row(D, "included.eyebrow", "Included — eyebrow", 10, {
-    de: "Rundum-Betreuung",
-    en: "All-Inclusive Care",
-    ar: "رعاية شاملة",
-    tr: "Her Şey Dahil Hizmet",
+  // ── Programmes: three text cards, as the layout supplied for this page ──
+  // No prices, as drawn. A `programs.N.price` row added in the dashboard
+  // brings the red pill back on that card.
+  row(D, "programs.eyebrow", "Programmes — eyebrow", 10, {
+    de: "Unsere Leistungen",
+    en: "Our Programs",
+    ar: "برامجنا",
+    tr: "Programlarımız",
   }),
-  row(D, "included.headline", "Included — headline", 11, {
-    de: "Was bei jeder Entrümpelung enthalten ist",
-    en: "What's included in every clearance",
-    ar: "ما المشمول في كل عملية إخلاء",
-    tr: "Her boşaltmaya neler dahil",
+  row(D, "programs.headline", "Programmes — headline", 11, {
+    de: "Entrümpelung für jeden Raum",
+    en: "Clearance for Every Space",
+    ar: "إخلاء لكل مساحة",
+    tr: "Her Alan İçin Boşaltma",
   }),
-  row(
-    D,
-    "included.subline",
-    "Included — subline",
-    12,
-    {
-      de: "Keller, Dachboden oder ganze Wohnung: Wir räumen, sortieren und entsorgen — und hinterlassen die Räume besenrein.",
-      en: "Cellar, attic or a whole flat: we clear, sort and dispose — and leave the rooms broom-clean.",
-      ar: "قبو أو عليّة أو شقة كاملة: نفرغ ونفرز ونتخلّص — ونترك الغرف نظيفة.",
-      tr: "Bodrum, çatı katı ya da tüm daire: boşaltır, ayrıştırır ve bertaraf ederiz — odaları süpürge temizliğinde bırakırız.",
-    },
-    "textarea",
-  ),
-  row(D, "included.1.title", "Included 1 — title", 13, {
-    de: "Sortieren statt wegwerfen",
-    en: "Sorted, not just skipped",
-    ar: "فرز لا مجرّد رمي",
-    tr: "Atmak değil, ayrıştırmak",
+
+  row(D, "programs.1.title", "Programme 1 — title", 12, {
+    de: "Haushaltsauflösung",
+    en: "Household Clearance",
+    ar: "إخلاء المنازل",
+    tr: "Ev Boşaltma",
   }),
   row(
     D,
-    "included.1.body",
-    "Included 1 — body",
-    14,
+    "programs.1.body",
+    "Programme 1 — description",
+    13,
     {
-      de: "Verwertbares geht an Sozialkaufhäuser, Elektro- und Sondermüll getrennt an zertifizierte Betriebe.",
-      en: "Anything reusable goes to charity shops; electronics and hazardous waste go separately to certified facilities.",
-      ar: "كل ما يمكن إعادة استخدامه يذهب لمتاجر خيرية، والإلكترونيات والنفايات الخطرة لمنشآت معتمدة.",
-      tr: "Yeniden kullanılabilir her şey hayır mağazalarına; elektronik ve tehlikeli atıklar ayrıca sertifikalı tesislere gider.",
+      de: "Komplette Wohnungs- und Hausauflösungen: Möbel, Geräte und Hausrat werden abgeholt, fachgerecht entsorgt und die Räume besenrein übergeben.",
+      en: "Complete apartment and house clearances: furniture, appliances and household goods collected, disposed of properly, and the rooms handed over broom-clean.",
+      ar: "إخلاء كامل للشقق والمنازل: نجمع الأثاث والأجهزة والأغراض المنزلية ونتخلّص منها بشكل نظامي، ونسلّم الغرف نظيفة.",
+      tr: "Daire ve evlerin eksiksiz boşaltılması: mobilya, cihaz ve ev eşyaları toplanır, usulüne uygun bertaraf edilir ve odalar süpürülmüş teslim edilir.",
     },
     "textarea",
   ),
-  row(D, "included.2.title", "Included 2 — title", 15, {
+  row(D, "programs.1.check.1", "Programme 1 — item 1", 14, {
+    de: "Möbel- & Geräteabholung",
+    en: "Furniture & Appliance Removal",
+    ar: "نقل الأثاث والأجهزة",
+    tr: "Mobilya ve Cihaz Taşıma",
+  }),
+  row(D, "programs.1.check.2", "Programme 1 — item 2", 15, {
+    de: "Festpreis nach m²",
+    en: "Fixed Price by m²",
+    ar: "سعر ثابت حسب المتر المربع",
+    tr: "m²'ye Göre Sabit Fiyat",
+  }),
+  row(D, "programs.1.check.3", "Programme 1 — item 3", 16, {
+    de: "Zertifizierte Entsorgung",
+    en: "Certified Disposal",
+    ar: "تخلّص معتمد",
+    tr: "Sertifikalı Bertaraf",
+  }),
+  row(D, "programs.1.check.4", "Programme 1 — item 4", 17, {
+    de: "Besenreine Übergabe",
+    en: "Broom-Clean Handover",
+    ar: "تسليم نظيف",
+    tr: "Süpürülmüş Teslim",
+  }),
+
+  row(D, "programs.2.title", "Programme 2 — title", 20, {
+    de: "Keller & Dachboden",
+    en: "Cellar & Attic Clearance",
+    ar: "إخلاء الأقبية والعلّيات",
+    tr: "Bodrum ve Tavan Arası Boşaltma",
+  }),
+  row(
+    D,
+    "programs.2.body",
+    "Programme 2 — description",
+    21,
+    {
+      de: "Keller, Dachböden und Garagen, befreit von jahrelang Gelagertem — inklusive Sperrmüll und Altholz.",
+      en: "Cellars, attics and garages cleared of years of storage — including bulky waste and scrap timber.",
+      ar: "نُخلي الأقبية والعلّيات والكراجات من أغراض مخزّنة منذ سنوات — بما فيها النفايات الضخمة وبقايا الخشب.",
+      tr: "Yıllardır biriken eşyalardan arındırılmış bodrum, tavan arası ve garajlar — iri atıklar ve hurda ahşap dahil.",
+    },
+    "textarea",
+  ),
+  row(D, "programs.2.check.1", "Programme 2 — item 1", 22, {
+    de: "Sperrmüll & Altholz",
+    en: "Bulky Waste & Scrap Timber",
+    ar: "النفايات الضخمة وبقايا الخشب",
+    tr: "İri Atık ve Hurda Ahşap",
+  }),
+  row(D, "programs.2.check.2", "Programme 2 — item 2", 23, {
+    de: "Festpreis nach m²",
+    en: "Fixed Price by m²",
+    ar: "سعر ثابت حسب المتر المربع",
+    tr: "m²'ye Göre Sabit Fiyat",
+  }),
+  row(D, "programs.2.check.3", "Programme 2 — item 3", 24, {
+    de: "Zertifizierte Entsorgung",
+    en: "Certified Disposal",
+    ar: "تخلّص معتمد",
+    tr: "Sertifikalı Bertaraf",
+  }),
+  row(D, "programs.2.check.4", "Programme 2 — item 4", 25, {
+    de: "Besenreine Übergabe",
+    en: "Broom-Clean Handover",
+    ar: "تسليم نظيف",
+    tr: "Süpürülmüş Teslim",
+  }),
+
+  row(D, "programs.3.title", "Programme 3 — title", 30, {
+    de: "Büro & Gewerbe",
+    en: "Office & Commercial",
+    ar: "المكاتب والمحلات",
+    tr: "Ofis ve Ticari",
+  }),
+  row(
+    D,
+    "programs.3.body",
+    "Programme 3 — description",
+    31,
+    {
+      de: "Büros, Ladenflächen und Lager, geräumt nach Ihrem Zeitplan — mit dokumentierter Entsorgung für Ihre Unterlagen.",
+      en: "Offices, shop floors and storage units cleared on your schedule — with documented disposal for your records.",
+      ar: "نُخلي المكاتب والمحلات والمستودعات حسب جدولك — مع توثيق التخلّص لسجلاتك.",
+      tr: "Ofisler, mağazalar ve depolar programınıza göre boşaltılır — kayıtlarınız için belgeli bertaraf ile.",
+    },
+    "textarea",
+  ),
+  row(D, "programs.3.check.1", "Programme 3 — item 1", 32, {
+    de: "Büromöbel & Ausstattung",
+    en: "Office Furniture & Equipment",
+    ar: "أثاث المكاتب والمعدّات",
+    tr: "Ofis Mobilyası ve Ekipman",
+  }),
+  row(D, "programs.3.check.2", "Programme 3 — item 2", 33, {
+    de: "Festpreis nach m²",
+    en: "Fixed Price by m²",
+    ar: "سعر ثابت حسب المتر المربع",
+    tr: "m²'ye Göre Sabit Fiyat",
+  }),
+  row(D, "programs.3.check.3", "Programme 3 — item 3", 34, {
+    de: "Zertifizierte Entsorgung",
+    en: "Certified Disposal",
+    ar: "تخلّص معتمد",
+    tr: "Sertifikalı Bertaraf",
+  }),
+  row(D, "programs.3.check.4", "Programme 3 — item 4", 35, {
     de: "Entsorgungsnachweis",
-    en: "Certificate of disposal",
+    en: "Certificate of Disposal",
     ar: "شهادة تخلّص",
-    tr: "Bertaraf sertifikası",
+    tr: "Bertaraf Belgesi",
   }),
-  row(
-    D,
-    "included.2.body",
-    "Included 2 — body",
-    16,
-    {
-      de: "Sie erhalten einen dokumentierten Nachweis für Vermieter, Nachlassverwaltung oder Behörden.",
-      en: "You receive a documented certificate for the landlord, an estate executor, or the authorities.",
-      ar: "تحصل على إثبات موثّق للمالك أو لإدارة التركة أو للجهات الرسمية.",
-      tr: "Ev sahibi, tereke yöneticisi veya resmî makamlar için belgeli bir kanıt alırsınız.",
-    },
-    "textarea",
-  ),
-  row(D, "included.3.title", "Included 3 — title", 17, {
-    de: "Diskret und respektvoll",
-    en: "Discreet and respectful",
-    ar: "بتكتّم واحترام",
-    tr: "Nazik ve saygılı",
-  }),
-  row(
-    D,
-    "included.3.body",
-    "Included 3 — body",
-    18,
-    {
-      de: "Gerade bei Nachlässen arbeiten wir leise, unauffällig und mit Rücksicht auf Nachbarn.",
-      en: "With bereavement clearances in particular we work quietly, discreetly, and with consideration for the neighbours.",
-      ar: "خاصة في إخلاء التركات، نعمل بهدوء وتكتّم ومراعاة للجيران.",
-      tr: "Özellikle miras boşaltmalarında sessiz, göze batmadan ve komşuları gözeterek çalışırız.",
-    },
-    "textarea",
-  ),
-  row(D, "included.4.title", "Included 4 — title", 19, {
-    de: "Besenrein übergeben",
-    en: "Left broom-clean",
-    ar: "تُسلَّم نظيفة",
-    tr: "Süpürge temizliğinde teslim",
-  }),
-  row(
-    D,
-    "included.4.body",
-    "Included 4 — body",
-    20,
-    {
-      de: "Nach dem Ausräumen kehren wir durch. Auf Wunsch schließt die Endreinigung direkt an.",
-      en: "Once the rooms are empty we sweep through. The final cleaning can follow on directly if you want it.",
-      ar: "بعد الإفراغ نكنس المكان. ويمكن أن يتبع ذلك التنظيف النهائي مباشرة إن رغبت.",
-      tr: "Odalar boşaldıktan sonra süpürürüz. İsterseniz son temizlik hemen ardından gelir.",
-    },
-    "textarea",
-  ),
 
-  row(D, "factors.eyebrow", "Pricing factors — eyebrow", 30, {
-    de: "Dynamischer Rechner",
-    en: "Dynamic Calculator",
-    ar: "حاسبة ديناميكية",
-    tr: "Dinamik Hesaplayıcı",
+  // ── Before / after: shown once both photos are set (see the page) ──
+  row(D, "gallery.eyebrow", "Before/after — eyebrow", 40, {
+    de: "Echte Ergebnisse",
+    en: "Visual Evidence",
+    ar: "نتائج حقيقية",
+    tr: "Gerçek Sonuçlar",
   }),
-  row(D, "factors.headline", "Pricing factors — headline", 31, {
-    de: "Wie Ihr Angebot berechnet wird",
-    en: "How your quote is calculated",
-    ar: "كيف يُحسب عرض السعر",
-    tr: "Teklifiniz nasıl hesaplanır",
+  row(D, "gallery.headline", "Before/after — headline", 41, {
+    de: "Echte Vorher/Nachher-Ergebnisse",
+    en: "Real Before/After Results",
+    ar: "نتائج حقيقية قبل وبعد",
+    tr: "Gerçek Öncesi/Sonrası Sonuçlar",
   }),
-  row(
-    D,
-    "factors.subline",
-    "Pricing factors — subline",
-    32,
-    {
-      de: "Festpreisgarantie nach m² — die vier Faktoren, die den Preis bestimmen.",
-      en: "A fixed-price guarantee by m² — the four factors that set the price.",
-      ar: "ضمان سعر ثابت حسب المتر المربّع — العوامل الأربعة التي تحدّد السعر.",
-      tr: "m² bazında sabit fiyat garantisi — fiyatı belirleyen dört etken.",
-    },
-    "textarea",
-  ),
-  row(D, "factors.1.title", "Factor 1", 33, {
-    de: "Fläche (m²)",
-    en: "Area (m²)",
-    ar: "المساحة (م²)",
-    tr: "Alan (m²)",
+  row(D, "gallery.subline", "Before/after — subline", 42, {
+    de: "Vergleichen Sie echte, unbearbeitete Fotos unserer Entrümpelungen.",
+    en: "Compare real, unedited photos of our clearance projects.",
+    ar: "قارن صوراً حقيقية غير معدّلة من مشاريع الإخلاء التي نفّذناها.",
+    tr: "Boşaltma projelerimizin gerçek, düzenlenmemiş fotoğraflarını karşılaştırın.",
   }),
-  row(
-    D,
-    "factors.1.body",
-    "Factor 1 — body",
-    34,
-    {
-      de: "Die zu räumende Fläche, inklusive Keller- und Dachbodenanteil.",
-      en: "The area to be cleared, including any cellar and attic space.",
-      ar: "المساحة المطلوب إخلاؤها، شاملة القبو والعليّة.",
-      tr: "Boşaltılacak alan, bodrum ve çatı katı dahil.",
-    },
-    "textarea",
-  ),
-  row(D, "factors.2.title", "Factor 2", 35, {
-    de: "Füllgrad",
-    en: "How full it is",
-    ar: "درجة الامتلاء",
-    tr: "Doluluk oranı",
+  row(D, "gallery.before", "Before/after — before label", 43, {
+    de: "Vorher",
+    en: "Before",
+    ar: "قبل",
+    tr: "Önce",
   }),
-  row(
-    D,
-    "factors.2.body",
-    "Factor 2 — body",
-    36,
-    {
-      de: "Ein leerstehender Keller und ein vollgestellter Dachboden sind nicht derselbe Aufwand.",
-      en: "An empty cellar and a packed attic are not the same job.",
-      ar: "قبو فارغ وعليّة مكتظّة ليسا العمل نفسه.",
-      tr: "Boş bir bodrum ile tıklım tıklım bir çatı katı aynı iş değildir.",
-    },
-    "textarea",
-  ),
-  row(D, "factors.3.title", "Factor 3", 37, {
-    de: "Etage und Zugang",
-    en: "Floor and access",
-    ar: "الطابق وسهولة الوصول",
-    tr: "Kat ve erişim",
+  row(D, "gallery.after", "Before/after — after label", 44, {
+    de: "Nach der Entrümpelung",
+    en: "After Clearance",
+    ar: "بعد الإخلاء",
+    tr: "Boşaltmadan Sonra",
   }),
-  row(
-    D,
-    "factors.3.body",
-    "Factor 3 — body",
-    38,
-    {
-      de: "Etage ohne Aufzug, enge Treppenhäuser und die Entfernung zum Fahrzeug.",
-      en: "A floor without a lift, narrow staircases, and the carry to the vehicle.",
-      ar: "طابق بلا مصعد، وسلالم ضيّقة، والمسافة حتى المركبة.",
-      tr: "Asansörsüz kat, dar merdivenler ve araca kadar taşıma mesafesi.",
-    },
-    "textarea",
-  ),
-  row(D, "factors.4.title", "Factor 4", 39, {
-    de: "Sondermüll",
-    en: "Hazardous waste",
-    ar: "النفايات الخطرة",
-    tr: "Tehlikeli atık",
-  }),
-  row(
-    D,
-    "factors.4.body",
-    "Factor 4 — body",
-    40,
-    {
-      de: "Farben, Chemikalien oder Elektrogroßgeräte werden gesondert abgerechnet und entsorgt.",
-      en: "Paint, chemicals or large electrical appliances are billed and disposed of separately.",
-      ar: "الدهانات والمواد الكيميائية والأجهزة الكهربائية الكبيرة تُحتسب وتُعالَج على حدة.",
-      tr: "Boya, kimyasal veya büyük elektrikli cihazlar ayrıca faturalandırılır ve bertaraf edilir.",
-    },
-    "textarea",
-  ),
 
-  row(D, "faq.eyebrow", "FAQ — eyebrow", 60, {
-    de: "Hilfe",
-    en: "Help Desk",
-    ar: "مكتب المساعدة",
-    tr: "Yardım Masası",
-  }),
-  row(D, "faq.headline", "FAQ — headline", 61, {
-    de: "Häufig gestellte Fragen",
-    en: "Frequently Asked Questions",
-    ar: "الأسئلة الشائعة",
-    tr: "Sık Sorulan Sorular",
-  }),
-  row(D, "faq.1.question", "FAQ 1 — question", 62, {
-    de: "Bekomme ich einen Entsorgungsnachweis?",
-    en: "Do I get a certificate of disposal?",
-    ar: "هل أحصل على شهادة تخلّص؟",
-    tr: "Bertaraf sertifikası alıyor muyum?",
+  // ── Guarantee ─────────────────────────────────────────────────────────
+  row(D, "guarantee.title", "Guarantee — title", 50, {
+    de: "Unsere Besenrein-Garantie",
+    en: "Our Broom-Clean Guarantee",
+    ar: "ضمان التسليم النظيف",
+    tr: "Süpürülmüş Teslim Garantimiz",
   }),
   row(
     D,
-    "faq.1.answer",
-    "FAQ 1 — answer",
-    63,
+    "guarantee.body",
+    "Guarantee — text",
+    51,
     {
-      de: "Ja. Sie erhalten nach Abschluss eine schriftliche Bestätigung über die fachgerechte Entsorgung — für Vermieter, Nachlassverwaltung oder Behörden.",
-      en: "Yes. After the job you receive written confirmation of proper disposal — for the landlord, an estate executor, or the authorities.",
-      ar: "نعم. تحصل بعد الانتهاء على تأكيد خطّي بالتخلّص النظامي — للمالك أو لإدارة التركة أو للجهات الرسمية.",
-      tr: "Evet. İş bitiminde usulüne uygun bertaraf edildiğine dair yazılı onay alırsınız — ev sahibi, tereke yöneticisi veya resmî makamlar için.",
+      de: "Findet Ihr Vermieter oder Hausverwalter bei der Übergabe noch etwas, das hätte entsorgt werden sollen, kommt unser Team zurück und räumt es kostenlos.",
+      en: "If your landlord or property manager finds anything left behind at the handover that should have gone, our crew comes back and clears it free of charge.",
+      ar: "إذا وجد المالك أو مدير العقار عند التسليم أي شيء كان يجب إزالته، يعود فريقنا ويُخليه مجاناً.",
+      tr: "Ev sahibiniz veya yöneticiniz teslimde kaldırılması gereken bir şey bulursa ekibimiz geri gelir ve ücretsiz olarak temizler.",
     },
     "textarea",
   ),
-  row(D, "faq.2.question", "FAQ 2 — question", 64, {
-    de: "Was passiert mit noch brauchbaren Sachen?",
-    en: "What happens to things that are still usable?",
-    ar: "ماذا يحدث للأغراض التي ما زالت صالحة؟",
-    tr: "Hâlâ kullanılabilir eşyalara ne oluyor?",
+  row(D, "guarantee.cta", "Guarantee — button", 52, {
+    de: "Entrümpelung buchen",
+    en: "Book a Clearance",
+    ar: "احجز إخلاء",
+    tr: "Boşaltma Rezervasyonu",
   }),
-  row(
-    D,
-    "faq.2.answer",
-    "FAQ 2 — answer",
-    65,
-    {
-      de: "Verwertbares geben wir an Sozialkaufhäuser und gemeinnützige Einrichtungen weiter, statt es zu entsorgen.",
-      en: "Anything reusable is passed to charity shops and non-profit organisations rather than thrown away.",
-      ar: "كل ما يصلح للاستخدام نمرّره لمتاجر خيرية ومؤسسات غير ربحية بدل التخلّص منه.",
-      tr: "Yeniden kullanılabilir her şeyi atmak yerine hayır mağazalarına ve kâr amacı gütmeyen kuruluşlara veririz.",
-    },
-    "textarea",
-  ),
-  row(D, "faq.3.question", "FAQ 3 — question", 66, {
-    de: "Muss ich während der Entrümpelung anwesend sein?",
-    en: "Do I have to be there during the clearance?",
-    ar: "هل يجب أن أكون حاضراً أثناء الإخلاء؟",
-    tr: "Boşaltma sırasında orada olmam gerekiyor mu?",
-  }),
-  row(
-    D,
-    "faq.3.answer",
-    "FAQ 3 — answer",
-    67,
-    {
-      de: "Nein. Nach Schlüsselübergabe und Freigabe erledigen wir alles selbstständig und dokumentieren den Ablauf.",
-      en: "No. Once the keys are handed over and the job is approved we work independently and document what we do.",
-      ar: "لا. بعد تسليم المفاتيح والموافقة، ننجز كل شيء بأنفسنا ونوثّق سير العمل.",
-      tr: "Hayır. Anahtarlar teslim edilip iş onaylandıktan sonra her şeyi biz hallederiz ve süreci belgeleriz.",
-    },
-    "textarea",
-  ),
 
-  row(D, "addons.eyebrow", "Add-ons — eyebrow", 70, {
-    de: "Zusatzmodule",
-    en: "Additional Modules",
-    ar: "وحدات إضافية",
-    tr: "Ek Modüller",
+  // ── Cross-sell: relocation, then final cleaning ────────────────────────
+  row(D, "crossSell.eyebrow", "Cross-sell — eyebrow", 60, {
+    de: "Kombi-Leistungen",
+    en: "Eco-System Modules",
+    ar: "خدمات متكاملة",
+    tr: "Birleşik Hizmetler",
   }),
-  row(D, "addons.headline", "Add-ons — headline", 71, {
-    de: "Kombinieren und sparen",
-    en: "Combine and save",
-    ar: "ادمج ووفّر",
-    tr: "Birleştir ve kazan",
+  row(D, "crossSell.headline", "Cross-sell — headline", 61, {
+    de: "Mehr buchen. Mehr sparen.",
+    en: "Book More. Save More.",
+    ar: "احجز أكثر. وفّر أكثر.",
+    tr: "Daha Fazla Rezervasyon. Daha Fazla Tasarruf.",
   }),
-  row(D, "addons.1.title", "Add-on 1 — title", 72, {
+  row(
+    D,
+    "crossSell.subline",
+    "Cross-sell — subline",
+    62,
+    {
+      de: "Wir belohnen Komplettbuchungen. Kombinieren Sie die Entrümpelung mit professionellem Transport und Endreinigung und sichern Sie sich Paketrabatte.",
+      en: "We reward comprehensive bookings. Bundle your clearance with professional transport and final cleaning to secure package discounts.",
+      ar: "نكافئ الحجوزات الشاملة. اجمع الإخلاء مع النقل الاحترافي والتنظيف النهائي لتحصل على خصومات الباقات.",
+      tr: "Kapsamlı rezervasyonları ödüllendiriyoruz. Boşaltmayı profesyonel taşıma ve son temizlikle birleştirerek paket indirimlerinden yararlanın.",
+    },
+    "textarea",
+  ),
+  row(D, "crossSell.1.title", "Cross-sell 1 — title", 63, {
+    de: "Umzug",
+    en: "Residential Relocation",
+    ar: "نقل المنزل",
+    tr: "Ev Taşıma",
+  }),
+  row(D, "crossSell.1.body", "Cross-sell 1 — text", 64, {
+    de: "Was mitkommt, transportieren wir; was bleibt, entsorgen wir — in einem Termin.",
+    en: "What comes with you we transport; what stays we dispose of — in a single appointment.",
+    ar: "ننقل ما يرافقك ونتخلّص مما يبقى — في موعد واحد.",
+    tr: "Sizinle gelenleri taşır, kalanları bertaraf ederiz — tek bir randevuda.",
+  }),
+  row(D, "crossSell.2.title", "Cross-sell 2 — title", 65, {
     de: "Endreinigung",
     en: "Final Cleaning",
     ar: "التنظيف النهائي",
     tr: "Son Temizlik",
   }),
-  row(
-    D,
-    "addons.1.body",
-    "Add-on 1 — body",
-    73,
-    {
-      de: "Direkt nach der Entrümpelung — mit Übergabegarantie gegenüber Ihrem Vermieter.",
-      en: "Straight after the clearance — with a handover guarantee for your landlord.",
-      ar: "مباشرة بعد الإخلاء — مع ضمان التسليم أمام المالك.",
-      tr: "Boşaltmanın hemen ardından — ev sahibinize karşı teslim garantisiyle.",
-    },
-    "textarea",
-  ),
-  row(D, "addons.2.title", "Add-on 2 — title", 74, {
-    de: "Umzug & Transport",
-    en: "Moving & Transport",
-    ar: "النقل والترحيل",
-    tr: "Taşınma ve Nakliye",
-  }),
-  row(
-    D,
-    "addons.2.body",
-    "Add-on 2 — body",
-    75,
-    {
-      de: "Was mitkommt, transportieren wir; was bleibt, entsorgen wir — in einem Termin.",
-      en: "What comes with you we transport; what stays we dispose of — in a single appointment.",
-      ar: "ما ينتقل معك ننقله، وما يبقى نتخلّص منه — في موعد واحد.",
-      tr: "Sizinle gelecekleri taşır, kalanları bertaraf ederiz — tek randevuda.",
-    },
-    "textarea",
-  ),
-  row(D, "addons.cta", "Add-ons — link label", 76, {
-    de: "Mehr erfahren",
-    en: "Learn More",
-    ar: "اعرف المزيد",
-    tr: "Daha Fazla",
-  }),
-
-  row(D, "cta.headline", "Closing CTA — headline", 90, {
-    de: "Platz schaffen, ohne sich zu kümmern",
-    en: "Clear the space without the hassle",
-    ar: "أفرغ المكان بلا عناء",
-    tr: "Zahmetsizce yer açın",
-  }),
-  row(
-    D,
-    "cta.body",
-    "Closing CTA — body",
-    91,
-    {
-      de: "Berechnen Sie Ihren Festpreis in unter 2 Minuten — kostenlos und ohne Registrierung.",
-      en: "Calculate your fixed price in under 2 minutes — free and with no registration.",
-      ar: "احسب سعرك الثابت في أقل من دقيقتين — مجاناً وبدون تسجيل.",
-      tr: "Sabit fiyatınızı 2 dakikadan kısa sürede hesaplayın — ücretsiz ve kayıtsız.",
-    },
-    "textarea",
-  ),
-  row(D, "cta.button", "Closing CTA — button", 92, {
-    de: "Preis berechnen",
-    en: "Calculate Price",
-    ar: "احسب السعر",
-    tr: "Fiyat Hesapla",
+  row(D, "crossSell.2.body", "Cross-sell 2 — text", 66, {
+    de: "Nach der Entrümpelung übergeben Sie die Räume blitzsauber — mit unserer Übergabegarantie.",
+    en: "Hand over spotless rooms after the clearance — with our handover guarantee.",
+    ar: "سلّم المكان نظيفاً تماماً بعد الإخلاء — مع ضمان التسليم.",
+    tr: "Boşaltmadan sonra odaları tertemiz teslim edin — teslim garantimizle.",
   }),
 ];

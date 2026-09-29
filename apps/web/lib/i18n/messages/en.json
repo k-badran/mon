@@ -290,6 +290,7 @@
   "site.themeReset": "The theme has been restored to its defaults.",
   "site.contentHint": "Copy is maintained per language.",
   "site.image.hint": "A path under /images/ or an https:// address. Photos apply to every language.",
+  "site.image.empty": "No photo set — the page shows its own, or none.",
   "site.image.invalid": "Only paths under /images/ or https:// addresses are allowed.",
   "site.image.broken": "The image could not be loaded.",
   "site.image.reset": "Default photo",

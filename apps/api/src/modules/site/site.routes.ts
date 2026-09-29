@@ -269,8 +269,14 @@ siteRouter.patch(
     }
 
     // An image block's value lands in an <img src> on a public page, so it is
-    // held to the image rule rather than accepted as free text.
-    if (before.kind === "image" && req.body.value !== undefined && !isSafeImageSrc(req.body.value)) {
+    // held to the image rule rather than accepted as free text. Empty is
+    // allowed: it means "no photo set", and the page shows its own or none.
+    if (
+      before.kind === "image" &&
+      req.body.value !== undefined &&
+      req.body.value !== "" &&
+      !isSafeImageSrc(req.body.value)
+    ) {
       throw AppError.unprocessable(IMAGE_RULE);
     }
 

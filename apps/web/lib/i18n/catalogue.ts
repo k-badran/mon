@@ -940,6 +940,12 @@ export const MESSAGES = {
     ar: "مسار ضمن ‎/images/‎ أو عنوان يبدأ بـ ‎https://‎. تسري الصور على جميع اللغات.",
     tr: "/images/ altında bir yol veya https:// adresi. Fotoğraflar tüm diller için geçerlidir.",
   },
+  "site.image.empty": {
+    de: "Kein Foto gesetzt — die Seite zeigt ihr eigenes oder keins.",
+    en: "No photo set — the page shows its own, or none.",
+    ar: "لا توجد صورة — تعرض الصفحة صورتها الافتراضية أو لا شيء.",
+    tr: "Fotoğraf yok — sayfa kendi fotoğrafını gösterir ya da hiç göstermez.",
+  },
   "site.image.invalid": {
     de: "Nur Pfade unter /images/ oder https://-Adressen sind erlaubt.",
     en: "Only paths under /images/ or https:// addresses are allowed.",

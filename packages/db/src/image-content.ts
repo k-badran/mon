@@ -39,6 +39,7 @@ function image(section: string, slot: string, label: string, sortOrder: number, 
 const HOME = "home";
 const MOVING = "service-moving";
 const CLEANING = "service-cleaning";
+const DISPOSAL = "service-disposal";
 const ABOUT = "page-about";
 const BLOG = "page-blog";
 const BUSINESS = "page-for-business";
@@ -80,6 +81,13 @@ export const IMAGE_CONTENT: ContentSeed[] = [
   image(CLEANING, "programs.3.image", "Programme 3 — photo", 19, "/images/service-cleaning/program-commercial-office.jpg"),
   image(CLEANING, "gallery.beforeImage", "Before / after — before photo", 33, "/images/service-cleaning/rectangle.jpg"),
   image(CLEANING, "gallery.afterImage", "Before / after — after photo", 34, "/images/service-cleaning/rectangle-2.jpg"),
+
+  // ══ Clearance (no frame; the cleaning page's layout) ════════════════
+  image(DISPOSAL, "hero.image", "Hero — background photo", 6, "/images/entsorgung.jpg"),
+  // Empty on purpose: the design has no clearance "before" photo, and the
+  // before/after pair stays hidden until one is set here.
+  image(DISPOSAL, "gallery.beforeImage", "Before / after — before photo", 45, ""),
+  image(DISPOSAL, "gallery.afterImage", "Before / after — after photo", 46, "/images/home/circular-photo-wrapper-2.jpg"),
 
   // ══ About ══════════════════════════════════════════════════════════
   image(ABOUT, "values.image", "Values — photo", 21, "/images/page-about/rectangle.jpg"),

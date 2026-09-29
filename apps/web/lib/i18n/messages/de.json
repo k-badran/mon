@@ -290,6 +290,7 @@
   "site.themeReset": "Die Farben wurden auf die Standardwerte zurückgesetzt.",
   "site.contentHint": "Texte werden pro Sprache gepflegt.",
   "site.image.hint": "Ein Pfad unter /images/ oder eine https://-Adresse. Fotos gelten für alle Sprachen.",
+  "site.image.empty": "Kein Foto gesetzt — die Seite zeigt ihr eigenes oder keins.",
   "site.image.invalid": "Nur Pfade unter /images/ oder https://-Adressen sind erlaubt.",
   "site.image.broken": "Das Bild konnte nicht geladen werden.",
   "site.image.reset": "Standardfoto",
