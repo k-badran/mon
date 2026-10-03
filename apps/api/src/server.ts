@@ -12,6 +12,7 @@ import { logger } from "./lib/logger.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { globalRateLimit } from "./middleware/rate-limit.js";
 import { requestContext } from "./middleware/request-context.js";
+import { auditRouter } from "./modules/audit/audit.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { availabilityRouter } from "./modules/availability/availability.routes.js";
 import { catalogRouter } from "./modules/catalog/catalog.routes.js";
@@ -109,6 +110,8 @@ export function createServer(): Express {
   // Administration.
   app.use("/api/pricing", pricingRouter);
   app.use("/api/discounts", discountsRouter);
+  // Read-only: the trail is written by recordAudit, never through a route.
+  app.use("/api/audit", auditRouter);
   // Mail diagnostics — answers "is outbound email actually working?"
   app.use("/api/admin/mail", mailRouter);
 

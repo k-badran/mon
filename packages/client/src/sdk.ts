@@ -70,6 +70,8 @@ export interface ListOrdersQuery {
   search?: string;
   limit?: number;
   cursor?: string;
+  /** By creation time. The server defaults to newest first. */
+  sort?: "newest" | "oldest";
 }
 
 export type UserStatus = "active" | "blocked";

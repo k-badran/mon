@@ -943,3 +943,274 @@
   .pager { flex-wrap: wrap; }
   .pager .count { inline-size: 100%; margin-block-end: var(--space-2); }
 }
+
+/* ── Audit log ───────────────────────────────────────────────────────── */
+
+.audit-toolbar { margin-block-start: var(--space-4); }
+.audit-date {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.audit-date input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--text-base);
+  background: var(--surface-card);
+  color: var(--text-default);
+}
+
+.audit-table td { vertical-align: top; }
+.audit-time { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.audit-stack { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; }
+.audit-id {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.table-wrap tbody tr.is-open,
+.table-wrap tbody tr.is-open + tr.audit-detail { background: var(--surface-page); }
+
+/* tables.css makes every row's last cell a flex row of buttons; the detail
+   row's only cell is its last one, and must stay a spanning table cell. */
+.table-wrap tbody tr.audit-detail td { display: table-cell; padding-block-start: 0; }
+/* The toggle is a single button, so its cell can stay a table cell and share
+   the row height rather than becoming the flex row of buttons. */
+.table-wrap .audit-table tbody td.row-action { display: table-cell; text-align: end; white-space: nowrap; }
+.audit-detail-body { display: grid; gap: var(--space-3); }
+.audit-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+.audit-facts dt { color: var(--text-muted); }
+.audit-facts dd { margin: 0; overflow-wrap: anywhere; }
+.audit-changes-title { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
+
+/* Wraps rather than widening the table: one long string value would
+   otherwise push every column off the screen. */
+.audit-json {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  max-block-size: 360px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: left;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-default);
+}
+
+@media (max-width: 640px) {
+  /* Not the visually hidden labels: at full width they would push the page
+     sideways by their own size. */
+  .audit-toolbar > :not(.sr-only),
+  .audit-toolbar select { inline-size: 100%; }
+  /* Stated with the table class so it outranks the 640px floor in tables.css
+     whatever order the two sheets load in. */
+  .table-wrap table.audit-table { min-inline-size: 0; }
+  .audit-date { justify-content: space-between; }
+  .audit-date input { inline-size: auto; flex: 1; }
+  .table-wrap tbody tr.audit-detail td { display: block; padding-block-start: 0; }
+  .table-wrap .audit-table tbody td.row-action { display: block; }
+  .table-wrap tbody tr.audit-detail td::before { content: none; }
+  .audit-stack { align-items: flex-end; text-align: end; }
+}
+
+/* ── Messages ────────────────────────────────────────────────────────── */
+
+/* List beside conversation on a desk, stacked on a phone. The conversation
+   keeps a fixed height so the composer stays on screen however long the
+   history grows — the history scrolls, not the page. */
+.msg-layout { display: grid; gap: var(--space-5); align-items: start; }
+@media (min-width: 900px) { .msg-layout { grid-template-columns: minmax(260px, 340px) 1fr; } }
+
+.msg-empty,
+.review-empty { color: var(--text-muted); margin: 0; }
+
+.msg-threads { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.msg-thread {
+  inline-size: 100%;
+  display: grid;
+  gap: 4px;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  font: inherit;
+  text-align: start;
+  color: var(--text-default);
+  cursor: pointer;
+}
+.msg-thread:hover { border-color: var(--border-default); }
+.msg-thread[aria-current="true"] { border-color: var(--brand-red); background: var(--red-50); }
+.msg-thread-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.msg-thread-title { font-weight: 600; color: var(--text-strong); font-size: var(--text-sm); }
+.msg-thread-preview {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.msg-unread {
+  background: var(--brand-red);
+  color: var(--text-on-brand);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  min-inline-size: 20px;
+  block-size: 20px;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  padding-inline: 6px;
+  flex: none;
+}
+
+.msg-conversation { display: flex; flex-direction: column; min-block-size: 520px; }
+.msg-history {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-block-size: 60vh;
+  min-block-size: 320px;
+  overflow-y: auto;
+  padding: var(--space-4);
+  background: var(--surface-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+.msg-intro {
+  margin: auto;
+  max-inline-size: 42ch;
+  text-align: center;
+  color: var(--text-muted);
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+.msg-intro svg { inline-size: 28px; block-size: 28px; color: var(--brand-red); }
+
+/* The customer's own messages sit on the inline-end side, so they follow the
+   reading direction in Arabic rather than being pinned to the right. */
+.msg-bubble {
+  max-inline-size: min(75%, 560px);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  align-self: flex-start;
+}
+.msg-bubble.is-user { align-self: flex-end; background: var(--brand-red); border-color: var(--brand-red); color: var(--text-on-brand); }
+.msg-bubble.is-staff { border-color: var(--info); background: var(--info-soft); }
+.msg-bubble.is-pending { opacity: 0.6; }
+.msg-meta { display: flex; gap: var(--space-3); font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); margin-block-end: 4px; }
+.msg-bubble.is-user .msg-meta { color: rgba(255, 255, 255, 0.8); }
+/* Line breaks are the author's, and the assistant's clarifying lists rely on them. */
+.msg-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-base); line-height: var(--leading-normal); }
+
+.msg-composer { display: flex; gap: var(--space-3); align-items: flex-end; margin-block-start: var(--space-4); }
+.msg-composer textarea,
+.review-form textarea,
+.modal textarea {
+  flex: 1;
+  inline-size: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-default);
+  font: inherit;
+  font-size: var(--text-base);
+  resize: vertical;
+}
+.msg-composer textarea:focus-visible,
+.review-form textarea:focus-visible,
+.modal textarea:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 1px; }
+
+/* The staff inbox reuses the layout above from the other side of the desk:
+   the reader's own messages are the staff ones, so those take the inline-end
+   side and the customer's move to the start. */
+.msg-layout.is-staff .msg-bubble.is-user {
+  align-self: flex-start;
+  background: var(--surface-card);
+  border-color: var(--border-subtle);
+  color: var(--text-default);
+}
+.msg-layout.is-staff .msg-bubble.is-user .msg-meta { color: var(--text-muted); }
+.msg-layout.is-staff .msg-bubble.is-staff { align-self: flex-end; }
+.msg-layout.is-staff .msg-list .filter-pills { margin-block-end: var(--space-3); }
+.msg-layout.is-staff .msg-list .filter-pills button { padding: var(--space-1) var(--space-3); font-size: var(--text-sm); }
+
+/* A waiting conversation is marked on its leading edge, so the eye finds the
+   ones to answer without reading every status line. */
+.msg-thread.is-waiting { border-inline-start: 3px solid var(--brand-red); }
+.msg-thread-status { font-size: var(--text-xs); color: var(--text-muted); }
+.msg-thread.is-waiting .msg-thread-status { color: var(--brand-red); font-weight: 600; }
+.msg-thread-when { font-size: var(--text-xs); color: var(--text-muted); flex: none; }
+
+.msg-head-actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.msg-customer { display: grid; gap: 2px; min-inline-size: 0; }
+.msg-customer .mail { font-size: var(--text-sm); color: var(--text-muted); overflow-wrap: anywhere; }
+.msg-hint { margin: var(--space-2) 0 0; font-size: var(--text-sm); color: var(--text-muted); }
+
+/* ── Reviews ─────────────────────────────────────────────────────────── */
+
+.review-forms { display: grid; gap: var(--space-4); }
+.review-form {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-page);
+}
+.review-form h3 { margin: 0; font-size: var(--text-base); font-weight: 700; color: var(--text-strong); }
+.review-label { font-weight: 600; font-size: var(--text-sm); color: var(--text-strong); }
+.review-optional { font-weight: 400; color: var(--text-muted); }
+.review-form-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.review-form-actions .field-hint { margin: 0; }
+
+.star-input { border: 0; margin: 0; padding: 0; display: flex; gap: 2px; }
+.star-input legend { font-weight: 600; font-size: var(--text-sm); color: var(--text-strong); margin-block-end: 4px; }
+.star-input label { cursor: pointer; font-size: 28px; line-height: 1; color: var(--border-strong); }
+.star-input label.is-on { color: var(--brand-yellow); }
+.star-input label:focus-within { outline: 2px solid var(--brand-red); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+.stars { display: inline-flex; gap: 1px; color: var(--border-strong); letter-spacing: 0; white-space: nowrap; }
+.stars .is-on { color: var(--brand-yellow); }
+
+.review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.review-item { padding: var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }
+.review-item-head { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.review-ref { font-weight: 600; color: var(--text-strong); font-size: var(--text-sm); margin-inline-end: auto; }
+.review-comment { margin: var(--space-2) 0 0; color: var(--text-default); white-space: pre-wrap; }
+.review-reply {
+  margin-block-start: var(--space-3);
+  padding: var(--space-3);
+  border-inline-start: 3px solid var(--brand-red);
+  background: var(--surface-page);
+  font-size: var(--text-sm);
+}
+.review-reply p { margin: 4px 0 0; white-space: pre-wrap; }
+.review-cell { max-inline-size: 420px; white-space: normal; }
+.review-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+/* tables.css turns every last cell into a flex row for its buttons, which
+   stops that cell stretching to the row height when a comment runs to several
+   lines. Above the phone breakpoint, where rows are still rows, it is put
+   back to a table cell and the buttons sit in their own flex wrapper. */
+@media (min-width: 641px) {
+  .table-wrap .review-table tbody td:last-child { display: table-cell; }
+}

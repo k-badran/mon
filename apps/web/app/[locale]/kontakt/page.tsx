@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 
 import type { Locale } from "@/lib/i18n/config";
 import { imageSrc } from "@/lib/site/image";
-import { fetchSiteContent } from "@/lib/site/theme";
+import { fetchSiteContent, fetchSiteTheme } from "@/lib/site/theme";
 import { PageHero, readList, type Copy } from "@/app/components/site/Blocks";
-import { ContactFormSection, HotlineBanner } from "@/app/components/site/Blocks2";
+import { ContactFormSection, HotlineBanner, telHref } from "@/app/components/site/Blocks2";
 
 /**
  * The contact page.
@@ -29,7 +29,7 @@ import { ContactFormSection, HotlineBanner } from "@/app/components/site/Blocks2
 const SECTION = "page-contact";
 
 export const metadata: Metadata = {
-  title: "Kontakt — m.on",
+  title: "Kontakt",
 };
 
 export default async function ContactPage({ params }: { params: { locale: Locale } }) {
@@ -41,7 +41,29 @@ export default async function ContactPage({ params }: { params: { locale: Locale
     .map((entry) => entry.title ?? "")
     .filter(Boolean);
 
-  const cards = readList(copy, "info") as Array<{ title: string; body: string }>;
+  /*
+   * The phone, e-mail, address and hours are the contact settings, not copy:
+   * one value an admin edits in the Website editor, the same one the calculator
+   * header and the dashboard show. The cards used to carry their own address
+   * and hours as CMS text, so the page and the settings could disagree. The
+   * cards' titles stay copy, since they are translated and the details are not.
+   */
+  const { contact } = await fetchSiteTheme();
+  const phone = contact["contact.phone"]?.trim() ?? "";
+  const email = contact["contact.email"]?.trim() ?? "";
+
+  const titles = readList(copy, "info", ["title"]).map((entry) => entry.title ?? "");
+  const cards = [
+    {
+      title: titles[0] ?? "",
+      body: contact["contact.address"]?.trim() ?? "",
+      links: [
+        ...(phone ? [{ label: phone, href: `tel:${telHref(phone)}` }] : []),
+        ...(email ? [{ label: email, href: `mailto:${email}` }] : []),
+      ],
+    },
+    { title: titles[1] ?? "", body: contact["contact.hours"]?.trim() ?? "" },
+  ].filter((card) => card.title && (card.body || (card.links?.length ?? 0) > 0));
 
   return (
     <>
@@ -92,7 +114,7 @@ export default async function ContactPage({ params }: { params: { locale: Locale
       <HotlineBanner
         title={copy["hotline.title"]}
         note={copy["hotline.body"]}
-        phone={copy["hotline.phone"]}
+        phone={phone}
       />
     </>
   );

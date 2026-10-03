@@ -33,7 +33,9 @@ export async function generateMetadata({
   // one — it is at least the page's own name in the reader's language.
   const name = copy["meta.title"] ?? copy["hero.headline"];
 
-  return { title: name ? `${name} — m.on` : "m.on" };
+  // The layout's template appends the brand; without a name the page
+  // inherits the default title rather than a bare brand.
+  return name ? { title: name } : {};
 }
 
 export default async function PricingPage({ params }: { params: { locale: Locale } }) {

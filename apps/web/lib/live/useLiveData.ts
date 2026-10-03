@@ -77,6 +77,10 @@ export interface OrderDetail extends OrderSummary {
   };
 
   notes: string | null;
+  contactPhone: string;
+  cancellationReason: string | null;
+  /** The language the customer booked in, and so the one their mail is in. */
+  locale: string;
   confirmedAt: string | null;
   cancelledAt: string | null;
   completedAt: string | null;

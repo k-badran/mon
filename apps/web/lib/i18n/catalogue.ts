@@ -538,6 +538,244 @@ export const MESSAGES = {
     tr: "5 yıldız üzerinden {rating}",
   },
 
+  // Dashboard: the customer's reviews and the moderation tab.
+  "reviews.tabMine": {
+    de: "Meine Bewertungen", en: "My reviews", ar: "تقييماتي", tr: "Yorumlarım",
+  },
+  "reviews.tabModeration": {
+    de: "Moderation", en: "Moderation", ar: "الإشراف", tr: "Moderasyon",
+  },
+  "reviews.rateTitle": {
+    de: "Abgeschlossene Aufträge bewerten",
+    en: "Rate a completed job",
+    ar: "قيّم طلبًا مكتملًا",
+    tr: "Tamamlanan bir işi değerlendirin",
+  },
+  "reviews.nothingToRate": {
+    de: "Im Moment gibt es nichts zu bewerten. Sobald ein Auftrag abgeschlossen ist, kannst du ihn hier bewerten.",
+    en: "There is nothing to rate right now. Once a job is completed, you can rate it here.",
+    ar: "لا يوجد ما تقيّمه حاليًا. بمجرد اكتمال أي طلب يمكنك تقييمه هنا.",
+    tr: "Şu anda değerlendirilecek bir şey yok. Bir iş tamamlandığında burada değerlendirebilirsiniz.",
+  },
+  "reviews.mineTitle": {
+    de: "Deine Bewertungen", en: "Your reviews", ar: "تقييماتك", tr: "Yorumlarınız",
+  },
+  "reviews.noneYet": {
+    de: "Du hast noch keine Bewertung abgegeben.",
+    en: "You have not written a review yet.",
+    ar: "لم تكتب أي تقييم بعد.",
+    tr: "Henüz bir yorum yazmadınız.",
+  },
+  "reviews.published": {
+    de: "Veröffentlicht", en: "Published", ar: "منشور", tr: "Yayında",
+  },
+  "reviews.awaiting": {
+    de: "Wird geprüft", en: "Awaiting review", ar: "قيد المراجعة", tr: "İnceleniyor",
+  },
+  "reviews.unpublished": {
+    de: "Nicht veröffentlicht", en: "Not published", ar: "غير منشور", tr: "Yayında değil",
+  },
+  "reviews.ratingLabel": {
+    de: "Deine Bewertung", en: "Your rating", ar: "تقييمك", tr: "Puanınız",
+  },
+  "reviews.commentLabel": {
+    de: "Kommentar", en: "Comment", ar: "تعليق", tr: "Yorum",
+  },
+  "reviews.commentPlaceholder": {
+    de: "Wie lief dein Umzug?",
+    en: "How did your move go?",
+    ar: "كيف كانت تجربة انتقالك؟",
+    tr: "Taşınmanız nasıl geçti?",
+  },
+  "reviews.moderationHint": {
+    de: "Bewertungen erscheinen auf der Website, sobald unser Team sie geprüft hat.",
+    en: "Reviews appear on the website once our team has checked them.",
+    ar: "تظهر التقييمات على الموقع بعد أن يراجعها فريقنا.",
+    tr: "Yorumlar ekibimiz kontrol ettikten sonra web sitesinde görünür.",
+  },
+  "reviews.submit": {
+    de: "Bewertung senden", en: "Submit review", ar: "إرسال التقييم", tr: "Yorumu gönder",
+  },
+  "reviews.submitFailed": {
+    de: "Die Bewertung konnte nicht gesendet werden. Bitte versuch es erneut.",
+    en: "The review could not be submitted. Please try again.",
+    ar: "تعذّر إرسال التقييم. الرجاء المحاولة مرّة أخرى.",
+    tr: "Yorum gönderilemedi. Lütfen tekrar deneyin.",
+  },
+  "reviews.filter.unpublished": {
+    de: "Nicht veröffentlicht", en: "Not published", ar: "غير منشورة", tr: "Yayında olmayan",
+  },
+  "reviews.filter.published": {
+    de: "Veröffentlicht", en: "Published", ar: "منشورة", tr: "Yayında",
+  },
+  "reviews.filter.all": {
+    de: "Alle", en: "All", ar: "الكل", tr: "Tümü",
+  },
+  "reviews.moderationEmpty": {
+    de: "Keine Bewertungen in dieser Ansicht.",
+    en: "No reviews in this view.",
+    ar: "لا توجد تقييمات في هذا العرض.",
+    tr: "Bu görünümde yorum yok.",
+  },
+  "reviews.updateFailed": {
+    de: "Die Änderung konnte nicht gespeichert werden. Bitte versuch es erneut.",
+    en: "The change could not be saved. Please try again.",
+    ar: "تعذّر حفظ التغيير. الرجاء المحاولة مرّة أخرى.",
+    tr: "Değişiklik kaydedilemedi. Lütfen tekrar deneyin.",
+  },
+  "reviews.reviewer": { de: "Kunde", en: "Reviewer", ar: "صاحب التقييم", tr: "Yorumlayan" },
+  "reviews.rating": { de: "Bewertung", en: "Rating", ar: "التقييم", tr: "Puan" },
+  "reviews.comment": { de: "Kommentar", en: "Comment", ar: "التعليق", tr: "Yorum" },
+  "reviews.submitted": { de: "Eingegangen", en: "Submitted", ar: "تاريخ الإرسال", tr: "Gönderilme" },
+  "reviews.publish": { de: "Veröffentlichen", en: "Publish", ar: "نشر", tr: "Yayınla" },
+  "reviews.hide": { de: "Ausblenden", en: "Hide", ar: "إخفاء", tr: "Gizle" },
+  "reviews.reply": { de: "Antworten", en: "Reply", ar: "ردّ", tr: "Yanıtla" },
+  "reviews.replyTitle": {
+    de: "Antwort auf die Bewertung zu {reference}",
+    en: "Reply to the review of {reference}",
+    ar: "الردّ على تقييم {reference}",
+    tr: "{reference} yorumuna yanıt",
+  },
+  "reviews.replyLabel": {
+    de: "Deine Antwort", en: "Your reply", ar: "ردّك", tr: "Yanıtınız",
+  },
+  "reviews.replyHint": {
+    de: "Die Antwort wird mit der Bewertung angezeigt, sobald sie veröffentlicht ist.",
+    en: "The reply is shown with the review once it is published.",
+    ar: "يظهر الردّ مع التقييم بمجرد نشره.",
+    tr: "Yanıt, yorum yayınlandığında onunla birlikte gösterilir.",
+  },
+
+  // ── Messages (dashboard) ────────────────────────────────────────────
+  "messages.threads": {
+    de: "Unterhaltungen", en: "Conversations", ar: "المحادثات", tr: "Sohbetler",
+  },
+  "messages.new": {
+    de: "Neue Unterhaltung", en: "New conversation", ar: "محادثة جديدة", tr: "Yeni sohbet",
+  },
+  "messages.empty": {
+    de: "Noch keine Unterhaltungen. Schreib uns — der Assistent antwortet sofort, und bei Bedarf übernimmt jemand aus unserem Team.",
+    en: "No conversations yet. Write to us — the assistant answers right away, and someone from our team takes over when needed.",
+    ar: "لا توجد محادثات بعد. راسلنا — يجيب المساعد فورًا، ويتولّى أحد أعضاء فريقنا المحادثة عند الحاجة.",
+    tr: "Henüz sohbet yok. Bize yazın — asistan hemen yanıtlar, gerektiğinde ekibimizden biri devralır.",
+  },
+  "messages.loadFailed": {
+    de: "Die Nachrichten konnten nicht geladen werden.",
+    en: "The messages could not be loaded.",
+    ar: "تعذّر تحميل الرسائل.",
+    tr: "Mesajlar yüklenemedi.",
+  },
+  "messages.conversationFrom": {
+    de: "Unterhaltung vom {date}",
+    en: "Conversation of {date}",
+    ar: "محادثة بتاريخ {date}",
+    tr: "{date} tarihli sohbet",
+  },
+  "messages.unread": {
+    de: { one: "{count} ungelesen", other: "{count} ungelesen" },
+    en: { one: "{count} unread", other: "{count} unread" },
+    ar: {
+      zero: "لا رسائل غير مقروءة", one: "رسالة واحدة غير مقروءة", two: "رسالتان غير مقروءتين",
+      few: "{count} رسائل غير مقروءة", many: "{count} رسالة غير مقروءة", other: "{count} رسالة غير مقروءة",
+    },
+    tr: { one: "{count} okunmamış", other: "{count} okunmamış" },
+  },
+  "messages.you": { de: "Du", en: "You", ar: "أنت", tr: "Siz" },
+  "messages.staff": {
+    de: "Kundenservice", en: "Customer service", ar: "خدمة العملاء", tr: "Müşteri hizmetleri",
+  },
+  "messages.assistant": { de: "Assistent", en: "Assistant", ar: "المساعد", tr: "Asistan" },
+  "messages.humanHandled": {
+    de: "Mit unserem Team", en: "With our team", ar: "مع فريقنا", tr: "Ekibimizle",
+  },
+  "messages.assistantHandled": {
+    de: "Mit dem Assistenten", en: "With the assistant", ar: "مع المساعد", tr: "Asistanla",
+  },
+  "messages.startHint": {
+    de: "Schreib deine Frage unten. Der Assistent antwortet sofort; wenn er nicht weiterweiß, übernimmt jemand aus unserem Team.",
+    en: "Write your question below. The assistant answers right away; if it cannot help, someone from our team takes over.",
+    ar: "اكتب سؤالك في الأسفل. يجيب المساعد فورًا، وإن لم يستطع المساعدة يتولّى أحد أعضاء فريقنا.",
+    tr: "Sorunuzu aşağıya yazın. Asistan hemen yanıtlar; yardımcı olamazsa ekibimizden biri devralır.",
+  },
+  "messages.composerLabel": { de: "Nachricht", en: "Message", ar: "الرسالة", tr: "Mesaj" },
+  "messages.placeholder": {
+    de: "Nachricht schreiben…", en: "Write a message…", ar: "اكتب رسالة…", tr: "Bir mesaj yazın…",
+  },
+  "messages.send": { de: "Senden", en: "Send", ar: "إرسال", tr: "Gönder" },
+  "messages.sendFailed": {
+    de: "Die Nachricht konnte nicht gesendet werden. Bitte versuch es erneut.",
+    en: "The message could not be sent. Please try again.",
+    ar: "تعذّر إرسال الرسالة. الرجاء المحاولة مرّة أخرى.",
+    tr: "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
+  },
+
+  // ── Support inbox (staff) ───────────────────────────────────────────
+  "admin.nav.messages": { de: "Nachrichten", en: "Messages", ar: "الرسائل", tr: "Mesajlar" },
+  "inbox.filterLabel": {
+    de: "Unterhaltungen filtern", en: "Filter conversations", ar: "تصفية المحادثات", tr: "Sohbetleri filtrele",
+  },
+  "inbox.filterAll": { de: "Alle", en: "All", ar: "الكل", tr: "Tümü" },
+  "inbox.filterWaiting": { de: "Wartend", en: "Waiting", ar: "بانتظار الرد", tr: "Bekleyen" },
+  "inbox.filterAssistant": { de: "Assistent", en: "Assistant", ar: "المساعد", tr: "Asistan" },
+  "inbox.filterHuman": { de: "Übernommen", en: "Taken over", ar: "تم تولّيها", tr: "Devralınan" },
+  "inbox.waiting": { de: "Wartet auf Antwort", en: "Waiting for a reply", ar: "بانتظار الرد", tr: "Yanıt bekliyor" },
+  "inbox.waitingCount": {
+    de: { one: "{count} Unterhaltung wartet", other: "{count} Unterhaltungen warten" },
+    en: { one: "{count} conversation waiting", other: "{count} conversations waiting" },
+    ar: {
+      zero: "لا توجد محادثات بانتظار الرد", one: "محادثة واحدة بانتظار الرد", two: "محادثتان بانتظار الرد",
+      few: "{count} محادثات بانتظار الرد", many: "{count} محادثة بانتظار الرد", other: "{count} محادثة بانتظار الرد",
+    },
+    tr: { one: "{count} sohbet bekliyor", other: "{count} sohbet bekliyor" },
+  },
+  "inbox.visitor": {
+    de: "Besucher (nicht angemeldet)", en: "Visitor (not signed in)", ar: "زائر (غير مسجّل الدخول)", tr: "Ziyaretçi (giriş yapmamış)",
+  },
+  "inbox.statusAssistant": {
+    de: "Assistent antwortet", en: "Assistant answering", ar: "المساعد يجيب", tr: "Asistan yanıtlıyor",
+  },
+  "inbox.statusHuman": {
+    de: "Übernommen von {name}", en: "Taken over by {name}", ar: "تولّاها {name}", tr: "{name} devraldı",
+  },
+  "inbox.statusHumanUnknown": { de: "Übernommen", en: "Taken over", ar: "تم تولّيها", tr: "Devralındı" },
+  "inbox.empty": {
+    de: "Keine Unterhaltungen in dieser Ansicht.",
+    en: "No conversations in this view.",
+    ar: "لا توجد محادثات في هذا العرض.",
+    tr: "Bu görünümde sohbet yok.",
+  },
+  "inbox.selectHint": {
+    de: "Wähle links eine Unterhaltung aus, um den Verlauf zu sehen.",
+    en: "Pick a conversation to see its history.",
+    ar: "اختر محادثة لعرض سجلّها.",
+    tr: "Geçmişini görmek için bir sohbet seçin.",
+  },
+  "inbox.takeOver": { de: "Übernehmen", en: "Take over", ar: "تولّي المحادثة", tr: "Devral" },
+  "inbox.takeOverHint": {
+    de: "Danach antwortet der Assistent in dieser Unterhaltung nicht mehr.",
+    en: "The assistant stops answering in this conversation.",
+    ar: "بعد ذلك يتوقّف المساعد عن الرد في هذه المحادثة.",
+    tr: "Bundan sonra asistan bu sohbette yanıt vermez.",
+  },
+  "inbox.takeOverFailed": {
+    de: "Die Unterhaltung konnte nicht übernommen werden.",
+    en: "The conversation could not be taken over.",
+    ar: "تعذّر تولّي المحادثة.",
+    tr: "Sohbet devralınamadı.",
+  },
+  "inbox.replyHint": {
+    de: "Mit deiner Antwort übernimmst du die Unterhaltung; der Assistent schweigt dann.",
+    en: "Replying takes the conversation over; the assistant then stays quiet.",
+    ar: "بالرد تتولّى المحادثة، ويتوقّف المساعد عن الرد.",
+    tr: "Yanıt verdiğinizde sohbeti devralırsınız; asistan artık yanıt vermez.",
+  },
+  "inbox.readOnly": {
+    de: "Du kannst Unterhaltungen lesen, aber nicht beantworten.",
+    en: "You can read conversations but not answer them.",
+    ar: "يمكنك قراءة المحادثات لكن لا يمكنك الرد عليها.",
+    tr: "Sohbetleri okuyabilir ama yanıtlayamazsınız.",
+  },
+
   // ── Admin ───────────────────────────────────────────────────────────
   "admin.orders": { de: "Aufträge", en: "Orders", ar: "الطلبات", tr: "Siparişler" },
   "admin.customer": { de: "Kunde", en: "Customer", ar: "العميل", tr: "Müşteri" },
@@ -891,6 +1129,62 @@ export const MESSAGES = {
   "site.tab.contact": { de: "Kontakt", en: "Contact", ar: "التواصل", tr: "İletişim" },
   "site.tab.seo": { de: "SEO", en: "SEO", ar: "تحسين الظهور", tr: "SEO" },
   "site.tab.content": { de: "Inhalte", en: "Content", ar: "المحتوى", tr: "İçerik" },
+  // The FAQ tab of the Website editor.
+  "site.tab.faq": { de: "FAQ", en: "FAQ", ar: "الأسئلة الشائعة", tr: "SSS" },
+  "site.faq.hint": {
+    de: "Fragen werden pro Sprache gepflegt. Die Startseite zeigt die ersten vier veröffentlichten.",
+    en: "Questions are maintained per language. The home page shows the first four published ones.",
+    ar: "تُحرَّر الأسئلة لكل لغة على حدة. تعرض الصفحة الرئيسية أول أربعة أسئلة منشورة.",
+    tr: "Sorular her dil için ayrı tutulur. Ana sayfa yayındaki ilk dördünü gösterir.",
+  },
+  "site.faq.question": { de: "Frage", en: "Question", ar: "السؤال", tr: "Soru" },
+  "site.faq.answer": { de: "Antwort", en: "Answer", ar: "الإجابة", tr: "Cevap" },
+  "site.faq.category": { de: "Thema", en: "Topic", ar: "الموضوع", tr: "Konu" },
+  "site.faq.position": { de: "Nr. {n}", en: "No. {n}", ar: "رقم {n}", tr: "No. {n}" },
+  "site.faq.empty": {
+    de: "In dieser Sprache gibt es noch keine Fragen.",
+    en: "There are no questions in this language yet.",
+    ar: "لا توجد أسئلة بهذه اللغة بعد.",
+    tr: "Bu dilde henüz soru yok.",
+  },
+  "site.faq.addTitle": { de: "Neue Frage", en: "New question", ar: "سؤال جديد", tr: "Yeni soru" },
+  "site.faq.add": { de: "Frage hinzufügen", en: "Add question", ar: "إضافة السؤال", tr: "Soruyu ekle" },
+  "site.faq.adding": { de: "Wird hinzugefügt …", en: "Adding…", ar: "جارٍ الإضافة…", tr: "Ekleniyor…" },
+  "site.faq.added": {
+    de: "Frage hinzugefügt — auf der Website in einigen Minuten sichtbar.",
+    en: "Question added — visible on the website within a few minutes.",
+    ar: "أُضيف السؤال — يظهر على الموقع خلال دقائق.",
+    tr: "Soru eklendi — birkaç dakika içinde sitede görünür.",
+  },
+  "site.faq.tooShort": {
+    de: "Frage und Antwort brauchen jeweils mindestens 3 Zeichen.",
+    en: "The question and the answer each need at least 3 characters.",
+    ar: "يحتاج كل من السؤال والإجابة إلى 3 أحرف على الأقل.",
+    tr: "Soru ve cevabın her biri en az 3 karakter olmalıdır.",
+  },
+  "site.faq.moveUp": { de: "Nach oben", en: "Move up", ar: "تحريك للأعلى", tr: "Yukarı taşı" },
+  "site.faq.moveDown": { de: "Nach unten", en: "Move down", ar: "تحريك للأسفل", tr: "Aşağı taşı" },
+  "site.faq.reordered": {
+    de: "Reihenfolge gespeichert.",
+    en: "Order saved.",
+    ar: "حُفظ الترتيب.",
+    tr: "Sıralama kaydedildi.",
+  },
+  "site.faq.delete": { de: "Löschen", en: "Delete", ar: "حذف", tr: "Sil" },
+  "site.faq.deleteTitle": {
+    de: "Diese Frage löschen?",
+    en: "Delete this question?",
+    ar: "حذف هذا السؤال؟",
+    tr: "Bu soru silinsin mi?",
+  },
+  "site.faq.deleteBody": {
+    de: "„{question}“ verschwindet von der Website. Das lässt sich nicht rückgängig machen — soll sie nur vorübergehend fehlen, nimm stattdessen den Haken bei „Veröffentlicht“ heraus.",
+    en: "“{question}” will be removed from the website. This cannot be undone — to hide it only for a while, untick “Published” instead.",
+    ar: "سيُحذف «{question}» من الموقع ولا يمكن التراجع عن ذلك — لإخفائه مؤقتاً فقط، أزِل علامة «منشور» بدلاً من ذلك.",
+    tr: "“{question}” web sitesinden kaldırılacak. Bu geri alınamaz — yalnızca bir süre gizlemek için bunun yerine “Yayında” işaretini kaldırın.",
+  },
+  "site.faq.deleting": { de: "Wird gelöscht …", en: "Deleting…", ar: "جارٍ الحذف…", tr: "Siliniyor…" },
+  "site.faq.deleted": { de: "Frage gelöscht.", en: "Question deleted.", ar: "حُذف السؤال.", tr: "Soru silindi." },
   "site.section.home": { de: "Startseite", en: "Home page", ar: "الصفحة الرئيسية", tr: "Ana sayfa" },
   "site.section.auth": { de: "Anmeldeseite", en: "Login page", ar: "صفحة الدخول", tr: "Giriş sayfası" },
   "site.section.footer": { de: "Fußzeile", en: "Footer", ar: "التذييل", tr: "Alt bilgi" },
@@ -1015,6 +1309,155 @@ export const MESSAGES = {
   "admin.nav.analytics": { de: "Analytics", en: "Analytics", ar: "التحليلات", tr: "Analitik" },
   "admin.nav.logs": { de: "Protokoll", en: "Logs", ar: "السجلّات", tr: "Kayıtlar" },
   "admin.nav.settings": { de: "Einstellungen", en: "Settings", ar: "الإعدادات", tr: "Ayarlar" },
+
+  // ── Audit log ───────────────────────────────────────────────────────
+  "admin.logs.lead": {
+    de: "Jede Änderung im Backoffice – wer sie gemacht hat und wann. Einträge lassen sich weder bearbeiten noch löschen.",
+    en: "Every change made in the back office — who made it and when. Entries cannot be edited or deleted.",
+    ar: "كل تغيير أُجري في لوحة الإدارة، ومن أجراه ومتى. لا يمكن تعديل السجلات أو حذفها.",
+    tr: "Yönetim panelinde yapılan her değişiklik; kimin ve ne zaman yaptığı. Kayıtlar düzenlenemez veya silinemez.",
+  },
+  "admin.logs.time": { de: "Zeitpunkt", en: "Time", ar: "الوقت", tr: "Zaman" },
+  "admin.logs.actor": { de: "Ausgeführt von", en: "Actor", ar: "المنفِّذ", tr: "Kişi" },
+  "admin.logs.action": { de: "Aktion", en: "Action", ar: "الإجراء", tr: "İşlem" },
+  "admin.logs.target": { de: "Objekt", en: "Target", ar: "الهدف", tr: "Hedef" },
+  "admin.logs.showDetails": {
+    de: "Details anzeigen", en: "Show details", ar: "عرض التفاصيل", tr: "Ayrıntıları göster",
+  },
+  "admin.logs.hideDetails": {
+    de: "Details ausblenden", en: "Hide details", ar: "إخفاء التفاصيل", tr: "Ayrıntıları gizle",
+  },
+  "admin.logs.allActions": {
+    de: "Alle Aktionen", en: "All actions", ar: "كل الإجراءات", tr: "Tüm işlemler",
+  },
+  "admin.logs.allActors": { de: "Alle Personen", en: "Everyone", ar: "الجميع", tr: "Herkes" },
+  "admin.logs.from": { de: "Von", en: "From", ar: "من", tr: "Başlangıç" },
+  "admin.logs.to": { de: "Bis", en: "To", ar: "إلى", tr: "Bitiş" },
+  "admin.logs.searchPlaceholder": {
+    de: "Aktion, Objekt oder E-Mail suchen",
+    en: "Search action, target or email",
+    ar: "ابحث عن إجراء أو هدف أو بريد إلكتروني",
+    tr: "İşlem, hedef veya e-posta ara",
+  },
+  "admin.logs.clearFilters": {
+    de: "Filter zurücksetzen", en: "Clear filters", ar: "مسح عوامل التصفية", tr: "Filtreleri temizle",
+  },
+  "admin.logs.empty": {
+    de: "Keine Einträge gefunden.", en: "No entries found.", ar: "لا توجد سجلات.", tr: "Kayıt bulunamadı.",
+  },
+  "admin.logs.loadFailed": {
+    de: "Das Protokoll konnte nicht geladen werden.",
+    en: "The log could not be loaded.",
+    ar: "تعذّر تحميل السجل.",
+    tr: "Kayıtlar yüklenemedi.",
+  },
+  "admin.logs.loadMore": {
+    de: "Weitere laden", en: "Load more", ar: "تحميل المزيد", tr: "Daha fazla yükle",
+  },
+  "admin.logs.shown": {
+    de: { one: "{count} Eintrag angezeigt", other: "{count} Einträge angezeigt" },
+    en: { one: "{count} entry shown", other: "{count} entries shown" },
+    ar: {
+      zero: "لا سجلات معروضة", one: "سجل واحد معروض", two: "سجلان معروضان",
+      few: "{count} سجلات معروضة", many: "{count} سجلًا معروضًا", other: "{count} سجل معروض",
+    },
+    tr: { one: "{count} kayıt gösteriliyor", other: "{count} kayıt gösteriliyor" },
+  },
+  "admin.logs.system": { de: "System", en: "System", ar: "النظام", tr: "Sistem" },
+  "admin.logs.unknownActor": { de: "Unbekannt", en: "Unknown", ar: "غير معروف", tr: "Bilinmiyor" },
+  "admin.logs.changes": { de: "Änderungen", en: "Changes", ar: "التغييرات", tr: "Değişiklikler" },
+  "admin.logs.noChanges": {
+    de: "Zu diesem Eintrag wurden keine Änderungsdaten gespeichert.",
+    en: "No change data was recorded for this entry.",
+    ar: "لم تُسجَّل بيانات تغيير لهذا السجل.",
+    tr: "Bu kayıt için değişiklik verisi saklanmadı.",
+  },
+  "admin.logs.ip": { de: "IP-Adresse", en: "IP address", ar: "عنوان IP", tr: "IP adresi" },
+  "admin.logs.requestId": { de: "Anfrage-ID", en: "Request ID", ar: "معرّف الطلب", tr: "İstek kimliği" },
+  "admin.logs.entryId": { de: "Eintrags-ID", en: "Entry ID", ar: "معرّف السجل", tr: "Kayıt kimliği" },
+  "admin.logs.rawAction": { de: "Schlüssel", en: "Key", ar: "المفتاح", tr: "Anahtar" },
+
+  // One per action key the API writes. A key missing here is shown raw
+  // rather than hidden, so a new action is readable before it is translated.
+  "admin.logs.action.catalog.created": {
+    de: "Katalogeintrag angelegt", en: "Catalogue item created", ar: "أُنشئ عنصر في الكتالوج", tr: "Katalog öğesi oluşturuldu",
+  },
+  "admin.logs.action.catalog.updated": {
+    de: "Katalogeintrag geändert", en: "Catalogue item updated", ar: "عُدّل عنصر في الكتالوج", tr: "Katalog öğesi güncellendi",
+  },
+  "admin.logs.action.catalog.deactivated": {
+    de: "Katalogeintrag deaktiviert", en: "Catalogue item deactivated", ar: "عُطّل عنصر في الكتالوج", tr: "Katalog öğesi devre dışı bırakıldı",
+  },
+  "admin.logs.action.complaint.status_changed": {
+    de: "Reklamationsstatus geändert", en: "Complaint status changed", ar: "تغيّرت حالة الشكوى", tr: "Şikâyet durumu değiştirildi",
+  },
+  "admin.logs.action.discount.created": {
+    de: "Rabattcode angelegt", en: "Discount code created", ar: "أُنشئ رمز خصم", tr: "İndirim kodu oluşturuldu",
+  },
+  "admin.logs.action.discount.enabled": {
+    de: "Rabattcode aktiviert", en: "Discount code enabled", ar: "فُعّل رمز الخصم", tr: "İndirim kodu etkinleştirildi",
+  },
+  "admin.logs.action.discount.disabled": {
+    de: "Rabattcode deaktiviert", en: "Discount code disabled", ar: "عُطّل رمز الخصم", tr: "İndirim kodu devre dışı bırakıldı",
+  },
+  "admin.logs.action.mail.test_sent": {
+    de: "Test-E-Mail gesendet", en: "Test email sent", ar: "أُرسل بريد تجريبي", tr: "Test e-postası gönderildi",
+  },
+  "admin.logs.action.order.created": {
+    de: "Auftrag angelegt", en: "Order created", ar: "أُنشئ طلب", tr: "Sipariş oluşturuldu",
+  },
+  "admin.logs.action.order.status_changed": {
+    de: "Auftragsstatus geändert", en: "Order status changed", ar: "تغيّرت حالة الطلب", tr: "Sipariş durumu değiştirildi",
+  },
+  "admin.logs.action.payment.recorded": {
+    de: "Zahlung erfasst", en: "Payment recorded", ar: "سُجّلت دفعة", tr: "Ödeme kaydedildi",
+  },
+  "admin.logs.action.pricing.updated": {
+    de: "Preise geändert", en: "Pricing updated", ar: "عُدّلت الأسعار", tr: "Fiyatlar güncellendi",
+  },
+  "admin.logs.action.review.moderated": {
+    de: "Bewertung moderiert", en: "Review moderated", ar: "رُوجع تقييم", tr: "Yorum denetlendi",
+  },
+  "admin.logs.action.site.content_updated": {
+    de: "Website-Text geändert", en: "Website content updated", ar: "عُدّل محتوى الموقع", tr: "Web sitesi içeriği güncellendi",
+  },
+  "admin.logs.action.site.image_uploaded": {
+    de: "Bild hochgeladen", en: "Image uploaded", ar: "رُفعت صورة", tr: "Görsel yüklendi",
+  },
+  "admin.logs.action.site.setting_updated": {
+    de: "Website-Einstellung geändert", en: "Site setting updated", ar: "عُدّل إعداد الموقع", tr: "Site ayarı güncellendi",
+  },
+  "admin.logs.action.site.theme_reset": {
+    de: "Design zurückgesetzt", en: "Theme reset", ar: "أُعيد ضبط التصميم", tr: "Tema sıfırlandı",
+  },
+  "admin.logs.action.user.created": {
+    de: "Nutzer angelegt", en: "User created", ar: "أُنشئ مستخدم", tr: "Kullanıcı oluşturuldu",
+  },
+  "admin.logs.action.user.updated": {
+    de: "Nutzer geändert", en: "User updated", ar: "عُدّل مستخدم", tr: "Kullanıcı güncellendi",
+  },
+
+  "admin.logs.entity.catalog_item": {
+    de: "Katalogeintrag", en: "Catalogue item", ar: "عنصر كتالوج", tr: "Katalog öğesi",
+  },
+  "admin.logs.entity.complaint": { de: "Reklamation", en: "Complaint", ar: "شكوى", tr: "Şikâyet" },
+  "admin.logs.entity.content_block": {
+    de: "Inhaltsblock", en: "Content block", ar: "كتلة محتوى", tr: "İçerik bloğu",
+  },
+  "admin.logs.entity.discount_code": {
+    de: "Rabattcode", en: "Discount code", ar: "رمز خصم", tr: "İndirim kodu",
+  },
+  "admin.logs.entity.mail": { de: "E-Mail", en: "Email", ar: "بريد إلكتروني", tr: "E-posta" },
+  "admin.logs.entity.order": { de: "Auftrag", en: "Order", ar: "طلب", tr: "Sipariş" },
+  "admin.logs.entity.price_setting": {
+    de: "Preiseinstellung", en: "Price setting", ar: "إعداد السعر", tr: "Fiyat ayarı",
+  },
+  "admin.logs.entity.review": { de: "Bewertung", en: "Review", ar: "تقييم", tr: "Yorum" },
+  "admin.logs.entity.site_setting": {
+    de: "Website-Einstellung", en: "Site setting", ar: "إعداد الموقع", tr: "Site ayarı",
+  },
+  "admin.logs.entity.upload": { de: "Upload", en: "Upload", ar: "ملف مرفوع", tr: "Yükleme" },
+  "admin.logs.entity.user": { de: "Nutzer", en: "User", ar: "مستخدم", tr: "Kullanıcı" },
 
   "dash.comingSoon": {
     de: "In Vorbereitung", en: "Coming soon", ar: "قريبًا", tr: "Yakında",
@@ -2400,6 +2843,99 @@ export const MESSAGES = {
   "footer.navLabel": {
     de: "Fußzeilen-Navigation", en: "Footer navigation", ar: "روابط التذييل", tr: "Alt bilgi gezinmesi",
   },
+
+  // ── Admin: the order list and order detail ──────────────────────────
+  "adminOrders.lead": {
+    de: "Alle Aufträge. Nach Status filtern oder nach Referenz, Name oder E-Mail suchen.",
+    en: "Every order. Filter by status, or search by reference, name or email.",
+    ar: "جميع الطلبات. صفِّ حسب الحالة أو ابحث بالمرجع أو الاسم أو البريد الإلكتروني.",
+    tr: "Tüm siparişler. Duruma göre filtreleyin veya referans, ad ya da e-posta ile arayın.",
+  },
+  "adminOrders.viewAll": {
+    de: "Alle Aufträge anzeigen", en: "View all orders", ar: "عرض كل الطلبات", tr: "Tüm siparişleri görüntüle",
+  },
+  "adminOrders.sort": { de: "Sortierung", en: "Sort", ar: "الترتيب", tr: "Sıralama" },
+  "adminOrders.sort.newest": {
+    de: "Neueste zuerst", en: "Newest first", ar: "الأحدث أولًا", tr: "Önce en yeni",
+  },
+  "adminOrders.sort.oldest": {
+    de: "Älteste zuerst", en: "Oldest first", ar: "الأقدم أولًا", tr: "Önce en eski",
+  },
+  "adminOrders.bookedOn": {
+    de: "Gebucht am {date}", en: "Booked {date}", ar: "حُجز في {date}", tr: "Rezervasyon: {date}",
+  },
+  "adminOrders.page": { de: "Seite {n}", en: "Page {n}", ar: "الصفحة {n}", tr: "Sayfa {n}" },
+  // Verbs, not the status names: the button says what pressing it does.
+  "adminOrders.moveTo.confirmed": { de: "Bestätigen", en: "Confirm", ar: "تأكيد", tr: "Onayla" },
+  "adminOrders.moveTo.completed": {
+    de: "Abschließen", en: "Mark completed", ar: "تحديد كمكتمل", tr: "Tamamlandı olarak işaretle",
+  },
+  "adminOrders.moveTo.quoted": {
+    de: "Auf Angebot zurücksetzen", en: "Back to quote", ar: "إعادة إلى عرض السعر", tr: "Teklife geri al",
+  },
+  "adminOrders.cancelBody": {
+    de: "Der Kunde wird per E-Mail informiert. Eine Stornogebühr nach den AGB wird automatisch berechnet. Ein stornierter Auftrag kann nicht wieder aufgenommen werden.",
+    en: "The customer is emailed. Any cancellation fee under the terms is calculated automatically. A cancelled order cannot be reopened.",
+    ar: "سيتم إبلاغ العميل بالبريد الإلكتروني. تُحتسب أي رسوم إلغاء وفق الشروط تلقائيًا. لا يمكن إعادة فتح طلب ملغى.",
+    tr: "Müşteriye e-posta gönderilir. Koşullara göre iptal ücreti otomatik hesaplanır. İptal edilen sipariş yeniden açılamaz.",
+  },
+  "adminOrders.cancelReason": {
+    de: "Grund (optional, wird am Auftrag gespeichert)",
+    en: "Reason (optional, kept on the order)",
+    ar: "السبب (اختياري، يُحفظ مع الطلب)",
+    tr: "Neden (isteğe bağlı, siparişte saklanır)",
+  },
+  "adminOrders.cancelReasonShort": {
+    de: "Stornogrund", en: "Cancellation reason", ar: "سبب الإلغاء", tr: "İptal nedeni",
+  },
+  "adminOrders.readOnly": {
+    de: "Mit dieser Rolle lassen sich Aufträge ansehen, aber nicht ändern.",
+    en: "Your role can view orders but not change them.",
+    ar: "يمكن لدورك عرض الطلبات دون تعديلها.",
+    tr: "Rolünüz siparişleri görüntüleyebilir ancak değiştiremez.",
+  },
+  "adminOrders.language": { de: "Sprache", en: "Language", ar: "اللغة", tr: "Dil" },
+  "adminOrders.schedule": { de: "Termin", en: "Schedule", ar: "الموعد", tr: "Program" },
+  "adminOrders.time": { de: "Uhrzeit", en: "Time", ar: "الوقت", tr: "Saat" },
+  "adminOrders.secondDay": {
+    de: "Fortsetzung am", en: "Continues on", ar: "يستمر في", tr: "Devam tarihi",
+  },
+  "adminOrders.crew": { de: "Team", en: "Crew", ar: "الفريق", tr: "Ekip" },
+  "adminOrders.crewCount": {
+    de: { one: "{count} Person", other: "{count} Personen" },
+    en: { one: "{count} mover", other: "{count} movers" },
+    ar: {
+      zero: "لا أحد", one: "شخص واحد", two: "شخصان",
+      few: "{count} أشخاص", many: "{count} شخصًا", other: "{count} شخص",
+    },
+    tr: { one: "{count} kişi", other: "{count} kişi" },
+  },
+  "adminOrders.hours": {
+    de: "Geschätzte Dauer", en: "Estimated time", ar: "المدة المقدّرة", tr: "Tahmini süre",
+  },
+  "adminOrders.hoursValue": {
+    de: "{hours} Std.", en: "{hours} h", ar: "{hours} ساعة", tr: "{hours} sa",
+  },
+  "adminOrders.distance": { de: "Entfernung", en: "Distance", ar: "المسافة", tr: "Mesafe" },
+  "adminOrders.distanceValue": {
+    de: "{km} km", en: "{km} km", ar: "{km} كم", tr: "{km} km",
+  },
+  "adminOrders.scope": { de: "Umfang", en: "Scope", ar: "نطاق العمل", tr: "Kapsam" },
+  "adminOrders.area": { de: "Fläche", en: "Area", ar: "المساحة", tr: "Alan" },
+  "adminOrders.areaValue": {
+    de: "{sqm} m²", en: "{sqm} m²", ar: "{sqm} م²", tr: "{sqm} m²",
+  },
+  "adminOrders.notes": {
+    de: "Anmerkungen des Kunden", en: "Customer notes", ar: "ملاحظات العميل", tr: "Müşteri notları",
+  },
+  "adminOrders.discountCode": {
+    de: "Rabattcode", en: "Discount code", ar: "رمز الخصم", tr: "İndirim kodu",
+  },
+  "adminOrders.deposit": { de: "Anzahlung", en: "Deposit", ar: "العربون", tr: "Kapora" },
+  "adminOrders.history": { de: "Verlauf", en: "History", ar: "السجل", tr: "Geçmiş" },
+  "adminOrders.event.booked": { de: "Gebucht", en: "Booked", ar: "تم الحجز", tr: "Rezerve edildi" },
+  "adminOrders.elevator": { de: "mit Aufzug", en: "lift", ar: "يوجد مصعد", tr: "asansörlü" },
+  "adminOrders.noElevator": { de: "ohne Aufzug", en: "no lift", ar: "بدون مصعد", tr: "asansörsüz" },
 
   // ── Errors ──────────────────────────────────────────────────────────
   "error.invalidCredentials": {

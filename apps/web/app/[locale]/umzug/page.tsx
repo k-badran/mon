@@ -25,7 +25,7 @@ import {
 const SECTION = "service-moving";
 
 export const metadata: Metadata = {
-  title: "Umzug — m.on",
+  title: "Umzug",
 };
 
 /* The gallery's photographs, in the frame's order: the tall one, then the two

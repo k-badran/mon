@@ -1,5 +1,5 @@
 import { db, schema } from "@mon/db";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { Router } from "express";
 import { z } from "zod";
 
@@ -10,7 +10,7 @@ import { requirePermission } from "../../middleware/require-permission.js";
 import { validate, validatedParams, validatedQuery } from "../../middleware/validate.js";
 import { recordAudit } from "../audit/audit.service.js";
 
-const { reviews, orders } = schema;
+const { reviews, orders, users } = schema;
 
 export const reviewsRouter: Router = Router();
 
@@ -86,6 +86,102 @@ reviewsRouter.post(
       .returning();
 
     res.status(201).json(created);
+  }),
+);
+
+/**
+ * The caller's own reviews, published or not, and the jobs they can still
+ * review.
+ *
+ * Ownership is the whole authorisation, as it is for leaving one. The
+ * moderation state is shown to its author so a review that has not appeared on
+ * the site reads as "waiting" rather than as lost. The reviewable jobs are
+ * worked out here rather than from the order list, because staff see every
+ * customer's orders there and would be offered to review other people's moves.
+ */
+reviewsRouter.get(
+  "/mine",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+
+    const [items, reviewable] = await Promise.all([
+      db
+        .select({
+          id: reviews.id,
+          orderId: reviews.orderId,
+          orderReference: orders.reference,
+          rating: reviews.rating,
+          comment: reviews.comment,
+          isPublished: reviews.isPublished,
+          adminReply: reviews.adminReply,
+          createdAt: reviews.createdAt,
+        })
+        .from(reviews)
+        .innerJoin(orders, eq(orders.id, reviews.orderId))
+        .where(eq(reviews.userId, userId))
+        .orderBy(desc(reviews.createdAt))
+        .limit(100),
+      db
+        .select({
+          id: orders.id,
+          reference: orders.reference,
+          serviceType: orders.serviceType,
+          scheduledDate: orders.scheduledDate,
+        })
+        .from(orders)
+        .leftJoin(reviews, eq(reviews.orderId, orders.id))
+        .where(and(eq(orders.userId, userId), eq(orders.status, "completed"), isNull(reviews.id)))
+        .orderBy(desc(orders.completedAt))
+        .limit(50),
+    ]);
+
+    res.json({ items, reviewable });
+  }),
+);
+
+const moderationQuery = z.object({
+  status: z.enum(["unpublished", "published", "all"]).default("unpublished"),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+/**
+ * The moderation list, in either state.
+ *
+ * `/pending` only ever shows what is held back, so a review that had been
+ * published could not be found again to take it down. Same capability as the
+ * queue: seeing what is on the site is no more than seeing what is waiting.
+ * The reviewer's name and the order reference are for the moderator's context
+ * only — the public listing above still carries neither.
+ */
+reviewsRouter.get(
+  "/moderation",
+  requireAuth,
+  requirePermission("reviews.read"),
+  validate({ query: moderationQuery }),
+  asyncHandler(async (req, res) => {
+    const { status, limit } = validatedQuery<z.infer<typeof moderationQuery>>(req);
+
+    const items = await db
+      .select({
+        id: reviews.id,
+        orderId: reviews.orderId,
+        orderReference: orders.reference,
+        reviewerName: users.fullName,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        isPublished: reviews.isPublished,
+        adminReply: reviews.adminReply,
+        createdAt: reviews.createdAt,
+      })
+      .from(reviews)
+      .innerJoin(orders, eq(orders.id, reviews.orderId))
+      .innerJoin(users, eq(users.id, reviews.userId))
+      .where(status === "all" ? undefined : eq(reviews.isPublished, status === "published"))
+      .orderBy(desc(reviews.createdAt))
+      .limit(limit);
+
+    res.json({ items });
   }),
 );
 

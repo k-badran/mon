@@ -186,9 +186,11 @@ async function main() {
     `Figma has ${newer.length} version(s) newer than the synced ${state.syncedVersion}; latest ${latest.id} (${latest.created_at}, ${latest.user.handle}).`,
   );
 
+  // The latest version through the cache too: on a low-quota seat a second
+  // whole-file read can cost days, so a repeated check must not spend one.
   const [before, after] = [
     await fileAt(state.fileKey, state.syncedVersion),
-    await figma(`/files/${state.fileKey}`),
+    await fileAt(state.fileKey, latest.id),
   ];
   const report = diff(before, after);
 

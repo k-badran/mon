@@ -44,7 +44,7 @@ const SERVICE_IMAGES = [
 ];
 
 export const metadata: Metadata = {
-  title: "Für Unternehmen — m.on",
+  title: "Für Unternehmen",
 };
 
 export default async function ForBusinessPage({ params }: { params: { locale: Locale } }) {

@@ -126,6 +126,13 @@ export const chatThreads = pgTable(
     /** True once a staff member joins; the assistant then stops replying. */
     isHumanHandled: boolean("is_human_handled").notNull().default(false),
     handledBy: uuid("handled_by").references(() => users.id, { onDelete: "set null" }),
+    /**
+     * When the signed-in owner last had this conversation open. Staff replies
+     * newer than this are what the dashboard counts as unread; null means the
+     * owner has never opened it there. One column rather than a per-message
+     * flag, because a conversation has exactly one reader on the customer side.
+     */
+    customerReadAt: timestamp("customer_read_at", { withTimezone: true }),
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

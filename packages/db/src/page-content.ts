@@ -2254,6 +2254,14 @@ export const PAGE_CONTENT: ContentSeed[] = [
     ar: "تحميل المزيد من التقييمات",
     tr: "Daha Fazla Değerlendirme Yükle",
   }),
+  // A published customer review is shown without the reviewer's name — the
+  // public feed does not carry it — so the card names them with this instead.
+  row(R, "feed.customerName", "Review card — name shown on a customer's review", 17, {
+    de: "m.on-Kunde",
+    en: "m.on customer",
+    ar: "عميل m.on",
+    tr: "m.on müşterisi",
+  }),
 
   row(R, "reviews.1.name", "Review 1 — name", 18, {
     de: "Dr. Michael Brand",
