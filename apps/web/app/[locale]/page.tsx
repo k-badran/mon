@@ -1,4 +1,6 @@
-import type { Locale } from "@/lib/i18n/config";
+import { notFound } from "next/navigation";
+
+import { isLocale } from "@/lib/i18n/config";
 import { fetchSiteContent } from "@/lib/site/theme";
 import {
   Areas,
@@ -68,9 +70,26 @@ async function fetchFaq(locale: string): Promise<HomeFaq[]> {
 export default async function HomePage({
   params,
 }: {
-  params: { locale: Locale };
+  // Not `Locale`: the segment is whatever the URL held. Typing it as the narrow
+  // union said it was already checked, and nothing was checking it.
+  params: { locale: string };
 }) {
-  const locale = params.locale;
+  const { locale } = params;
+
+  /**
+   * Reject a segment that is not a language before fetching anything.
+   *
+   * `[locale]` matches any single path segment, so every request for a file the
+   * site does not serve — `/favicon.ico`, `/robots.txt`, and each path a
+   * vulnerability scanner tries — arrived here as a "locale" and was forwarded
+   * into the API as `?locale=favicon.ico`. That was 260 failed validations in an
+   * hour, two API round trips per probe, and a 200 rendering the homepage at a
+   * URL that should have been a 404.
+   *
+   * The layout has this guard already, but a layout and its page render
+   * together: by the time the layout aborted, these fetches had been issued.
+   */
+  if (!isLocale(locale)) notFound();
 
   const [sections, faq] = await Promise.all([fetchSiteContent(locale), fetchFaq(locale)]);
   const copy: Copy = sections.home ?? {};
